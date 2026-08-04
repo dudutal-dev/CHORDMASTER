@@ -534,8 +534,9 @@ function renderImport(){
     <div class="stamp">ייבוא מקומי · הקובץ לא עוזב את המכשיר</div>
     <h2 style="margin:8px 0 10px">ספר האקורדים שלך</h2>
     <p class="lead" style="margin-bottom:16px">
-      יש לך ספר אקורדים כקובץ PDF? טען אותו כאן. האפליקציה סורקת אותו <b>בדפדפן שלך בלבד</b>,
-      בונה אינדקס של השירים, ומאפשרת לטעון את האקורדים של כל שיר ישירות ללוח.
+      יש לך ספר אקורדים כקובץ PDF? טען אותו כאן <b>פעם אחת</b>. האפליקציה סורקת אותו
+      <b>בדפדפן שלך בלבד</b> ושומרת מקומית את השירים <b>עם האקורדים שלהם</b> —
+      ומאותו רגע הם חלק מהקטלוג, והקובץ כבר לא נחוץ. אפשר למחוק אותו מהמכשיר.
     </p>
 
     <div class="note rust">
@@ -545,7 +546,7 @@ function renderImport(){
     </div>
 
     <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:18px 0">
-      <button class="btn primary" id="ibPick">${bookIndex?"טעינת קובץ מחדש":"בחירת קובץ PDF"}</button>
+      <button class="btn primary" id="ibPick">${bookIndex?"סריקה מחדש":"בחר קובץ וסרוק — פעם אחת"}</button>
       ${bookIndex?`<span class="time">${bookIndex.length} שירים · ${groupByArtist(bookIndex,x=>x.a).length} אמנים · ${bookIndex.filter(x=>x.c).length} עם אקורדים שמורים</span>
         <button class="btn sm" id="ibSwap">החלף שיר↔אמן</button>
         <button class="btn sm" id="ibClear">מחיקת האינדקס</button>`:""}
@@ -986,7 +987,8 @@ function catalogItems(){
 function catRow(x){
   const act = x.src==="built" ? `<button class="btn sm primary" data-cb="${x.ref}">טען</button>`
     : x.src==="imported" ? `<a class="btn sm" href="${ytSearch(x.a,x.t)}" target="_blank" rel="noopener" style="text-decoration:none">▶</a>
-        <button class="btn sm primary" data-bp="${x.ref}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}">טען אקורדים</button>`
+        <button class="btn sm primary" data-bp="${x.ref}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}">פתח</button>
+        <button class="btn sm" data-brm="${x.ref}" title="הסרה מהקטלוג">✕</button>`
     : `<button class="btn sm primary" data-open="${x.ref}">פתח</button>
        <button class="btn sm" data-del="${x.ref}">✕</button>`;
   return `<div class="catrow">
@@ -1032,7 +1034,8 @@ function renderBook(){
       חפש שיר או אמן, או בחר אמן מהרשימה.
     </p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
-      <button class="btn" id="sbImport">📕 ייבוא מספר אקורדים שלך (PDF)</button>
+      <button class="btn" id="sbImport">📕 ${bookIndex&&bookIndex.length?"ייבוא ספר אחר":"ייבוא ספר אקורדים שלך (PDF)"}</button>
+      ${bookIndex&&bookIndex.length?`<button class="btn" id="sbDrop">הסרת הספר המיובא</button>`:""}
     </div>
     <input type="text" id="sbQ" placeholder="חיפוש שיר או אמן…" value="${esc(sbQuery)}" style="width:100%;margin-bottom:14px">
 
@@ -1053,6 +1056,13 @@ function renderBook(){
   </div>`;
 
   $("sbImport").onclick = ()=>{ mode="import"; render(); };
+  const sd=$("sbDrop");
+  if(sd) sd.onclick = ()=>{
+    if(!confirm(`להסיר ${bookIndex.length} שירים מהספר המיובא?\nהשירים ששמרת בעצמך לא ייפגעו.`)) return;
+    localStorage.removeItem(BOOK_KEY);
+    bookIndex=null; bookArtist=null; pdfDoc=null;
+    renderBook(); toast("הספר המיובא הוסר");
+  };
   const ca=$("catAll"); if(ca) ca.onclick=()=>{ bookArtist=null; renderBook(); };
   app.querySelectorAll("[data-ca]").forEach(b=>b.onclick=()=>{ bookArtist=b.dataset.ca; sbQuery=""; renderBook(); });
   const qi=$("sbQ");
@@ -1065,6 +1075,11 @@ function renderBook(){
     if(!pdfDoc && !(rec && rec.c)){ toast("טען את הקובץ מחדש כדי לשלוף אקורדים"); mode="import"; render(); return; }
     bookPick={p:+b.dataset.bp, t:b.dataset.bt, a:b.dataset.ba, c: rec && rec.c};
     bookApply();
+  });
+  app.querySelectorAll("[data-brm]").forEach(b=>b.onclick=()=>{
+    if(!confirm("להסיר את השיר הזה מהקטלוג?")) return;
+    bookIndex = (bookIndex||[]).filter(x=>x.p !== +b.dataset.brm);
+    bookSave(bookIndex); renderBook();
   });
   app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
     const x=lib().find(y=>y.id===b.dataset.open);
@@ -1436,14 +1451,15 @@ function renderGuide(){
       <div class="gnum">📕</div>
       <div>
         <h3>ספר אקורדים אישי (PDF)</h3>
-        <p>יש לך ספר אקורדים כקובץ? בספר השירים לחץ <b>«ייבוא מספר אקורדים שלך»</b>, בחר את הקובץ, והאפליקציה תסרוק אותו <b>בדפדפן שלך בלבד</b>. היא בונה אינדקס של השירים — שם, אמן ומספר עמוד — ומאפשרת לטעון את האקורדים של כל שיר ישירות ללוח.</p>
+        <p>יש לך ספר אקורדים כקובץ? בקטלוג לחץ <b>«ייבוא ספר אקורדים שלך»</b>, בחר את הקובץ, והאפליקציה תסרוק אותו <b>בדפדפן שלך בלבד</b>. היא בונה אינדקס של השירים — שם, אמן ומספר עמוד — ומאפשרת לטעון את האקורדים של כל שיר ישירות ללוח.</p>
         <ul>
           <li>הסריקה מתבצעת פעם אחת ואורכת דקה-שתיים בספר גדול. האינדקס נשמר, החיפוש אחריו מיידי.</li>
           <li><b>הכול מקוטלג לפי אמן.</b> אחרי הסריקה מוצגת רשימת האמנים עם מספר השירים של כל אחד; לחיצה על אמן פותחת את השירים שלו. חיפוש חופשי עוקף את הקיטלוג ומחפש בשם השיר ובשם האמן גם יחד.</li>
           <li>הסריקה שומרת מקומית <b>גם את האקורדים</b>, ולכן אחרי הפעם הראשונה <b>הקובץ לא נדרש יותר</b> — הכול עובד גם בלעדיו. הקובץ עצמו לא נשמר ולא נשלח לשום מקום.</li>
           <li>מרגע הסריקה, שירי הספר מופיעים בקטלוג לצד כל השאר, מקוטלגים לפי אמן.</li>
           <li><b>אין צורך לטעון שיר-שיר מהקובץ.</b> הסריקה שומרת את האקורדים של כל השירים בבת אחת, ומאותו רגע כל שיר בקטלוג נפתח מיד — גם אם הקובץ כבר לא אצלך. מסך הייבוא מציג כמה שירים כוללים אקורדים שמורים.</li>
-          <li>שיר שנטען מהספר נפתח <b>מיד</b>, גם בלי קישור יוטיוב. במקום הנגן יופיע שדה להדבקת קישור, עם כפתור חיפוש לצדו.</li>
+          <li>שיר שנטען מהספר נפתח <b>מיד</b>, גם בלי קישור יוטיוב. במקום הנגן יופיע <b>חיפוש מוטמע</b>: לחיצה על «חפש והצג כאן» טוענת את התוצאה הראשונה מיוטיוב לתוך האפליקציה, «התוצאה הבאה ›» מדלגת, ו«אשר קישור זה» מחבר אותה לשיר. אם החיפוש המוטמע לא נתמך אצלך, יש תמיד הדבקה ידנית מתחתיו.</li>
+          <li><b>הסרה:</b> ✕ ליד שיר מסיר אותו מהקטלוג, ו«הסרת הספר המיובא» מוחקת את כולו בבת אחת. השירים ששמרת בעצמך לא נפגעים.</li>
           <li><b>מי שיר ומי אמן</b> נקבע אוטומטית: שם אמן חוזר על פני שירים רבים ושם שיר כמעט ייחודי, ולכן הצד עם פחות ערכים שונים הוא האמן. אם בכל זאת יצא הפוך — יש כפתור <b>«החלף שיר↔אמן»</b> במסך הייבוא, ואין צורך לסרוק מחדש.</li>
           <li>לפני הטעינה מוצגת תצוגה מקדימה של האקורדים הראשונים. אם הסדר יוצא הפוך — בטל, ונסה שוב עם כיוון הפוך.</li>
           <li>שיר שנטען <b>בלי אקורדים</b> — כמו הערכים הישראליים בספר — יציג בפס הודעה במקום בלוקים ריקים, ודיאגרמת האצבעות תישאר ריקה עד שיהיה מה להראות. זה תקין, ולא תקלה.</li>
@@ -1973,6 +1989,11 @@ function renderStart(){
   $("hGuide").onclick=()=>{ prevMode="start"; mode="guide"; render(); };
   $("hImport").onclick=()=>{ mode="import"; render(); };
   $("hAbout").onclick=()=>{ prevMode="start"; mode="about"; render(); };
+  app.querySelectorAll("[data-brm]").forEach(b=>b.onclick=()=>{
+    if(!confirm("להסיר את השיר הזה מהקטלוג?")) return;
+    bookIndex = (bookIndex||[]).filter(x=>x.p !== +b.dataset.brm);
+    bookSave(bookIndex); renderBook();
+  });
   app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
     const x=lib().find(y=>y.id===b.dataset.open);
     if(x){ S=Object.assign(newSong(),x); open_(); }
@@ -1992,6 +2013,48 @@ function open_(){
   if(S.ytId) mountPlayer();
 }
 
+
+/* ═══ חיפוש יוטיוב מוטמע ═══
+   הנגן של יוטיוב יודע לטעון רשימת השמעה מסוג "search", וכך אפשר להציג
+   את התוצאה הראשונה בתוך האפליקציה. התמיכה בזה אינה מובטחת לאורך זמן,
+   ולכן יש נפילה חיננית להדבקה ידנית. */
+let searchPlayer = null, searchTimer = 0;
+function foundTitle(){
+  const el = $("lateFound"); if(!el) return;
+  let d=null; try{ d=searchPlayer && searchPlayer.getVideoData(); }catch(e){}
+  if(d && d.video_id){
+    el.textContent = d.title ? d.title : "נמצאה תוצאה";
+    el.style.color = "var(--jade)";
+  }
+}
+async function searchPreview(q){
+  if(!q){ toast("הקלד שם שיר לחיפוש"); return; }
+  const box=$("lateBox"); if(box) box.classList.remove("hidden");
+  const el=$("lateFound"); if(el){ el.textContent="מחפש…"; el.style.color=""; }
+  try{
+    await loadYT();
+    if(searchPlayer){ try{ searchPlayer.destroy(); }catch(e){} searchPlayer=null; }
+    searchPlayer = new YT.Player("searchFrame", {
+      playerVars:{ listType:"search", list:q, rel:0, modestbranding:1, playsinline:1 },
+      events:{
+        onReady: ()=> setTimeout(foundTitle, 900),
+        onStateChange: foundTitle,
+        onError: ()=>{ if(el){ el.textContent="החיפוש המוטמע לא נתמך — הדבק קישור למטה"; el.style.color="var(--ruby)"; } }
+      }
+    });
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(()=>{
+      let d=null; try{ d=searchPlayer && searchPlayer.getVideoData(); }catch(e){}
+      if((!d || !d.video_id) && el){
+        el.textContent = "לא התקבלה תוצאה — השתמש בהדבקה ידנית";
+        el.style.color = "var(--ruby)";
+      }
+    }, 7000);
+  }catch(e){
+    if(el){ el.textContent="טעינת הנגן נכשלה"; el.style.color="var(--ruby)"; }
+  }
+}
+
 function renderMain(){
   setTimeout(resetTop,0);
   $("ttl").textContent=S.title||"נגן־יחד";
@@ -2008,11 +2071,24 @@ function renderMain(){
   const B_YT = `      ${S.ytId ? `<div class="ytbox"><div id="ytFrame"></div></div>` : `
       <div class="panel" style="margin-bottom:0">
         <h3>עוד אין קישור לשיר</h3>
-        <p class="sub">האקורדים כבר בלוח. הדבק קישור יוטיוב כדי לכייל ולנגן איתו.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <input type="text" id="lateUrl" placeholder="https://www.youtube.com/watch?v=…" style="flex:1;min-width:180px">
-          <button class="btn primary" id="lateGo">חבר</button>
-          <a class="btn" id="lateFind" target="_blank" rel="noopener" style="text-decoration:none">▶ חפש ביוטיוב</a>
+        <p class="sub">האקורדים כבר בלוח. חפש את השיר כאן, או הדבק קישור.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px">
+          <input type="text" id="lateQ" value="${esc((S.title||"").replace(/\s+—\s+/g," "))}" style="flex:1;min-width:180px">
+          <button class="btn primary" id="lateSearch">חפש והצג כאן</button>
+        </div>
+        <div id="lateBox" class="hidden">
+          <div class="ytbox"><div id="searchFrame"></div></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px">
+            <span class="time" id="lateFound">מחפש…</span>
+            <span style="flex:1"></span>
+            <button class="btn sm" id="lateNext">התוצאה הבאה ›</button>
+            <button class="btn sm primary" id="lateUse">אשר קישור זה</button>
+          </div>
+        </div>
+        <div id="lateManual" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:11px">
+          <input type="text" id="lateUrl" placeholder="או הדבק קישור ידנית…" style="flex:1;min-width:180px">
+          <button class="btn" id="lateGo">חבר</button>
+          <a class="btn" id="lateFind" target="_blank" rel="noopener" style="text-decoration:none">↗ יוטיוב</a>
         </div>
       </div>`}`;
   const B_TR = `      <div class="tr" style="margin-top:13px">
@@ -2149,6 +2225,22 @@ function renderMain(){
     if(!narrow() && !document.querySelector(".stickytop"))
       toast("במסך רחב הפס תמיד גלוי — אין צורך לגלול");
     else if(done) toast("חזרה לפס");
+  };
+  const lsB=$("lateSearch");
+  if(lsB) lsB.onclick = ()=> searchPreview($("lateQ").value.trim());
+  const lqI=$("lateQ");
+  if(lqI) lqI.onkeydown=e=>{ if(e.key==="Enter") $("lateSearch").click(); };
+  const lnB=$("lateNext");
+  if(lnB) lnB.onclick = ()=>{ try{ searchPlayer.nextVideo(); setTimeout(foundTitle,900); }catch(e){} };
+  const luB=$("lateUse");
+  if(luB) luB.onclick = ()=>{
+    let d=null; try{ d=searchPlayer.getVideoData(); }catch(e){}
+    if(!d || !d.video_id){ toast("עוד אין תוצאה לאשר"); return; }
+    try{ searchPlayer.destroy(); }catch(e){}
+    searchPlayer=null;
+    S.ytId=d.video_id;
+    if(d.title && !S.title) S.title=d.title;
+    open_();
   };
   const lu=$("lateGo");
   if(lu) lu.onclick=()=>{
