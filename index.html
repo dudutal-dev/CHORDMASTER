@@ -118,7 +118,7 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
   display:flex;align-items:center;justify-content:center}
 .horizon .nowdgm svg{height:96px;width:auto;max-width:100%}
 .horizon .hzhold{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;
-  background:rgba(11,9,8,.86);backdrop-filter:blur(2px)}
+  background:rgba(11,9,8,.62);backdrop-filter:blur(1.5px)}
 .horizon .hzhold span{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--tungsten);
   border:1px solid var(--tungsten-d);border-radius:4px;padding:7px 14px;text-align:center;line-height:1.6}
 .horizon .hzbeats{position:absolute;left:10px;bottom:6px;z-index:3;gap:4px;margin:0}
@@ -156,7 +156,14 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
   .bc{width:60px}
 }
 @media(max-width:820px) and (orientation:landscape){
-  .stickytop{position:static}
+  .stickytop{position:sticky;top:var(--topH,44px)}
+  .stickytop .ytbox{padding-top:38%}
+  .horizon{height:86px}
+  .horizon .nowdgm{width:64px;top:6px}
+  .horizon .nowdgm svg{height:74px}
+  .horizon .nowline{right:72px}
+  .horizon .nowcap{right:56px}
+  .hchip{top:22px;height:42px;font-size:18px}
 }
 .ytbox{position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;
   border:1px solid var(--edge);box-shadow:0 6px 22px rgba(0,0,0,.5)}
@@ -449,6 +456,31 @@ const SONGBOOK = [
     sec:{ main:["Am","E","G","F","C","C"] },
     arr:[["main",10]] },
 
+  { a:"John Denver", t:"Take Me Home, Country Roads", yt:"1vrEljMfXYo", y:1971, key:"A", diff:2,
+    note:"ארבעה אקורדים, מהלך שכולם מכירים. שיר מצוין לשירה משותפת ולתרגול מעבר A→F#m.",
+    sec:{ verse:["A","A","F#m","F#m","E","E","D","A"], chorus:["D","A","E","F#m","D","A","E","A"] },
+    arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
+
+  { a:"Bob Marley & The Wailers", t:"Redemption Song", yt:"yv5xonFSC4c", y:1980, key:"G", diff:2,
+    note:"גיטרה אקוסטית לבדה — אין להתחבא מאחורי הלהקה. הפיקינג העדין הוא חצי מהשיר.",
+    sec:{ verse:["G","Em","C","G","G","Em","Am","D"], chorus:["C","D","Em","C","G","C","G","D"] },
+    arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
+
+  { a:"Bob Dylan", t:"Like a Rolling Stone", yt:"IwOfCgkyEj0", y:1965, key:"C", diff:2,
+    note:"הבית עולה בדרגות — C, Dm, Em, F, G — ואז נשאר תלוי על G. זה מה שיוצר את המתח.",
+    sec:{ verse:["C","Dm","Em","F","G","G","G","G"], chorus:["F","G","C","C","F","G","C","C"] },
+    arr:[["verse",3],["chorus",2],["verse",3],["chorus",2]] },
+
+  { a:"The Beatles", t:"Hey Jude", yt:"A_MjCqQoLLA", y:1968, key:"F", diff:3,
+    note:"הסיום החוזר (F–Eb–Bb–F) נמשך יותר מארבע דקות בהקלטה. Bb ו-F דורשים ברה — קאפו 3 עם צורות D–A–G מקל מאוד.",
+    sec:{ verse:["F","C","C","F","Bb","F","C","F"], coda:["F","Eb","Bb","F"] },
+    arr:[["verse",4],["coda",16]] },
+
+  { a:"The Doobie Brothers", t:"Long Train Runnin'", yt:"9SRRyD61ZhI", y:1973, key:"Gm", diff:2,
+    note:"כמעט כולו אקורד אחד — הכל בפריטה המנוחתת (muted) ובגרוב. תרגיל יד ימין מצוין.",
+    sec:{ main:["Gm","Gm","Gm","Gm"], chorus:["Bb","C","Gm","Gm"] },
+    arr:[["main",6],["chorus",2],["main",6],["chorus",2]] },
+
   /* ---- תבניות גנריות ---- */
   { a:"תבנית", t:"בלוז 12 מידות · A", y:0, key:"A", diff:1, tpl:true,
     note:"הצורה שמתחת לחלק גדול מהרוק המוקדם. I–IV–V.",
@@ -664,7 +696,9 @@ function syncTopH(){
   const t = document.querySelector(".top");
   if(t) document.documentElement.style.setProperty("--topH", Math.round(t.getBoundingClientRect().height)+"px");
 }
-window.addEventListener("orientationchange", ()=>setTimeout(syncTopH,300));
+window.addEventListener("orientationchange", ()=>{ setTimeout(syncTopH,300); setTimeout(syncTopH,700); });
+let scT; window.addEventListener("scroll", ()=>{ clearTimeout(scT); scT=setTimeout(syncTopH,120); }, {passive:true});
+if(window.visualViewport) window.visualViewport.addEventListener("resize", ()=>syncTopH());
 let wasNarrow = narrow(), rzT;
 window.addEventListener("resize", ()=>{
   clearTimeout(rzT);
@@ -701,7 +735,7 @@ function renderGuide(){
       <div class="gnum">1½</div>
       <div>
         <h3>קיצור הדרך: ספר השירים</h3>
-        <p>במקום להזין אקורדים מאפס — <b>ספר השירים</b> מכיל 34 שירים (1967–1979) ו-5 תבניות הרמוניות, עם מהלך אקורדים ומבנה מוכנים. בחירה טוענת עשרות מידות מלאות ישר ללוח.</p>
+        <p>במקום להזין אקורדים מאפס — <b>ספר השירים</b> מכיל 39 שירים (1963–1980) ו-5 תבניות הרמוניות, עם מהלך אקורדים ומבנה מוכנים. בחירה טוענת עשרות מידות מלאות ישר ללוח.</p>
         <ul>
           <li><b>✔ קישור מוכן</b> — לשיר יש קישור יוטיוב רשמי מאומת. לחיצה אחת ואתה בפנים.</li>
           <li><b>✔ קליפ מילים</b> — לשיר יש קליפ מילים רשמי. פתיחה דרכו נכנסת ישר למצב קליפ, והמילים מגיעות מהווידאו.</li>
@@ -1227,6 +1261,7 @@ function renderMain(){
         <div class="grp"><label>טונים</label>
           <select id="tr">${Array.from({length:13},(_,i)=>i-6).map(v=>`<option value="${v}" ${v===S.transpose?"selected":""}>${v>0?"+"+v:v}</option>`).join("")}</select></div>
         <div class="grp"><label>מידות</label><span class="time" id="binfo">–</span></div>
+        <button class="btn sm" id="toStrip" title="גלילה חזרה לפס האקורדים">↑ לפס</button>
         <button class="btn sm ${holdSync?"on":""}" id="hold" title="מקפיא את האקורדים במקום — לפרסומות או להפסקה">${holdSync?"⏸ מוקפא":"הקפא סנכרון"}</button>
         <button class="btn sm ${S.cinema?"on":""}" id="cine" title="הווידאו גדול והאקורדים מתחתיו — לקליפים שהמילים כבר בתוכם">מצב קליפ מילים</button>
       </div>`;
@@ -1381,6 +1416,7 @@ function renderMain(){
   };
   if($("chPaste")) $("chPaste").onclick=pasteProg;
   $("gridTog").onclick=()=>{ gridOpen=!gridOpen; renderMain(); paint(true); };
+  const ts=$("toStrip"); if(ts) ts.onclick=()=>{ window.scrollTo({top:0,behavior:"smooth"}); syncTopH(); };
   const hb=$("hold"); if(hb) hb.onclick=()=>{ holdSync=!holdSync; renderMain(); paint(true);
     toast(holdSync?"הסנכרון מוקפא — האקורדים לא יזוזו":"הסנכרון חזר"); };
   const ci=$("cine"); if(ci) ci.onclick=()=>{ S.cinema=!S.cinema; renderMain();
