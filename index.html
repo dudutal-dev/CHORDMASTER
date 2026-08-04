@@ -440,11 +440,20 @@ async function pageLines(pageNo){
     .filter(Boolean);
 }
 
-/* שורת הכותרת בספר: «שם השיר  -אמן» */
+/* שורת הכותרת בספר מכילה שם שיר ואמן משני צדי מקף.
+   איזה צד הוא מה תלוי בכיוון החילוץ, ולכן לא מחליטים כאן — מחזירים שניים. */
 function parseHead(line){
-  const m = String(line).split(/\s+-\s*|\s+-/);
-  if(m.length >= 2) return {t: m[0].trim(), a: m.slice(1).join(" - ").trim()};
-  return {t: String(line).trim(), a: ""};
+  const m = String(line).split(/\s*[-\u2013\u2014]\s*/).map(x=>x.trim()).filter(Boolean);
+  if(m.length >= 2) return [m[0], m.slice(1).join(" - ")];
+  return [String(line).trim(), ""];
+}
+/* הכרעה סטטיסטית: שם אמן חוזר על פני שירים רבים, שם שיר כמעט ייחודי.
+   הצד עם פחות ערכים שונים הוא האמן. */
+function decideSides(pairs){
+  const A=new Set(), B=new Set();
+  pairs.forEach(([a,b])=>{ if(a) A.add(a); if(b) B.add(b); });
+  if(!B.size) return false;
+  return A.size < B.size;      // true = הצד הראשון הוא האמן
 }
 
 async function buildBookIndex(file, onProg){
@@ -463,7 +472,7 @@ async function buildBookIndex(file, onProg){
       }).length;
       if(chordy >= 2){
         const h = parseHead(lines[0]);
-        if(h.t && h.t.length < 90){
+        if(h[0] && h[0].length < 90){
           const rows = [];
           lines.forEach(L=>{
             const tk = L.split(/[\s|,]+/).filter(Boolean);
@@ -474,14 +483,20 @@ async function buildBookIndex(file, onProg){
             }
           });
           /* הסדר בספרים בעברית הפוך — נשמר כפי שחולץ, וההיפוך בטעינה */
-          idx.push({t:h.t, a:h.a, p, c: rows.flat().join(" ")});
+          idx.push({h0:h[0], h1:h[1], p, c: rows.flat().join(" ")});
         }
       }
     }
     if(p % 10 === 0){ onProg(p, n); await new Promise(r=>setTimeout(r,0)); }
   }
   onProg(n, n);
-  return idx;
+  /* עכשיו, עם כל הזוגות ביד, אפשר להכריע איזה צד הוא האמן */
+  const artistFirst = decideSides(idx.map(x=>[x.h0, x.h1]));
+  return idx.map(x=>({
+    t: artistFirst ? (x.h1 || x.h0) : x.h0,
+    a: artistFirst ? x.h0 : (x.h1 || ""),
+    p: x.p, c: x.c
+  }));
 }
 
 async function bookChords(pageNo){
@@ -531,7 +546,8 @@ function renderImport(){
 
     <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:18px 0">
       <button class="btn primary" id="ibPick">${bookIndex?"טעינת קובץ מחדש":"בחירת קובץ PDF"}</button>
-      ${bookIndex?`<span class="time">${bookIndex.length} שירים באינדקס</span>
+      ${bookIndex?`<span class="time">${bookIndex.length} שירים · ${groupByArtist(bookIndex,x=>x.a).length} אמנים · ${bookIndex.filter(x=>x.c).length} עם אקורדים שמורים</span>
+        <button class="btn sm" id="ibSwap">החלף שיר↔אמן</button>
         <button class="btn sm" id="ibClear">מחיקת האינדקס</button>`:""}
       <span class="time" id="ibProg"></span>
     </div>
@@ -580,6 +596,12 @@ function renderImport(){
     if(!f){ toast("שדה הקובץ חסר"); return; }
     try{ f.click(); }
     catch(e){ toast("הדפדפן חסם את בורר הקבצים — נסה דפדפן אחר"); }
+  };
+  const sw = $("ibSwap");
+  if(sw) sw.onclick = ()=>{
+    bookIndex = bookIndex.map(x=>({...x, t:x.a, a:x.t}));
+    bookSave(bookIndex); bookArtist=null; renderImport();
+    toast("הוחלף. אם עכשיו נכון — זהו; אם לא, לחץ שוב");
   };
   const cl = $("ibClear");
   if(cl) cl.onclick = ()=>{
@@ -631,13 +653,9 @@ async function bookApply(){
     gridOpen = true;
     mode = "main"; ready=false; player=null; songDur=0; adOn=false; holdSync=false;
     cur={bar:-1,beat:-1,line:-1};
-    const url = prompt(
-      "הדבק קישור יוטיוב לשיר.\n\n" +
-      "אין קישור? לחץ ביטול — השיר יישמר בספרייה עם האקורדים,\n" +
-      "ואפשר להשתמש בכפתור «▶ יוטיוב» שליד השיר כדי לחפש אותו.", "");
-    const id = url ? ytId(url) : null;
-    if(id){ S.ytId = id; open_(); toast(`${chords.length} אקורדים נטענו — עכשיו כיול רשת`); }
-    else { mode="book"; render(); toast("האקורדים נטענו. פתח את השיר מהספרייה והוסף קישור"); libSave(); }
+    S.ytId = "";
+    open_();
+    toast(`${chords.length} אקורדים נטענו — חבר קישור וכייל`);
   }catch(e){
     console.error(e); toast("שליפת העמוד נכשלה");
   }finally{ bookBusy = false; }
@@ -1424,6 +1442,9 @@ function renderGuide(){
           <li><b>הכול מקוטלג לפי אמן.</b> אחרי הסריקה מוצגת רשימת האמנים עם מספר השירים של כל אחד; לחיצה על אמן פותחת את השירים שלו. חיפוש חופשי עוקף את הקיטלוג ומחפש בשם השיר ובשם האמן גם יחד.</li>
           <li>הסריקה שומרת מקומית <b>גם את האקורדים</b>, ולכן אחרי הפעם הראשונה <b>הקובץ לא נדרש יותר</b> — הכול עובד גם בלעדיו. הקובץ עצמו לא נשמר ולא נשלח לשום מקום.</li>
           <li>מרגע הסריקה, שירי הספר מופיעים בקטלוג לצד כל השאר, מקוטלגים לפי אמן.</li>
+          <li><b>אין צורך לטעון שיר-שיר מהקובץ.</b> הסריקה שומרת את האקורדים של כל השירים בבת אחת, ומאותו רגע כל שיר בקטלוג נפתח מיד — גם אם הקובץ כבר לא אצלך. מסך הייבוא מציג כמה שירים כוללים אקורדים שמורים.</li>
+          <li>שיר שנטען מהספר נפתח <b>מיד</b>, גם בלי קישור יוטיוב. במקום הנגן יופיע שדה להדבקת קישור, עם כפתור חיפוש לצדו.</li>
+          <li><b>מי שיר ומי אמן</b> נקבע אוטומטית: שם אמן חוזר על פני שירים רבים ושם שיר כמעט ייחודי, ולכן הצד עם פחות ערכים שונים הוא האמן. אם בכל זאת יצא הפוך — יש כפתור <b>«החלף שיר↔אמן»</b> במסך הייבוא, ואין צורך לסרוק מחדש.</li>
           <li>לפני הטעינה מוצגת תצוגה מקדימה של האקורדים הראשונים. אם הסדר יוצא הפוך — בטל, ונסה שוב עם כיוון הפוך.</li>
           <li>שיר שנטען <b>בלי אקורדים</b> — כמו הערכים הישראליים בספר — יציג בפס הודעה במקום בלוקים ריקים, ודיאגרמת האצבעות תישאר ריקה עד שיהיה מה להראות. זה תקין, ולא תקלה.</li>
         </ul>
@@ -1968,7 +1989,7 @@ function open_(){
   mode="main"; ready=false; player=null; songDur=0; adOn=false; holdSync=false;
   cur={bar:-1,beat:-1,line:-1};
   render();
-  mountPlayer();
+  if(S.ytId) mountPlayer();
 }
 
 function renderMain(){
@@ -1984,7 +2005,16 @@ function renderMain(){
     <button class="btn sm" id="bBack">ספרייה</button>`;
 
   const capo=suggestCapo();
-  const B_YT = `      <div class="ytbox"><div id="ytFrame"></div></div>`;
+  const B_YT = `      ${S.ytId ? `<div class="ytbox"><div id="ytFrame"></div></div>` : `
+      <div class="panel" style="margin-bottom:0">
+        <h3>עוד אין קישור לשיר</h3>
+        <p class="sub">האקורדים כבר בלוח. הדבק קישור יוטיוב כדי לכייל ולנגן איתו.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="text" id="lateUrl" placeholder="https://www.youtube.com/watch?v=…" style="flex:1;min-width:180px">
+          <button class="btn primary" id="lateGo">חבר</button>
+          <a class="btn" id="lateFind" target="_blank" rel="noopener" style="text-decoration:none">▶ חפש ביוטיוב</a>
+        </div>
+      </div>`}`;
   const B_TR = `      <div class="tr" style="margin-top:13px">
         <button class="btn primary" id="pp">נגן</button>
         <span class="time" id="tc">0:00</span>
@@ -2120,6 +2150,16 @@ function renderMain(){
       toast("במסך רחב הפס תמיד גלוי — אין צורך לגלול");
     else if(done) toast("חזרה לפס");
   };
+  const lu=$("lateGo");
+  if(lu) lu.onclick=()=>{
+    const id=ytId($("lateUrl").value);
+    if(!id){ toast("לא זיהיתי קישור יוטיוב תקין"); return; }
+    S.ytId=id; open_();
+  };
+  const lf=$("lateFind");
+  if(lf) lf.href = ytSearch("", (S.title||"").replace(/\s+—\s+/g," "));
+  const li=$("lateUrl");
+  if(li) li.onkeydown=e=>{ if(e.key==="Enter") $("lateGo").click(); };
   $("bBook").onclick=()=>{ mode="book"; render(); };
   $("bGuide").onclick=()=>{ prevMode="main"; mode="guide"; render(); };
   $("bAbout").onclick=()=>{ prevMode="main"; mode="about"; render(); };
