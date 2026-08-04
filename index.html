@@ -142,6 +142,8 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
     scrollbar-width:none;max-width:100%;padding-bottom:1px}
   .top .right::-webkit-scrollbar{display:none}
   .top .right .btn{padding:4px 9px;font-size:12.5px;flex:0 0 auto}
+  .top .right #toStrip{position:sticky;right:0;z-index:2;background:linear-gradient(180deg,#3A2E1C,#2A2116);
+    border-color:var(--tungsten-d);color:var(--tungsten);box-shadow:-8px 0 10px -6px rgba(11,9,8,.9)}
   .stickytop{position:sticky;top:var(--topH,44px);z-index:25;padding-bottom:6px;
     box-shadow:0 10px 18px -8px rgba(11,9,8,.95)}
   .stickytop .ytbox{border-radius:0 0 6px 6px}
@@ -284,9 +286,229 @@ kbd{font-family:var(--mono);font-size:12px;background:#120F0D;border:1px solid v
   </div>
 </div>
 
+<div class="big" id="pasteBox" hidden>
+  <div style="max-width:640px;width:100%;text-align:start">
+    <div class="k">הדבקת אקורדים מדף אקורדים</div>
+    <p style="color:var(--cream-2);font-size:14px;line-height:1.7;margin:10px 0 12px">
+      העתק את דף האקורדים מכל אתר והדבק כאן כמו שהוא — שורות אקורדים מעל מילים, פורמט
+      <span class="stamp">[G]</span> בתוך השורה, או רשימה. המילים יסוננו, האקורדים יחולצו לפי הסדר.
+    </p>
+    <textarea id="pasteIn" style="min-height:180px" placeholder="הדבק כאן…"></textarea>
+    <div style="display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:10px">
+      <label style="display:flex;gap:6px;align-items:center;font-size:13.5px;color:var(--cream-2)">
+        <input type="checkbox" id="pasteRtl"> אקורדים מימין לשמאל (ספר עברי)
+      </label>
+      <label style="display:flex;gap:6px;align-items:center;font-size:13.5px;color:var(--cream-2)">
+        <input type="checkbox" id="pasteDedupe"> אחד מכל אקורד חוזר רצוף
+      </label>
+      <span class="time" id="pasteInfo">—</span>
+    </div>
+    <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">
+      <button class="btn primary" id="pasteGo">מלא את הלוח</button>
+      <button class="btn" id="pasteCancel" style="margin-inline-start:auto">ביטול</button>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
+
+/* ═══════════════════════════════════════════════════════════════
+   ייבוא מספר אקורדים אישי (PDF)
+   הקובץ נקרא בדפדפן בלבד — הוא לא נשלח לשום מקום ולא נשמר בפרויקט.
+   נשמר מקומית רק אינדקס קל: שם שיר, אמן ומספר עמוד.
+   ═══════════════════════════════════════════════════════════════ */
+const BOOK_KEY = "playalong-book-index-v1";
+let pdfDoc = null, bookIndex = null, bookQuery = "", bookPick = null, bookRtl = true;
+
+function bookLoad(){ try{ return JSON.parse(localStorage.getItem(BOOK_KEY)||"null"); }catch(e){ return null; } }
+function bookSave(idx){
+  try{ localStorage.setItem(BOOK_KEY, JSON.stringify(idx)); }
+  catch(e){ toast("האינדקס גדול מדי לשמירה מקומית — יישאר לסשן הזה"); }
+}
+
+function loadPdfJs(){
+  return new Promise((res, rej)=>{
+    if(window.pdfjsLib) return res();
+    const sc = document.createElement("script");
+    sc.src = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";
+    sc.onload = ()=>{
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+      res();
+    };
+    sc.onerror = ()=>rej(new Error("pdfjs"));
+    document.head.appendChild(sc);
+  });
+}
+
+/* תווי כיווניות נסתרים שוברים כל זיהוי — מנקים אותם ראשונים */
+const stripBidi = t => String(t).replace(/[\u200E\u200F\u202A-\u202E\u2066-\u2069]/g, "");
+
+/* איסוף פריטי טקסט לשורות לפי מיקום אנכי, וסידור כל שורה משמאל לימין */
+async function pageLines(pageNo){
+  const page = await pdfDoc.getPage(pageNo);
+  const tc = await page.getTextContent();
+  const rows = new Map();
+  tc.items.forEach(it=>{
+    const s = stripBidi(it.str);
+    if(!s.trim()) return;
+    const y = Math.round(it.transform[5]);
+    const key = Math.round(y/3)*3;
+    if(!rows.has(key)) rows.set(key, []);
+    rows.get(key).push({x: it.transform[4], s});
+  });
+  return [...rows.entries()]
+    .sort((a,b)=> b[0]-a[0])
+    .map(([,items]) => items.sort((a,b)=>a.x-b.x).map(i=>i.s).join(" ").replace(/\s+/g," ").trim())
+    .filter(Boolean);
+}
+
+/* שורת הכותרת בספר: «שם השיר  -אמן» */
+function parseHead(line){
+  const m = String(line).split(/\s+-\s*|\s+-/);
+  if(m.length >= 2) return {t: m[0].trim(), a: m.slice(1).join(" - ").trim()};
+  return {t: String(line).trim(), a: ""};
+}
+
+async function buildBookIndex(file, onProg){
+  await loadPdfJs();
+  const buf = await file.arrayBuffer();
+  pdfDoc = await window.pdfjsLib.getDocument({data: buf}).promise;
+  const n = pdfDoc.numPages;
+  const idx = [];
+  for(let p=1; p<=n; p++){
+    const lines = await pageLines(p);
+    if(lines.length >= 3){
+      const chordy = lines.filter(L=>{
+        const t = L.split(/[\s|,]+/).filter(Boolean);
+        const h = t.filter(isChordToken);
+        return h.length && h.length >= t.length*0.6;
+      }).length;
+      if(chordy >= 2){
+        const h = parseHead(lines[0]);
+        if(h.t && h.t.length < 90) idx.push({t:h.t, a:h.a, p});
+      }
+    }
+    if(p % 10 === 0){ onProg(p, n); await new Promise(r=>setTimeout(r,0)); }
+  }
+  onProg(n, n);
+  return idx;
+}
+
+async function bookChords(pageNo){
+  const lines = await pageLines(pageNo);
+  const out = [];
+  lines.forEach(L=>{
+    const t = L.split(/[\s|,]+/).filter(Boolean);
+    const hits = t.filter(isChordToken);
+    if(hits.length && hits.length >= t.length*0.6){
+      const row = hits.map(baseOf).filter(Boolean);
+      if(row.length) out.push(bookRtl ? [...row].reverse() : row);
+    }
+  });
+  return out.flat();
+}
+
+/* ---------- מסך ---------- */
+let bookBusy = false;
+
+function renderImport(){
+  $("ttl").textContent = "ייבוא מספר אקורדים";
+  $("topRight").innerHTML = `<button class="btn sm primary" id="ibBack">חזרה</button>`;
+  $("ibBack").onclick = ()=>{ bookPick=null; mode="book"; render(); };
+
+  bookIndex = bookIndex || bookLoad();
+  const q = bookQuery.trim().toLowerCase();
+  const list = bookIndex ? bookIndex.filter(x =>
+    !q || (x.t+" "+x.a).toLowerCase().includes(q)).slice(0, 60) : [];
+
+  app.innerHTML = `
+  <div class="guide">
+    <div class="stamp">ייבוא מקומי · הקובץ לא עוזב את המכשיר</div>
+    <h2 style="margin:8px 0 10px">ספר האקורדים שלך</h2>
+    <p class="lead" style="margin-bottom:16px">
+      יש לך ספר אקורדים כקובץ PDF? טען אותו כאן. האפליקציה סורקת אותו <b>בדפדפן שלך בלבד</b>,
+      בונה אינדקס של השירים, ומאפשרת לטעון את האקורדים של כל שיר ישירות ללוח.
+    </p>
+
+    <div class="note rust">
+      <strong>הקובץ נשאר אצלך.</strong> הוא לא נשלח לשום שרת, לא נשמר בפרויקט ולא נכנס לגיטהאב —
+      נשמר מקומית רק אינדקס קל של שמות ועמודים. ספרי אקורדים מסמנים לרוב «לשימוש אישי בלבד»,
+      וזו בדיוק המסגרת הזו. שמור על הקובץ אצלך ואל תעלה אותו לריפו.
+    </div>
+
+    <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin:18px 0">
+      <button class="btn primary" id="ibPick">${bookIndex?"טעינת קובץ מחדש":"בחירת קובץ PDF"}</button>
+      ${bookIndex?`<span class="time">${bookIndex.length} שירים באינדקס</span>
+        <button class="btn sm" id="ibClear">מחיקת האינדקס</button>`:""}
+      <span class="time" id="ibProg"></span>
+    </div>
+
+    ${bookIndex ? `
+      <input type="text" id="ibQ" placeholder="חיפוש שיר או אמן…" value="${esc(bookQuery)}" style="width:100%;margin-bottom:14px">
+      ${list.length ? list.map((x,i)=>`
+        <div class="gstep" style="grid-template-columns:1fr;padding:11px 0">
+          <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+            <strong style="font-size:16px">${esc(x.t)}</strong>
+            <span class="stamp">${esc(x.a)} · עמוד ${x.p}</span>
+            <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}"
+              style="margin-inline-start:auto">טען אקורדים</button>
+          </div>
+        </div>`).join("")
+        : `<div class="note">אין תוצאה תואמת.</div>`}
+      ${bookIndex.filter(x=>!q||(x.t+" "+x.a).toLowerCase().includes(q)).length>60
+        ? `<p class="stamp" style="margin-top:12px">מוצגות 60 הראשונות — צמצם את החיפוש</p>`:""}
+    ` : `<div class="note">עדיין לא נטען ספר. הסריקה של ספר גדול אורכת דקה-שתיים, ומתבצעת פעם אחת.</div>`}
+  </div>`;
+
+  $("ibPick").onclick = ()=> $("bookFile").click();
+  const cl = $("ibClear");
+  if(cl) cl.onclick = ()=>{
+    if(!confirm("למחוק את האינדקס? הקובץ עצמו לא ייפגע.")) return;
+    localStorage.removeItem(BOOK_KEY); bookIndex=null; pdfDoc=null; renderImport();
+  };
+  const qi = $("ibQ");
+  if(qi) qi.oninput = ()=>{ const p=qi.selectionStart; bookQuery=qi.value; renderImport();
+    const n2=$("ibQ"); n2.focus(); n2.setSelectionRange(p,p); };
+
+  app.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{
+    if(!pdfDoc){ toast("טען את הקובץ מחדש כדי לשלוף אקורדים"); $("bookFile").click(); return; }
+    bookPick = {p:+b.dataset.bp, t:b.dataset.bt, a:b.dataset.ba};
+    bookApply();
+  });
+}
+
+async function bookApply(){
+  if(bookBusy) return;
+  bookBusy = true;
+  try{
+    const chords = await bookChords(bookPick.p);
+    if(!chords.length){ toast("לא זוהו אקורדים בעמוד הזה"); return; }
+    const ok = confirm(
+      `${bookPick.t} — ${bookPick.a}\nעמוד ${bookPick.p}\n\n` +
+      `זוהו ${chords.length} אקורדים.\nהתחלה: ${chords.slice(0,8).join("  ")}\n\n` +
+      `לטעון ללוח?\n(אם הסדר יוצא הפוך — בטל, שנה את מתג הכיוון ונסה שוב)`);
+    if(!ok) return;
+    S = newSong();
+    S.title = bookPick.a ? bookPick.a+" — "+bookPick.t : bookPick.t;
+    S.bars = chords.map(c=>{
+      const p = parseChord(c);
+      return {c: p ? PC_SHARP[p.pc]+p.q : null};
+    });
+    while(S.bars.length < 64) S.bars.push({c:null});
+    gridOpen = true;
+    mode = "main"; ready=false; player=null; songDur=0; adOn=false; holdSync=false;
+    cur={bar:-1,beat:-1,line:-1};
+    const url = prompt("הדבק קישור יוטיוב לשיר (אפשר גם אחר כך):", "");
+    const id = url ? ytId(url) : null;
+    if(id){ S.ytId = id; open_(); toast(`${chords.length} אקורדים נטענו — עכשיו כיול רשת`); }
+    else { mode="book"; render(); toast("האקורדים נטענו. פתח את השיר מהספרייה והוסף קישור"); libSave(); }
+  }catch(e){
+    console.error(e); toast("שליפת העמוד נכשלה");
+  }finally{ bookBusy = false; }
+}
+
 
 /* ═══════════════════════════════════════════════════════════════
    ספר השירים — מהלכי אקורדים ומבנה בלבד.
@@ -481,6 +703,27 @@ const SONGBOOK = [
     sec:{ main:["Gm","Gm","Gm","Gm"], chorus:["Bb","C","Gm","Gm"] },
     arr:[["main",6],["chorus",2],["main",6],["chorus",2]] },
 
+  /* ---- ישראלי · קישור רשמי, אקורדים להזנה ---- */
+  { a:"משינה", t:"רכבת לילה", yt:"7etbVoEEqGU", y:1985, key:"?", diff:0, blank:96, il:true,
+    note:"מילים: אהוד בנאי · לחן: שלומי ברכה. הקישור הוא ההקלטה הרשמית מהאלבום הראשון (1985).",
+    sec:{}, arr:[] },
+
+  { a:"משינה", t:"רכבת לילה · הקליפ המקורי", yt:"IOSmBOsGRMc", y:1985, key:"?", diff:0, blank:96, il:true,
+    note:"הקליפ המיתולוגי מ-1985 מהערוץ הרשמי של הלהקה.",
+    sec:{}, arr:[] },
+
+  { a:"ברי סחרוף & דודו טסה", t:"מה אספר לך", yt:"pQX0jXwUuhM", y:2020, key:"?", diff:0, blank:96, il:true,
+    note:"מתוך «בדל של אור».",
+    sec:{}, arr:[] },
+
+  { a:"ברי סחרוף & דודו טסה", t:"הרגעים האחרונים של האור", yt:"baDIw_c5xYg", y:2020, key:"?", diff:0, blank:96, il:true,
+    note:"מתוך «בדל של אור».",
+    sec:{}, arr:[] },
+
+  { a:"ברי סחרוף & דודו טסה", t:"הכי קרוב שיש", yt:"Udv0kTQMl9c", y:2021, key:"?", diff:0, blank:96, il:true,
+    note:"מתוך «בדל של אור».",
+    sec:{}, arr:[] },
+
   /* ---- תבניות גנריות ---- */
   { a:"תבנית", t:"בלוז 12 מידות · A", y:0, key:"A", diff:1, tpl:true,
     note:"הצורה שמתחת לחלק גדול מהרוק המוקדם. I–IV–V.",
@@ -513,7 +756,7 @@ function expandSong(entry){
       prog.forEach(c => bars.push({c: c==="-" ? null : c}));
     }
   });
-  while(bars.length < 32) bars.push({c:null});
+  while(bars.length < (entry.blank || 32)) bars.push({c:null});
   return {bars, marks};
 }
 
@@ -536,7 +779,10 @@ function renderBook(){
 
     <div class="note rust"><strong>קרא לפני שאתה סומך על זה:</strong> אלה הגרסאות האקוסטיות המקובלות, אקורד אחד למידה — לא תמלול של ההקלטה. ספטימות, סלאש וקישוטים הושמטו, ומספר החזרות הוא הערכה. <b>אמת מול האוזן ותקן בלוח המידות</b> — לשם כך הוא קיים.</p></div>
 
-    <div style="display:flex;gap:8px;margin:18px 0 14px">
+    <div style="display:flex;gap:8px;margin:18px 0 10px;flex-wrap:wrap">
+      <button class="btn" id="sbImport">📕 ייבוא מספר אקורדים שלך (PDF)</button>
+    </div>
+    <div style="display:flex;gap:8px;margin:0 0 14px">
       <input type="text" id="sbQ" placeholder="חיפוש לפי שיר, אמן, שנה או סולם…" value="${esc(sbQuery)}" style="flex:1">
     </div>
 
@@ -548,12 +794,14 @@ function renderBook(){
         <div>
           <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
             <h3 style="margin:0">${esc(s.t)}</h3>
-            <span class="stamp">${esc(s.a)}${s.y?" · "+s.y:""} · ${esc(s.key)}${s.capo?" · קאפו "+s.capo:""} · רמה ${s.diff}</span>
+            <span class="stamp">${esc(s.a)}${s.y?" · "+s.y:""}${s.key!=="?"?" · "+esc(s.key):""}${s.capo?" · קאפו "+s.capo:""}${s.diff?" · רמה "+s.diff:""}</span>
             ${s.ytl?`<span class="stamp" style="color:var(--jade)">✔ קליפ מילים</span>`:s.yt?`<span class="stamp" style="color:var(--tungsten)">✔ קישור מוכן</span>`:""}
+            ${chords.length?"":`<span class="stamp" style="color:var(--ruby)">אקורדים להזנה</span>`}
             <button class="btn sm primary" data-pick="${idx}" style="margin-inline-start:auto">טען</button>
           </div>
           <div style="font-family:var(--mono);font-size:13px;color:var(--tungsten);letter-spacing:.08em;margin:8px 0 6px">
-            ${chords.map(esc).join("  ·  ")}
+            ${chords.length ? chords.map(esc).join("  ·  ")
+              : `<span style="color:var(--ruby)">הרשת ריקה — הזן אקורדים פעם אחת ושמור</span>`}
           </div>
           ${s.note?`<p style="margin:0;font-size:13.5px">${esc(s.note)}</p>`:""}
         </div>
@@ -564,12 +812,15 @@ function renderBook(){
   const qi = $("sbQ");
   qi.oninput = ()=>{ sbQuery = qi.value; const p=qi.selectionStart; renderBook();
     const n=$("sbQ"); n.focus(); n.setSelectionRange(p,p); };
+  $("sbImport").onclick = ()=>{ mode="import"; render(); };
   app.querySelectorAll("[data-pick]").forEach(b => b.onclick = ()=> pickSong(SONGBOOK[+b.dataset.pick]));
 }
 
 function pickSong(entry){
   const search = "https://www.youtube.com/results?search_query=" +
     encodeURIComponent(entry.a==="תבנית" ? entry.t : entry.a+" "+entry.t+" official");
+  const chordSearch = "https://www.google.com/search?q=" +
+    encodeURIComponent(entry.a+" "+entry.t+" אקורדים");
   $("ttl").textContent = entry.t;
   $("topRight").innerHTML = `<button class="btn sm" id="sbBack2">חזרה לספר</button>`;
   $("sbBack2").onclick = ()=>{ mode="book"; render(); };
@@ -578,7 +829,9 @@ function pickSong(entry){
   <div class="start">
     <div class="stamp">${esc(entry.a)}${entry.y?" · "+entry.y:""}</div>
     <h1 class="hero-amp" style="margin-top:10px">${esc(entry.t)}</h1>
-    <p>האקורדים והמבנה מוכנים. מה שנשאר: קישור יוטיוב לגרסה שאתה רוצה לנגן איתה.</p>
+    <p>${Object.keys(entry.sec).length
+      ? "האקורדים והמבנה מוכנים. מה שנשאר: קישור יוטיוב לגרסה שאתה רוצה לנגן איתה."
+      : "הקישור הרשמי מוכן, אבל <b>האקורדים לא</b> — לא הזנתי אותם כדי לא לנחש. פתח, כייל את הרשת, הזן את האקורדים פעם אחת ולחץ «שמור». מכאן זה שלך."}</p>
     ${entry.capo?`<div class="note"><strong>קאפו ${entry.capo}.</strong> ${esc(entry.note||"")}</div>`:""}
     ${(entry.yt||entry.ytl)?`
     <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
@@ -594,6 +847,17 @@ function pickSong(entry){
       <a href="${search}" target="_blank" rel="noopener" style="color:var(--tungsten)">חיפוש השיר ביוטיוב ↗</a>
       — העתק את הקישור מהגרסה שאתה רוצה והדבק כאן.
     </p>
+    ${Object.keys(entry.sec).length ? "" : `
+    <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--edge);text-align:start">
+      <div class="stamp">אקורדים לשיר הזה</div>
+      <p style="color:var(--cream-2);font-size:13.5px;line-height:1.75;margin:8px 0 0">
+        פתח אחד מאלה, העתק את דף האקורדים כמו שהוא, ואחרי שתפתח את השיר לחץ
+        <b>«הדבקה מאתר אקורדים»</b> — האפליקציה תסנן את המילים ותמלא את הלוח לבד.
+      </p>
+      <p style="margin:9px 0 0;font-size:14px;line-height:2">
+        <a href="${chordSearch}" target="_blank" rel="noopener" style="color:var(--tungsten)">חיפוש אקורדים ↗</a>
+      </p>
+    </div>`}
   </div>`;
 
   const go = ()=>{
@@ -742,6 +1006,7 @@ function renderGuide(){
           <li>לשאר השירים — קישור חיפוש ביוטיוב, ואתה מדביק את הגרסה שבחרת.</li>
         </ul>
         <div class="note rust"><strong>הסתייגות חשובה:</strong> המהלכים הם הגרסאות האקוסטיות המקובלות, אקורד למידה — לא תמלול של ההקלטה. ספטימות וסלאש הושמטו ומספר החזרות משוער. <b>הלוח קיים כדי שתתקן.</b></div>
+        <p><b>ערכים מסומנים «אקורדים להזנה»</b> — בעיקר שירים ישראליים — מגיעים עם קישור רשמי אבל בלי מהלך אקורדים. זה מכוון: העדפתי להשאיר ריק על פני לנחש. פתח, כייל, ואת האקורדים קח מאתר אקורדים והדבק בכפתור «הדבקה מאתר אקורדים» — הוא מחלץ אותם לבד. לחץ «שמור», ומאותו רגע השיר בספרייה שלך מוכן.</p>
       </div>
     </div>
 
@@ -780,10 +1045,43 @@ function renderGuide(){
         <p>שתי דרכים, ואפשר לשלב:</p>
         <ul>
           <li><b>אחד־אחד:</b> לחץ על מידה בלוח, הקלד את האקורד בתיבה והקש <kbd>Enter</kbd>. הסמן קופץ למידה הבאה, כך שאפשר לרוץ על כל השיר במקלדת בלבד.</li>
-          <li><b>הדבקת רצף:</b> לחץ <b>הדבקת רצף</b> והדבק את כל המהלך בבת אחת — <span class="stamp">G | D | Em | C</span>. כל אקורד תופס מידה אחת. נקודה או מקף מדלגים על מידה בלי לשנות אותה.</li>
+          <li><b>הדבקה מאתר אקורדים:</b> הדרך המהירה. מצא את השיר באתר אקורדים, העתק את הדף <b>כמו שהוא</b> והדבק בחלון. האפליקציה מזהה מה אקורד ומה מילים, מסננת את המילים ומחלצת את האקורדים לפי הסדר. עובד עם שורות אקורדים מעל מילים, עם פורמט <span class="stamp">[G]</span> בתוך השורה, ועם רשימה פשוטה — ובעברית כמו באנגלית.</li>
+          <li>בחלון יש חיווי חי של כמה אקורדים זוהו ואילו, ואפשרות <b>«אחד מכל אקורד חוזר רצוף»</b> — שימושי כשהדף חוזר על אותו אקורד בכל שורה.</li>
+          <li><b>«אקורדים מימין לשמאל»</b> — בספרי אקורדים בעברית האקורדים נכתבים בכיוון הטקסט, כלומר מימין לשמאל, והחילוץ הישיר מחזיר כל שורה בסדר הפוך. המתג הופך את הסדר בכל שורה בנפרד. הוא נדלק לבד כשהטקסט המודבק עברי ברובו — אם יצא הפוך, בטל אותו.</li>
         </ul>
         <p><b>מידה ריקה ממשיכה את האקורד הקודם.</b> אם אקורד נמשך ארבע מידות, מספיק להקליד אותו פעם אחת ולהשאיר את השלוש הבאות ריקות.</p>
-        <p>נתמכים מז'ור ומינור: <span class="stamp">G · Am · F#m · Bb · C#m</span>.</p>
+        <p>נתמכים מז'ור ומינור: <span class="stamp">G · Am · F#m · Bb · C#m</span>. בהדבקה, אקורדים מורכבים מצטמצמים לבסיס שלהם — <span class="stamp">Cmaj7→C</span>, <span class="stamp">Am7→Am</span>, <span class="stamp">G/B→G</span>, <span class="stamp">Ddim→Dm</span> — כי זה מה שתצוגת האצבעות יודעת להראות. אם משהו לא זוהה הוא פשוט מדולג, ואפשר להשלים ידנית בלוח.</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">3½</div>
+      <div>
+        <h3>שיר שאין לו אקורדים בספר</h3>
+        <p>חלק מהערכים — בעיקר הישראליים — מגיעים עם <b>קישור רשמי בלבד</b> ובלי מהלך אקורדים. זה מכוון: מהלך שאני לא בטוח בו יגרום לך ללמוד אקורדים שגויים, ולכן העדפתי להשאיר ריק.</p>
+        <p>הדרך הקצרה למלא אותו, בשלוש פעולות:</p>
+        <ul>
+          <li>במסך פתיחת השיר לחץ <b>«חיפוש אקורדים ↗»</b> — נפתחת לשונית עם אתרי האקורדים לשיר.</li>
+          <li>העתק את הדף כמו שהוא — שורות אקורדים, מילים, הכול.</li>
+          <li>חזור לאפליקציה, פתח את לוח המידות ולחץ <b>«הדבקה מאתר אקורדים»</b>. המילים יסוננו, האקורדים ימולאו לפי הסדר.</li>
+        </ul>
+        <p>אחר כך כייל את הרשת, תקן מה שצריך בלוח, ולחץ <b>שמור</b>. מהרגע הזה השיר בספרייה שלך בדיוק כמו כל השאר.</p>
+        <div class="note"><strong>ספר אקורדים אישי שיש לך?</strong> אפשר להעתיק ממנו דף ולהדביק בדיוק כמו מאתר. שים לב שספרי אקורדים בעברית מסמנים במפורש «לשימוש אישי בלבד» — כלומר מותר לך למלא את הספרייה שלך במכשיר, ולא להפיץ את התוצאה.</div>
+        <div class="note"><strong>שים לב לטון:</strong> אתרי אקורדים מציעים לרוב גם «גרסה קלה» מוזזת בטונים. אם האקורדים לא נשמעים עם ההקלטה — כנראה העתקת גרסה מוזזת. השתמש בבורר <b>טונים</b> כדי להחזיר אותה למקום.</div>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">📕</div>
+      <div>
+        <h3>ספר אקורדים אישי (PDF)</h3>
+        <p>יש לך ספר אקורדים כקובץ? בספר השירים לחץ <b>«ייבוא מספר אקורדים שלך»</b>, בחר את הקובץ, והאפליקציה תסרוק אותו <b>בדפדפן שלך בלבד</b>. היא בונה אינדקס של השירים — שם, אמן ומספר עמוד — ומאפשרת לטעון את האקורדים של כל שיר ישירות ללוח.</p>
+        <ul>
+          <li>הסריקה מתבצעת פעם אחת ואורכת דקה-שתיים בספר גדול. האינדקס נשמר, החיפוש אחריו מיידי.</li>
+          <li>נשמר מקומית <b>רק האינדקס</b> — שמות ועמודים. הקובץ עצמו לא נשמר ולא נשלח לשום מקום, ולכן צריך לבחור אותו מחדש כשרוצים לשלוף עמוד אחרי רענון.</li>
+          <li>לפני הטעינה מוצגת תצוגה מקדימה של האקורדים הראשונים. אם הסדר יוצא הפוך — בטל, ונסה שוב עם כיוון הפוך.</li>
+        </ul>
+        <div class="note rust"><strong>שמור על ההפרדה:</strong> ספרי אקורדים מסמנים לרוב «לשימוש אישי בלבד». השימוש הזה — ספרייה במכשיר שלך — הוא בדיוק המסגרת שהם מתירים. אל תעלה את הקובץ עצמו לריפו, גם לא פרטי, וגם לא את הספרייה שנוצרה ממנו.</div>
       </div>
     </div>
 
@@ -1136,6 +1434,58 @@ function diagram(name, size, opt){
   return s+`</svg>`;
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   חילוץ אקורדים מדף אקורדים מכל פורמט:
+   שורת אקורדים מעל שורת מילים · ChordPro עם [G] בתוך השורה · רשימה.
+   תוספות (7, sus, maj7, add9, סלאש) מצטמצמות למז'ור/מינור,
+   כי זה מה שתצוגת האצבעות יודעת להראות.
+   ═══════════════════════════════════════════════════════════════ */
+const CHTOK = /^([A-G][#b]?)((?:maj|min|m|dim|aug|sus|add|M|\+|°)?[0-9]*(?:sus[0-9]?|add[0-9]+|maj[0-9]|[0-9])*)(\/[A-G][#b]?)?$/;
+const isChordToken = t => CHTOK.test(t);
+function baseOf(tok){
+  const m = tok.match(CHTOK);
+  if(!m) return null;
+  const q = m[2] || "";
+  return m[1] + (/^(m(?!aj)|min|dim|°)/.test(q) ? "m" : "");
+}
+function parseChordLines(text){
+  const lines = [];
+  const inline = [...String(text).matchAll(/\[([^\]\n]{1,10})\]/g)].map(m=>m[1].trim());
+  if(inline.length >= 3 && inline.filter(isChordToken).length >= inline.length*0.7){
+    String(text).split(/\r?\n/).forEach(L=>{
+      const t = [...L.matchAll(/\[([^\]\n]{1,10})\]/g)].map(m=>baseOf(m[1].trim())).filter(Boolean);
+      if(t.length) lines.push(t);
+    });
+    return {lines, inline:true};
+  }
+  String(text).split(/\r?\n/).forEach(L=>{
+    const toks = L.trim().split(/[\s|,]+/).filter(Boolean);
+    if(!toks.length) return;
+    const hits = toks.filter(isChordToken);
+    if(hits.length && hits.length >= toks.length*0.6){
+      const t = hits.map(baseOf).filter(Boolean);
+      if(t.length) lines.push(t);
+    }
+  });
+  return {lines, inline:false};
+}
+/* בספרי אקורדים בעברית האקורדים נכתבים מימין לשמאל, ולכן חילוץ ישיר
+   מחזיר כל שורה בסדר הפוך. ההיפוך הוא לכל שורה בנפרד — לא לכל הרצף. */
+function parseChordSheet(text, rtl){
+  const {lines, inline} = parseChordLines(text);
+  const out = [];
+  lines.forEach(t => out.push(...(rtl && !inline ? [...t].reverse() : t)));
+  return out;
+}
+/* זיהוי אוטומטי: טקסט עברי ברובו = כנראה ספר אקורדים בעברית */
+function looksHebrew(text){
+  const heb = (String(text).match(/[\u0590-\u05FF]/g)||[]).length;
+  const lat = (String(text).match(/[A-Za-z]/g)||[]).length;
+  return heb > 20 && heb > lat;
+}
+
+
 /* ═══════════════════════════════════════════════════════════════
    3. יוטיוב
    ═══════════════════════════════════════════════════════════════ */
@@ -1177,6 +1527,7 @@ const playing = () => ready && player.getPlayerState && player.getPlayerState()=
 function render(){
   if(mode==="guide") renderGuide();
   else if(mode==="book") renderBook();
+  else if(mode==="import") renderImport();
   else if(mode==="start") renderStart();
   else renderMain();
 }
@@ -1244,6 +1595,7 @@ function open_(){
 function renderMain(){
   $("ttl").textContent=S.title||"נגן־יחד";
   $("topRight").innerHTML=`
+    ${(S.cinema || narrow()) ? `<button class="btn sm" id="toStrip" title="חזרה לפס האקורדים">↑ לפס</button>` : ""}
     <button class="btn sm" id="bBook">ספר השירים</button>
     <button class="btn sm" id="bGuide">מדריך</button>
     <button class="btn sm" id="bSave">שמור</button>
@@ -1261,7 +1613,6 @@ function renderMain(){
         <div class="grp"><label>טונים</label>
           <select id="tr">${Array.from({length:13},(_,i)=>i-6).map(v=>`<option value="${v}" ${v===S.transpose?"selected":""}>${v>0?"+"+v:v}</option>`).join("")}</select></div>
         <div class="grp"><label>מידות</label><span class="time" id="binfo">–</span></div>
-        <button class="btn sm" id="toStrip" title="גלילה חזרה לפס האקורדים">↑ לפס</button>
         <button class="btn sm ${holdSync?"on":""}" id="hold" title="מקפיא את האקורדים במקום — לפרסומות או להפסקה">${holdSync?"⏸ מוקפא":"הקפא סנכרון"}</button>
         <button class="btn sm ${S.cinema?"on":""}" id="cine" title="הווידאו גדול והאקורדים מתחתיו — לקליפים שהמילים כבר בתוכם">מצב קליפ מילים</button>
       </div>`;
@@ -1302,7 +1653,8 @@ function renderMain(){
         <div id="gridWrap" class="${gridOpen?"":"hidden"}" style="margin-top:13px">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;align-items:center">
           <input type="text" id="chIn" placeholder="G / Am / F#m" style="width:130px">
-          <button class="btn sm" id="chPaste">הדבקת רצף</button>
+          <button class="btn sm" id="chPaste">הדבקה מאתר אקורדים</button>
+          <a class="btn sm" id="chFind" target="_blank" rel="noopener" style="text-decoration:none">חיפוש אקורדים ↗</a>
           <button class="btn sm" id="addBars">+16 מידות</button>
           <button class="btn sm" id="delBars">−16</button>
           ${capo?`<span class="time">הצעה: קאפו ${capo.cap} → ${capo.n} מתוך ${capo.total} אקורדים פתוחים</span>`:""}
@@ -1368,6 +1720,23 @@ function renderMain(){
     </div>
   </div>`;
 
+  if($("toStrip")) $("toStrip").onclick=()=>{
+    syncTopH();
+    /* לא להסתמך על window.scrollTo בלבד: בספארי בנייד הגולל בפועל
+       יכול להיות body ולא documentElement, ואז הקריאה לא עושה כלום. */
+    const el = document.querySelector(".stickytop") || $("hzLane");
+    let done = false;
+    if(el && el.scrollIntoView){
+      try{ el.scrollIntoView({block:"start", behavior:"smooth"}); done = true; }catch(e){}
+    }
+    try{ window.scrollTo({top:0, behavior:"smooth"}); done = true; }catch(e){ window.scrollTo(0,0); }
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    setTimeout(()=>{ syncTopH(); paint(true); }, 420);
+    if(!narrow() && !document.querySelector(".stickytop"))
+      toast("במסך רחב הפס תמיד גלוי — אין צורך לגלול");
+    else if(done) toast("חזרה לפס");
+  };
   $("bBook").onclick=()=>{ mode="book"; render(); };
   $("bGuide").onclick=()=>{ prevMode="main"; mode="guide"; render(); };
   $("bSave").onclick=libSave;
@@ -1415,8 +1784,10 @@ function renderMain(){
     $("chIn").value=""; buildGrid(); paint(true);
   };
   if($("chPaste")) $("chPaste").onclick=pasteProg;
+  const cf=$("chFind");
+  if(cf) cf.href = "https://www.google.com/search?q=" +
+    encodeURIComponent((S.title||"").replace(/\s+—\s+/g," ") + " אקורדים");
   $("gridTog").onclick=()=>{ gridOpen=!gridOpen; renderMain(); paint(true); };
-  const ts=$("toStrip"); if(ts) ts.onclick=()=>{ window.scrollTo({top:0,behavior:"smooth"}); syncTopH(); };
   const hb=$("hold"); if(hb) hb.onclick=()=>{ holdSync=!holdSync; renderMain(); paint(true);
     toast(holdSync?"הסנכרון מוקפא — האקורדים לא יזוזו":"הסנכרון חזר"); };
   const ci=$("cine"); if(ci) ci.onclick=()=>{ S.cinema=!S.cinema; renderMain();
@@ -1445,21 +1816,35 @@ function buildGrid(){
 }
 
 function pasteProg(){
-  const t=prompt("הדבק רצף אקורדים — מופרד ברווח או בקו אנכי. כל אקורד תופס מידה.\nלמשל:  G | D | Em | C");
-  if(!t) return;
-  const toks=t.split(/[\s|,]+/).map(x=>x.trim()).filter(Boolean);
-  let i=Math.max(0,sel), bad=0;
-  toks.forEach(tok=>{
-    if(tok==="."||tok==="-"){ i++; return; }
-    const p=parseChord(tok);
-    if(!p){ bad++; return; }
-    while(i>=S.bars.length) S.bars.push({c:null});
-    S.bars[i].c=PC_SHARP[((p.pc-S.transpose)%12+12)%12]+p.q;
+  $("pasteIn").value = "";
+  $("pasteRtl").checked = false;
+  $("pasteInfo").textContent = "—";
+  $("pasteIn").dataset.autochecked="";
+  $("pasteBox").hidden = false;
+  setTimeout(()=>$("pasteIn").focus(), 60);
+}
+function pastePreview(){
+  let c = parseChordSheet($("pasteIn").value, $("pasteRtl").checked);
+  if($("pasteDedupe").checked) c = c.filter((x,i)=> i===0 || x!==c[i-1]);
+  $("pasteInfo").textContent = c.length ? `זוהו ${c.length} אקורדים · ${[...new Set(c)].join(" ")}` : "לא זוהו אקורדים";
+  return c;
+}
+function pasteApply(){
+  const c = pastePreview();
+  if(!c.length){ toast("לא זוהו אקורדים בטקסט"); return; }
+  let i = Math.max(0, sel);
+  c.forEach(ch=>{
+    const pchd = parseChord(ch);
+    if(!pchd) return;
+    while(i >= S.bars.length) S.bars.push({c:null});
+    S.bars[i].c = PC_SHARP[((pchd.pc - S.transpose)%12+12)%12] + pchd.q;
     i++;
   });
-  sel=Math.min(i,S.bars.length-1);
-  buildGrid(); paint(true);
-  toast(bad?`נטענו ${toks.length-bad} אקורדים, ${bad} לא זוהו`:`נטענו ${toks.length} אקורדים`);
+  sel = Math.min(i, S.bars.length-1);
+  $("pasteBox").hidden = true;
+  gridOpen = true;
+  renderMain(); paint(true);
+  toast(`${c.length} אקורדים נטענו ללוח`);
 }
 
 /* ---------- מילים ---------- */
