@@ -116,7 +116,12 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .hchip.silent{opacity:.28;font-size:16px;color:var(--dim)}
 .horizon .nowdgm{position:absolute;top:8px;right:4px;width:82px;z-index:4;
   display:flex;align-items:center;justify-content:center}
+.horizon .nodgm{font-family:var(--disp);font-size:26px;color:var(--dim);opacity:.5}
 .horizon .nowdgm svg{height:96px;width:auto;max-width:100%}
+.horizon .hzempty{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:10px}
+.horizon .hzempty span{font-size:13px;line-height:1.65;color:var(--cream-2);text-align:center;
+  border:1px dashed var(--edge-2);border-radius:6px;padding:9px 16px;background:rgba(11,9,8,.5)}
+.horizon .hzempty b{color:var(--tungsten);font-weight:500}
 .horizon .hzhold{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;
   background:rgba(11,9,8,.62);backdrop-filter:blur(1.5px)}
 .horizon .hzhold span{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--tungsten);
@@ -162,7 +167,8 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
   .stickytop .ytbox{padding-top:38%}
   .horizon{height:86px}
   .horizon .nowdgm{width:64px;top:6px}
-  .horizon .nowdgm svg{height:74px}
+  .horizon .nodgm{font-family:var(--disp);font-size:26px;color:var(--dim);opacity:.5}
+.horizon .nowdgm svg{height:74px}
   .horizon .nowline{right:72px}
   .horizon .nowcap{right:56px}
   .hchip{top:22px;height:42px;font-size:18px}
@@ -290,6 +296,10 @@ body.locked{overflow:hidden}
   .sp-mark,.sp-title,.sp-sub,.sp-go,.sp-hint{animation:none;opacity:1}
   #splash{transition:none}
 }
+/* שדה קובץ עם display:none לא נפתח בחלק מהדפדפנים בנייד —
+   מסתירים אותו ויזואלית אבל משאירים אותו בפריסה. */
+.filein{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden;
+  clip:rect(0 0 0 0);white-space:nowrap;border:0;padding:0;margin:-1px;pointer-events:none}
 .toast{position:fixed;bottom:16px;inset-inline-start:16px;background:#2B241E;
   border:1px solid var(--tungsten-d);color:var(--tungsten);padding:10px 15px;border-radius:5px;
   z-index:95;font-size:14px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
@@ -362,6 +372,7 @@ body.locked{overflow:hidden}
     </div>
   </div>
 </div>
+<input type="file" id="bookFile" accept=".pdf,application/pdf" class="filein">
 <div class="toast" id="toast"></div>
 
 <script>
@@ -371,6 +382,8 @@ body.locked{overflow:hidden}
    הקובץ נקרא בדפדפן בלבד — הוא לא נשלח לשום מקום ולא נשמר בפרויקט.
    נשמר מקומית רק אינדקס קל: שם שיר, אמן ומספר עמוד.
    ═══════════════════════════════════════════════════════════════ */
+const ytSearch = (a,t) => "https://www.youtube.com/results?search_query=" +
+  encodeURIComponent(((a?a+" ":"") + t).trim());
 const BOOK_KEY = "playalong-book-index-v1";
 let pdfDoc = null, bookIndex = null, bookQuery = "", bookPick = null, bookRtl = true;
 
@@ -512,8 +525,9 @@ function renderImport(){
             <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
               <strong style="font-size:16px">${esc(x.t)}</strong>
               <span class="stamp">עמוד ${x.p}</span>
-              <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}"
-                style="margin-inline-start:auto">טען אקורדים</button>
+              <a class="btn sm" href="${ytSearch(x.a,x.t)}" target="_blank" rel="noopener"
+                style="margin-inline-start:auto;text-decoration:none">▶ יוטיוב</a>
+            <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}">טען אקורדים</button>
             </div>
           </div>`).join("")}
       ` : (q ? `
@@ -522,8 +536,9 @@ function renderImport(){
             <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
               <strong style="font-size:16px">${esc(x.t)}</strong>
               <span class="stamp">${esc(x.a)} · עמוד ${x.p}</span>
-              <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}"
-                style="margin-inline-start:auto">טען אקורדים</button>
+              <a class="btn sm" href="${ytSearch(x.a,x.t)}" target="_blank" rel="noopener"
+                style="margin-inline-start:auto;text-decoration:none">▶ יוטיוב</a>
+              <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}">טען אקורדים</button>
             </div>
           </div>`).join("") || `<div class="note">אין תוצאה תואמת.</div>`}
         ${matches.length>60?`<p class="stamp" style="margin-top:12px">מוצגות 60 מתוך ${matches.length} — צמצם את החיפוש</p>`:""}
@@ -537,7 +552,12 @@ function renderImport(){
     ` : `<div class="note">עדיין לא נטען ספר. הסריקה של ספר גדול אורכת דקה-שתיים, ומתבצעת פעם אחת.</div>`}
   </div>`;
 
-  $("ibPick").onclick = ()=> $("bookFile").click();
+  $("ibPick").onclick = ()=>{
+    const f = $("bookFile");
+    if(!f){ toast("שדה הקובץ חסר"); return; }
+    try{ f.click(); }
+    catch(e){ toast("הדפדפן חסם את בורר הקבצים — נסה דפדפן אחר"); }
+  };
   const cl = $("ibClear");
   if(cl) cl.onclick = ()=>{
     if(!confirm("למחוק את האינדקס? הקובץ עצמו לא ייפגע.")) return;
@@ -578,7 +598,10 @@ async function bookApply(){
     gridOpen = true;
     mode = "main"; ready=false; player=null; songDur=0; adOn=false; holdSync=false;
     cur={bar:-1,beat:-1,line:-1};
-    const url = prompt("הדבק קישור יוטיוב לשיר (אפשר גם אחר כך):", "");
+    const url = prompt(
+      "הדבק קישור יוטיוב לשיר.\n\n" +
+      "אין קישור? לחץ ביטול — השיר יישמר בספרייה עם האקורדים,\n" +
+      "ואפשר להשתמש בכפתור «▶ יוטיוב» שליד השיר כדי לחפש אותו.", "");
     const id = url ? ytId(url) : null;
     if(id){ S.ytId = id; open_(); toast(`${chords.length} אקורדים נטענו — עכשיו כיול רשת`); }
     else { mode="book"; render(); toast("האקורדים נטענו. פתח את השיר מהספרייה והוסף קישור"); libSave(); }
@@ -1019,6 +1042,12 @@ function paintHorizon(now){
   const span = W - NOWX - 8;
   const bi = Math.max(0, cur.bar);
 
+  /* שיר שנטען בלי אקורדים (למשל מהערכים הישראליים) — הפס מסביר במקום להיראות שבור */
+  const empty = !S.bars.some(b=>b.c);
+  const eh = $("hzEmpty");
+  if(eh) eh.classList.toggle("hidden", !empty);
+  if(empty){ hzPool.forEach(el=>el.style.display="none"); return; }
+
   /* איחוד מידות רצופות בעלות אותו אקורד לבלוק אחד */
   const blocks = [];
   let i = bi;
@@ -1027,7 +1056,9 @@ function paintHorizon(now){
     if(t0 > now + HZ_LOOK) break;
     const c = chordAt(i);
     let j = i + 1;
-    while(j < S.bars.length && chordAt(j) === c && timeOfBar(j) <= now + HZ_LOOK) j++;
+    /* מידות ריקות לא מתאחדות לבלוק אחד ענק — משאירים חלוקה נראית */
+    const cap = c ? S.bars.length : i + 2;
+    while(j < S.bars.length && j < cap && chordAt(j) === c && timeOfBar(j) <= now + HZ_LOOK) j++;
     blocks.push({c, t0, t1: timeOfBar(j)});
     i = j;
     if(blocks.length >= 14) break;
@@ -1049,7 +1080,7 @@ function paintHorizon(now){
     el.style.right = right + "px";
     el.style.width = Math.min(w, span + NOWX) + "px";
     el.style.display = "flex";
-    const hot = d0 <= 0 && d1 > 0;
+    const hot = d0 <= 0 && d1 > 0 && !!b.c;
     el.className = "hchip" + (hot ? " hot" : "") + (b.c ? "" : " silent");
     const txt = b.c || "·";
     if(el.textContent !== txt) el.textContent = txt;
@@ -1285,6 +1316,7 @@ function renderGuide(){
           <li><b>הכול מקוטלג לפי אמן.</b> אחרי הסריקה מוצגת רשימת האמנים עם מספר השירים של כל אחד; לחיצה על אמן פותחת את השירים שלו. חיפוש חופשי עוקף את הקיטלוג ומחפש בשם השיר ובשם האמן גם יחד.</li>
           <li>נשמר מקומית <b>רק האינדקס</b> — שמות ועמודים. הקובץ עצמו לא נשמר ולא נשלח לשום מקום, ולכן צריך לבחור אותו מחדש כשרוצים לשלוף עמוד אחרי רענון.</li>
           <li>לפני הטעינה מוצגת תצוגה מקדימה של האקורדים הראשונים. אם הסדר יוצא הפוך — בטל, ונסה שוב עם כיוון הפוך.</li>
+          <li>שיר שנטען <b>בלי אקורדים</b> — כמו הערכים הישראליים בספר — יציג בפס הודעה במקום בלוקים ריקים, ודיאגרמת האצבעות תישאר ריקה עד שיהיה מה להראות. זה תקין, ולא תקלה.</li>
         </ul>
         <div class="note rust"><strong>שמור על ההפרדה:</strong> ספרי אקורדים מסמנים לרוב «לשימוש אישי בלבד». השימוש הזה — ספרייה במכשיר שלך — הוא בדיוק המסגרת שהם מתירים. אל תעלה את הקובץ עצמו לריפו, גם לא פרטי, וגם לא את הספרייה שנוצרה ממנו.</div>
       </div>
@@ -1903,6 +1935,8 @@ function renderMain(){
         <div class="nowdgm" id="hzDgm"></div>
         <div class="hzbeats beats" id="hzDots"></div>
         <div class="hzhold hidden" id="hzHold"><span></span></div>
+        <div class="hzempty hidden" id="hzEmpty"><span>אין עדיין אקורדים לשיר הזה<br>
+          פתח את <b>לוח המידות</b> ולחץ «הדבקה מאתר אקורדים», או טען אותם מהספר</span></div>
       </div>`;
   const B_STAGE = `      <div class="stage">
         <div>
@@ -2172,6 +2206,45 @@ function stopCal(){
 }
 $("calStop").onclick=stopCal;
 
+/* ── חלון ההדבקה ── */
+$("pasteCancel").onclick = ()=>{ $("pasteBox").hidden = true; };
+$("pasteGo").onclick     = pasteApply;
+$("pasteRtl").onchange   = pastePreview;
+$("pasteDedupe").onchange= pastePreview;
+$("pasteBox").onclick    = e => { if(e.target === $("pasteBox")) $("pasteBox").hidden = true; };
+$("pasteIn").oninput     = ()=>{
+  const el = $("pasteIn");
+  if(!el.dataset.autochecked && el.value.length > 40){
+    el.dataset.autochecked = "1";
+    if(looksHebrew(el.value) && !$("pasteRtl").checked){
+      $("pasteRtl").checked = true;
+      toast("טקסט בעברית — היפוך סדר האקורדים הופעל. בטל אם יצא הפוך");
+    }
+  }
+  pastePreview();
+};
+
+/* ── בחירת קובץ ספר האקורדים ── */
+$("bookFile").onchange = async e => {
+  const f = e.target.files && e.target.files[0];
+  e.target.value = "";
+  if(!f) return;
+  const say = m => { if($("ibProg")) $("ibProg").textContent = m; };
+  try{
+    say("טוען מנוע PDF…");
+    const idx = await buildBookIndex(f, (a,b)=> say(`סורק ${a}/${b}`));
+    if(!idx.length){ say(""); toast("לא זוהו שירים בקובץ — ודא שזה ספר אקורדים"); return; }
+    bookIndex = idx; bookSave(idx);
+    bookArtist = null; bookQuery = "";
+    renderImport();
+    toast(`נסרקו ${idx.length} שירים מהספר`);
+  }catch(err){
+    console.error(err);
+    say("");
+    toast("קריאת הקובץ נכשלה — נדרש חיבור לרשת בטעינה הראשונה");
+  }
+};
+
 function reAnchor(){
   if(!ready){ toast("הנגן עוד נטען"); return; }
   if(cur.bar<0){ toast("אין מידה נוכחית"); return; }
@@ -2263,7 +2336,9 @@ function paint(force){
     const nc2=$("nextc"); if(nc2) nc2.textContent=nx?nx.c:"–";
     const bn=$("bn"); if(bn) bn.textContent=bi>=0?bi+1:"–";
     const dg=$("dgm"); if(dg) dg.innerHTML=diagram(c,140);
-    const hd=$("hzDgm"); if(hd) hd.innerHTML=diagram(c, narrow()?78:88, {hand:false});
+    const hd=$("hzDgm");
+    if(hd) hd.innerHTML = c ? diagram(c, narrow()?78:88, {hand:false})
+      : `<div class="nodgm">–</div>`;
     document.querySelectorAll(".bc.cur").forEach(x=>x.classList.remove("cur"));
     const cell=document.querySelector(`.bc[data-b="${bi}"]`);
     if(cell){ cell.classList.add("cur"); if(!force) cell.scrollIntoView({block:"nearest",behavior:"smooth"}); }
