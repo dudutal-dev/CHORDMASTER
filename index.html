@@ -199,6 +199,9 @@ svg.dgm{display:block}
 .time{font-family:var(--mono);font-size:12.5px;color:var(--cream-2)}
 
 /* ---- bar grid ---- */
+.catrow{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;padding:11px 2px;
+  border-bottom:1px solid var(--edge)}
+.catrow b{font-weight:500;font-size:16px}
 .chipA{background:linear-gradient(180deg,#2C2520,#221C19);border:1px solid var(--edge);color:var(--cream);
   border-radius:20px;padding:6px 13px;font-size:14px;display:inline-flex;gap:7px;align-items:baseline;transition:.14s}
 .chipA:hover{border-color:var(--tungsten-d);color:var(--tungsten)}
@@ -389,8 +392,15 @@ let pdfDoc = null, bookIndex = null, bookQuery = "", bookPick = null, bookRtl = 
 
 function bookLoad(){ try{ return JSON.parse(localStorage.getItem(BOOK_KEY)||"null"); }catch(e){ return null; } }
 function bookSave(idx){
-  try{ localStorage.setItem(BOOK_KEY, JSON.stringify(idx)); }
-  catch(e){ toast("האינדקס גדול מדי לשמירה מקומית — יישאר לסשן הזה"); }
+  try{ localStorage.setItem(BOOK_KEY, JSON.stringify(idx)); return true; }
+  catch(e){
+    /* אם אין מקום לאקורדים — שומרים לפחות את האינדקס */
+    try{
+      localStorage.setItem(BOOK_KEY, JSON.stringify(idx.map(x=>({t:x.t,a:x.a,p:x.p}))));
+      toast("נשמר אינדקס בלבד — לשליפת אקורדים יידרש הקובץ שוב");
+    }catch(e2){ toast("אין מקום לשמירה מקומית — האינדקס יישאר לסשן הזה"); }
+    return false;
+  }
 }
 
 function loadPdfJs(){
@@ -453,7 +463,19 @@ async function buildBookIndex(file, onProg){
       }).length;
       if(chordy >= 2){
         const h = parseHead(lines[0]);
-        if(h.t && h.t.length < 90) idx.push({t:h.t, a:h.a, p});
+        if(h.t && h.t.length < 90){
+          const rows = [];
+          lines.forEach(L=>{
+            const tk = L.split(/[\s|,]+/).filter(Boolean);
+            const hits = tk.filter(isChordToken);
+            if(hits.length && hits.length >= tk.length*0.6){
+              const row = hits.map(baseOf).filter(Boolean);
+              if(row.length) rows.push(row);
+            }
+          });
+          /* הסדר בספרים בעברית הפוך — נשמר כפי שחולץ, וההיפוך בטעינה */
+          idx.push({t:h.t, a:h.a, p, c: rows.flat().join(" ")});
+        }
       }
     }
     if(p % 10 === 0){ onProg(p, n); await new Promise(r=>setTimeout(r,0)); }
@@ -480,6 +502,7 @@ async function bookChords(pageNo){
 let bookBusy = false;
 
 function renderImport(){
+  setTimeout(resetTop,0);
   $("ttl").textContent = "ייבוא מספר אקורדים";
   $("topRight").innerHTML = `<button class="btn sm primary" id="ibBack">חזרה</button>`;
   $("ibBack").onclick = ()=>{ bookPick=null; mode="book"; render(); };
@@ -571,8 +594,11 @@ function renderImport(){
     const n2=$("ibQ"); n2.focus(); n2.setSelectionRange(p,p); };
 
   app.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{
-    if(!pdfDoc){ toast("טען את הקובץ מחדש כדי לשלוף אקורדים"); $("bookFile").click(); return; }
-    bookPick = {p:+b.dataset.bp, t:b.dataset.bt, a:b.dataset.ba};
+    const rec = (bookIndex||[]).find(x=>x.p===+b.dataset.bp);
+    if(!pdfDoc && !(rec && rec.c)){
+      toast("טען את הקובץ מחדש כדי לשלוף אקורדים"); $("bookFile").click(); return;
+    }
+    bookPick = {p:+b.dataset.bp, t:b.dataset.bt, a:b.dataset.ba, c: rec && rec.c};
     bookApply();
   });
 }
@@ -581,7 +607,14 @@ async function bookApply(){
   if(bookBusy) return;
   bookBusy = true;
   try{
-    const chords = await bookChords(bookPick.p);
+    /* אקורדים שנשמרו בסריקה — הקובץ כבר לא נחוץ */
+    let chords;
+    if(bookPick.c){
+      chords = bookPick.c.split(" ").filter(Boolean);
+      if(bookRtl) chords = chords.reverse();
+    } else {
+      chords = await bookChords(bookPick.p);
+    }
     if(!chords.length){ toast("לא זוהו אקורדים בעמוד הזה"); return; }
     const ok = confirm(
       `${bookPick.t} — ${bookPick.a}\nעמוד ${bookPick.p}\n\n` +
@@ -906,51 +939,124 @@ function songCard(s){
       </div>`;
 }
 
+function catalogItems(){
+  const out = [];
+  SONGBOOK.forEach((x,idx)=>{
+    if(x.tpl) return;
+    out.push({src:"built", a:x.a, t:x.t, ref:idx,
+      tag: x.ytl?"קליפ מילים":(x.yt?"קישור מוכן":""),
+      tagCol: x.ytl?"var(--jade)":"var(--tungsten)",
+      sub: [x.y||"", x.key!=="?"?x.key:"", x.capo?"קאפו "+x.capo:""].filter(Boolean).join(" · "),
+      empty: !Object.keys(x.sec).length});
+  });
+  SONGBOOK.filter(x=>x.tpl).forEach((x)=>{
+    out.push({src:"built", a:"תבניות", t:x.t, ref:SONGBOOK.indexOf(x), sub:x.key, tag:"", empty:false});
+  });
+  (bookIndex||[]).forEach(x=>{
+    out.push({src:"imported", a:x.a||"ללא אמן", t:x.t, ref:x.p, sub:"עמוד "+x.p,
+      tag: x.c?"מהספר":"מהספר · דורש קובץ", tagCol:"var(--cream-2)", empty:false});
+  });
+  lib().forEach(x=>{
+    const sp = splitTitle(x.title || x.ytId);
+    out.push({src:"lib", a:sp.a||"ללא אמן", t:sp.t, ref:x.id,
+      sub: x.bars.filter(b=>b.c).length+"/"+x.bars.length+" מידות" + (x.anchors&&x.anchors.length?" · מכויל":""),
+      tag:"שלי", tagCol:"var(--jade)", empty:!x.bars.some(b=>b.c)});
+  });
+  return out;
+}
+
+function catRow(x){
+  const act = x.src==="built" ? `<button class="btn sm primary" data-cb="${x.ref}">טען</button>`
+    : x.src==="imported" ? `<a class="btn sm" href="${ytSearch(x.a,x.t)}" target="_blank" rel="noopener" style="text-decoration:none">▶</a>
+        <button class="btn sm primary" data-bp="${x.ref}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}">טען אקורדים</button>`
+    : `<button class="btn sm primary" data-open="${x.ref}">פתח</button>
+       <button class="btn sm" data-del="${x.ref}">✕</button>`;
+  return `<div class="catrow">
+    <b>${esc(x.t)}</b>
+    <span class="stamp">${esc(x.sub||"")}</span>
+    ${x.tag?`<span class="stamp" style="color:${x.tagCol}">${esc(x.tag)}</span>`:""}
+    ${x.empty?`<span class="stamp" style="color:var(--ruby)">ללא אקורדים</span>`:""}
+    <span style="flex:1"></span>${act}
+  </div>`;
+}
+
 function renderBook(){
-  $("ttl").textContent = "ספר השירים";
+  setTimeout(resetTop,0);
+  $("ttl").textContent = "קטלוג";
   $("topRight").innerHTML = `
     <button class="btn sm primary" id="sbBack">חזרה</button>
     <button class="btn sm" id="sbImp2">📕 ייבוא</button>
     <button class="btn sm" id="sbGuide2">מדריך</button>`;
-  $("sbImp2").onclick = ()=>{ mode="import"; render(); };
-  $("sbGuide2").onclick = ()=>{ prevMode="book"; mode="guide"; render(); };
-  $("sbBack").onclick = ()=>{ sbPick = null; mode = "start"; render(); };
+  $("sbBack").onclick  = ()=>{ bookArtist=null; mode="start"; render(); };
+  $("sbImp2").onclick  = ()=>{ mode="import"; render(); };
+  $("sbGuide2").onclick= ()=>{ prevMode="book"; mode="guide"; render(); };
 
+  bookIndex = bookIndex || bookLoad();
+  const all = catalogItems();
   const q = sbQuery.trim().toLowerCase();
-  const list = SONGBOOK.filter(s => !q ||
-    (s.t+" "+s.a).toLowerCase().includes(q) || String(s.y).includes(q) || s.key.toLowerCase()===q);
+  const artists = groupByArtist(all, x=>x.a);
+  const matches = bookArtist
+    ? all.filter(x=>x.a===bookArtist)
+    : (q ? all.filter(x=>(x.t+" "+x.a).toLowerCase().includes(q)) : []);
+
+  const counts = {
+    built: all.filter(x=>x.src==="built").length,
+    imported: all.filter(x=>x.src==="imported").length,
+    lib: all.filter(x=>x.src==="lib").length
+  };
 
   app.innerHTML = `
   <div class="guide">
-    <div class="stamp">מהלכי אקורדים ומבנה · ${SONGBOOK.length} ערכים</div>
-    <h2 style="margin:8px 0 10px">ספר השירים</h2>
-    <p class="lead" style="margin-bottom:18px">בחר שיר — האקורדים והמבנה ייטענו מוכנים, ויישאר לך רק לחבר קישור יוטיוב ולכייל את הרשת. הרשימה מקובצת לפי אמן; אפשר להחליף לרשימה רציפה.</p>
-
-    <div class="note rust"><strong>קרא לפני שאתה סומך על זה:</strong> אלה הגרסאות האקוסטיות המקובלות, אקורד אחד למידה — לא תמלול של ההקלטה. ספטימות, סלאש וקישוטים הושמטו, ומספר החזרות הוא הערכה. <b>אמת מול האוזן ותקן בלוח המידות</b> — לשם כך הוא קיים.</p></div>
-
-    <div style="display:flex;gap:8px;margin:18px 0 10px;flex-wrap:wrap">
+    <div class="stamp">קטלוג · ${all.length} שירים · ${artists.length} אמנים</div>
+    <h2 style="margin:8px 0 8px">כל השירים במקום אחד</h2>
+    <p class="lead" style="margin-bottom:14px">
+      ${counts.built} מהספר המובנה · ${counts.imported} מספר האקורדים שלך · ${counts.lib} בספרייה האישית.
+      חפש שיר או אמן, או בחר אמן מהרשימה.
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
       <button class="btn" id="sbImport">📕 ייבוא מספר אקורדים שלך (PDF)</button>
-      <button class="btn ${sbGroup?"on":""}" id="sbGroupTog">${sbGroup?"מקובץ לפי אמן":"רשימה רציפה"}</button>
     </div>
-    <div style="display:flex;gap:8px;margin:0 0 14px">
-      <input type="text" id="sbQ" placeholder="חיפוש לפי שיר, אמן, שנה או סולם…" value="${esc(sbQuery)}" style="flex:1">
-    </div>
+    <input type="text" id="sbQ" placeholder="חיפוש שיר או אמן…" value="${esc(sbQuery)}" style="width:100%;margin-bottom:14px">
 
-    ${list.length
-      ? (sbGroup
-          ? groupByArtist(list, x=>x.a).map(([artist, songs]) => `
-              <div class="grouphead">${esc(artist)}<span>${songs.length}</span></div>
-              ${songs.map(songCard).join("")}`).join("")
-          : list.map(songCard).join(""))
-      : `<div class="note">לא נמצא ערך תואם. אפשר תמיד לפתוח שיר ריק ולהזין אקורדים ידנית.</div>`}
+    ${bookArtist ? `
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:4px">
+        <button class="btn sm" id="catAll">← כל האמנים</button>
+        <span class="grouphead" style="margin:0;border:0;padding:0">${esc(bookArtist)}<span>${matches.length}</span></span>
+      </div>
+      ${matches.map(catRow).join("")}
+    ` : q ? `
+      ${matches.length ? matches.slice(0,80).map(catRow).join("") : `<div class="note">אין תוצאה תואמת.</div>`}
+      ${matches.length>80?`<p class="stamp" style="margin-top:10px">מוצגות 80 מתוך ${matches.length}</p>`:""}
+    ` : `
+      <div style="display:flex;flex-wrap:wrap;gap:6px">
+        ${artists.map(([a,songs])=>`<button class="chipA" data-ca="${esc(a)}">${esc(a)}<span>${songs.length}</span></button>`).join("")}
+      </div>
+    `}
   </div>`;
 
-  const qi = $("sbQ");
-  qi.oninput = ()=>{ sbQuery = qi.value; const p=qi.selectionStart; renderBook();
-    const n=$("sbQ"); n.focus(); n.setSelectionRange(p,p); };
   $("sbImport").onclick = ()=>{ mode="import"; render(); };
-  $("sbGroupTog").onclick = ()=>{ sbGroup = !sbGroup; renderBook(); };
-  app.querySelectorAll("[data-pick]").forEach(b => b.onclick = ()=> pickSong(SONGBOOK[+b.dataset.pick]));
+  const ca=$("catAll"); if(ca) ca.onclick=()=>{ bookArtist=null; renderBook(); };
+  app.querySelectorAll("[data-ca]").forEach(b=>b.onclick=()=>{ bookArtist=b.dataset.ca; sbQuery=""; renderBook(); });
+  const qi=$("sbQ");
+  qi.oninput=()=>{ const c=qi.selectionStart; sbQuery=qi.value; bookArtist=null; renderBook();
+    const n=$("sbQ"); n.focus(); n.setSelectionRange(c,c); };
+
+  app.querySelectorAll("[data-cb]").forEach(b=>b.onclick=()=> pickSong(SONGBOOK[+b.dataset.cb]));
+  app.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{
+    const rec=(bookIndex||[]).find(x=>x.p===+b.dataset.bp);
+    if(!pdfDoc && !(rec && rec.c)){ toast("טען את הקובץ מחדש כדי לשלוף אקורדים"); mode="import"; render(); return; }
+    bookPick={p:+b.dataset.bp, t:b.dataset.bt, a:b.dataset.ba, c: rec && rec.c};
+    bookApply();
+  });
+  app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
+    const x=lib().find(y=>y.id===b.dataset.open);
+    if(x){ S=Object.assign(newSong(),x); open_(); }
+  });
+  app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(!confirm("למחוק מהספרייה?")) return;
+    localStorage.setItem(KEY, JSON.stringify(lib().filter(y=>y.id!==b.dataset.del)));
+    renderBook();
+  });
 }
 
 function pickSong(entry){
@@ -1120,6 +1226,7 @@ window.addEventListener("resize", ()=>{
 
 
 function renderAbout(){
+  setTimeout(resetTop,0);
   $("ttl").textContent = "אודות";
   $("topRight").innerHTML = `<button class="btn sm primary" id="abBack">חזרה</button>`;
   $("abBack").onclick = ()=>{ mode = ["main","book"].includes(prevMode) ? prevMode : "start"; render(); };
@@ -1197,6 +1304,7 @@ function renderAbout(){
 }
 
 function renderGuide(){
+  setTimeout(resetTop,0);
   $("ttl").textContent = "מדריך";
   $("topRight").innerHTML = `<button class="btn sm primary" id="gBack">חזרה</button>`;
   $("gBack").onclick = ()=>{ mode = ["main","book"].includes(prevMode) ? prevMode : "start"; render(); };
@@ -1233,8 +1341,8 @@ function renderGuide(){
     <div class="gstep">
       <div class="gnum">1½</div>
       <div>
-        <h3>קיצור הדרך: ספר השירים</h3>
-        <p>במקום להזין אקורדים מאפס — <b>ספר השירים</b> מכיל 39 שירים (1963–1980) ו-5 תבניות הרמוניות, עם מהלך אקורדים ומבנה מוכנים. בחירה טוענת עשרות מידות מלאות ישר ללוח.</p>
+        <h3>קיצור הדרך: הקטלוג</h3>
+        <p><b>הקטלוג</b> מאחד שלושה מקורות למקום אחד: הספר המובנה (39 שירים 1963–1980 ו-5 תבניות), ספר האקורדים שייבאת, והשירים ששמרת בעצמך. הרשימה הראשית היא <b>רשימת אמנים</b> עם מונה לכל אחד; לחיצה על אמן פותחת את כל שיריו מכל המקורות יחד. תיבת החיפוש מחפשת בו־זמנית בשם השיר ובשם האמן.</p>
         <ul>
           <li><b>✔ קישור מוכן</b> — לשיר יש קישור יוטיוב רשמי מאומת. לחיצה אחת ואתה בפנים.</li>
           <li><b>✔ קליפ מילים</b> — לשיר יש קליפ מילים רשמי. פתיחה דרכו נכנסת ישר למצב קליפ, והמילים מגיעות מהווידאו.</li>
@@ -1314,7 +1422,8 @@ function renderGuide(){
         <ul>
           <li>הסריקה מתבצעת פעם אחת ואורכת דקה-שתיים בספר גדול. האינדקס נשמר, החיפוש אחריו מיידי.</li>
           <li><b>הכול מקוטלג לפי אמן.</b> אחרי הסריקה מוצגת רשימת האמנים עם מספר השירים של כל אחד; לחיצה על אמן פותחת את השירים שלו. חיפוש חופשי עוקף את הקיטלוג ומחפש בשם השיר ובשם האמן גם יחד.</li>
-          <li>נשמר מקומית <b>רק האינדקס</b> — שמות ועמודים. הקובץ עצמו לא נשמר ולא נשלח לשום מקום, ולכן צריך לבחור אותו מחדש כשרוצים לשלוף עמוד אחרי רענון.</li>
+          <li>הסריקה שומרת מקומית <b>גם את האקורדים</b>, ולכן אחרי הפעם הראשונה <b>הקובץ לא נדרש יותר</b> — הכול עובד גם בלעדיו. הקובץ עצמו לא נשמר ולא נשלח לשום מקום.</li>
+          <li>מרגע הסריקה, שירי הספר מופיעים בקטלוג לצד כל השאר, מקוטלגים לפי אמן.</li>
           <li>לפני הטעינה מוצגת תצוגה מקדימה של האקורדים הראשונים. אם הסדר יוצא הפוך — בטל, ונסה שוב עם כיוון הפוך.</li>
           <li>שיר שנטען <b>בלי אקורדים</b> — כמו הערכים הישראליים בספר — יציג בפס הודעה במקום בלוקים ריקים, ודיאגרמת האצבעות תישאר ריקה עד שיהיה מה להראות. זה תקין, ולא תקלה.</li>
         </ul>
@@ -1763,6 +1872,12 @@ const playing = () => ready && player.getPlayerState && player.getPlayerState()=
 /* ═══════════════════════════════════════════════════════════════
    4. מסכים
    ═══════════════════════════════════════════════════════════════ */
+/* גלילת הכותרת נשארה מהמסך הקודם ו"תקעה" כפתורים מחוץ לתצוגה */
+function resetTop(){
+  const r = $("topRight");
+  if(r) r.scrollLeft = 0;
+  if(typeof syncTopH === "function") syncTopH();
+}
 function render(){
   if(mode==="guide") renderGuide();
   else if(mode==="book") renderBook();
@@ -1857,6 +1972,7 @@ function open_(){
 }
 
 function renderMain(){
+  setTimeout(resetTop,0);
   $("ttl").textContent=S.title||"נגן־יחד";
   $("topRight").innerHTML=`
     ${(S.cinema || narrow()) ? `<button class="btn sm" id="toStrip" title="חזרה לפס האקורדים">↑ לפס</button>` : ""}
