@@ -114,6 +114,9 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .hchip.hot{background:linear-gradient(180deg,#F5BE5C,#D8912E);border-color:#F5C36B;color:#241705;
   box-shadow:0 0 22px var(--tungsten-glow)}
 .hchip.silent{opacity:.28;font-size:16px;color:var(--dim)}
+.horizon .nowdgm{position:absolute;top:2px;right:4px;width:88px;z-index:4;
+  display:flex;align-items:center;justify-content:center}
+.horizon .nowdgm svg{max-height:100px}
 .horizon .fadeout{position:absolute;top:0;bottom:0;left:0;width:70px;z-index:2;
   background:linear-gradient(90deg,#1A1512,transparent);pointer-events:none}
 
@@ -122,7 +125,26 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 @media(max-width:1020px){.main{grid-template-columns:1fr}}
 .main.cinema{grid-template-columns:1fr;max-width:1080px;margin:0 auto}
 .main.cinema .horizon{margin-top:13px}
+.stage #dgm svg{max-width:150px;height:auto}
 .main.cinema .ytbox{box-shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 1px var(--edge)}
+.stickytop{background:var(--tolex)}
+@media(max-width:820px){
+  .stickytop{position:sticky;top:44px;z-index:25;padding-bottom:7px;
+    box-shadow:0 10px 18px -8px rgba(11,9,8,.95)}
+  .stickytop .ytbox{border-radius:0 0 6px 6px}
+  .horizon{height:86px;margin-bottom:0}
+  .main.cinema .horizon{margin-top:7px}
+  .hchip{top:20px;height:46px;font-size:20px}
+  .horizon .nowdgm{width:74px}
+  .horizon .nowline{right:82px}
+  .horizon .nowcap{right:66px;font-size:8px}
+  .stage{padding:13px}
+  .nowc{font-size:clamp(42px,15vw,64px)}
+  .bc{width:60px}
+}
+@media(max-width:820px) and (orientation:landscape){
+  .stickytop{position:static}
+}
 .ytbox{position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;
   border:1px solid var(--edge);box-shadow:0 6px 22px rgba(0,0,0,.5)}
 .ytbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
@@ -282,17 +304,17 @@ const SONGBOOK = [
     sec:{ verse:["Am","F","C","G"], chorus:["F","G","C","Am","F","G","C","C"] },
     arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
 
-  { a:"The Beatles", t:"Let It Be", y:1970, key:"C", diff:2,
+  { a:"The Beatles", t:"Let It Be", yt:"CGj85pVzRJs", y:1970, key:"C", diff:2,
     note:"מקורו בפסנתר. הבס היורד בין C ל-Am הוא מה שנותן לו את התנועה.",
     sec:{ verse:["C","G","Am","F","C","G","F","C"], chorus:["Am","G","F","C","C","G","F","C"] },
     arr:[["verse",2],["chorus",1],["verse",1],["chorus",1]] },
 
-  { a:"The Beatles", t:"Here Comes the Sun", y:1969, key:"D", capo:7, diff:3,
+  { a:"The Beatles", t:"Here Comes the Sun", yt:"KQetemT1sWc", y:1969, key:"D", capo:7, diff:3,
     note:"קאפו 7 — עם הקאפו מנגנים צורות D–G–A ונשמעים ב-A. בלי קאפו זה שיר אחר לגמרי.",
     sec:{ verse:["D","G","A","D"], chorus:["G","D","A","A"] },
     arr:[["verse",4],["chorus",2],["verse",4]] },
 
-  { a:"Eagles", t:"Take It Easy", y:1972, key:"G", diff:2,
+  { a:"Eagles", t:"Take It Easy", yt:"5igDtWadYms", y:1972, key:"G", diff:2,
     sec:{ verse:["G","G","D","C","G","G","D","C"], chorus:["C","G","D","D","C","G","D","G"] },
     arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
 
@@ -310,7 +332,7 @@ const SONGBOOK = [
     sec:{ verse:["Bm","A","G","Em","Bm","Bm","Bm","Bm"], chorus:["D","A","C","G","D","A","C","G"] },
     arr:[["verse",2],["chorus",2],["verse",2],["chorus",2]] },
 
-  { a:"Pink Floyd", t:"Another Brick in the Wall, Pt. 2", y:1979, key:"Dm", diff:1,
+  { a:"Pink Floyd", t:"Another Brick in the Wall, Pt. 2", yt:"HrxX9TBj2zY", y:1979, key:"Dm", diff:1,
     note:"שני אקורדים. הגרוב הוא כל השיר — תרגל את הפריטה, לא את האקורדים.",
     sec:{ main:["Dm","Dm","G","G"] },
     arr:[["main",16]] },
@@ -338,7 +360,7 @@ const SONGBOOK = [
     sec:{ verse:["D","Em","G","D","D","Em","G","D"], chorus:["A","G","D","D","A","G","D","D"] },
     arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
 
-  { a:"Neil Young", t:"Heart of Gold", y:1972, key:"Em", diff:2,
+  { a:"Neil Young", t:"Heart of Gold", yt:"c7eB7Wns1-M", y:1972, key:"Em", diff:2,
     note:"הרמוניקה מנגנת את המהלך לפני שהשירה נכנסת — נקודת התחלה טובה לכיול.",
     sec:{ verse:["Em","C","D","G"], chorus:["D","C","G","G","D","C","G","G"] },
     arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
@@ -562,7 +584,7 @@ function pickSong(entry){
    הכול נגזר מאותו שעון: אין אנימציית CSS עצמאית שיכולה להתפצל.
    ═══════════════════════════════════════════════════════════════ */
 const HZ_LOOK = 9;              // שניות קדימה שנראות במסלול
-const HZ_NOWX = 96;             // מיקום קו ההווה מהקצה הימני
+const hzNowX = () => narrow() ? 82 : 96;   // חייב להתאים למיקום קו ההווה ב-CSS
 let hzPool = [];
 
 function paintHorizon(now){
@@ -570,7 +592,8 @@ function paintHorizon(now){
   if(!lane){ hzPool = []; return; }
   const W = lane.clientWidth;
   if(W < 40) return;
-  const span = W - HZ_NOWX - 8;
+  const NOWX = hzNowX();
+  const span = W - NOWX - 8;
   const bi = Math.max(0, cur.bar);
 
   /* איחוד מידות רצופות בעלות אותו אקורד לבלוק אחד */
@@ -598,10 +621,10 @@ function paintHorizon(now){
     const el = hzPool[k];
     const d0 = (b.t0 - now) / HZ_LOOK * span;
     const d1 = (b.t1 - now) / HZ_LOOK * span;
-    const right = HZ_NOWX + Math.max(d0, -HZ_NOWX + 2);
-    const w = Math.max(26, d1 - Math.max(d0, -HZ_NOWX + 2));
+    const right = NOWX + Math.max(d0, -NOWX + 2);
+    const w = Math.max(26, d1 - Math.max(d0, -NOWX + 2));
     el.style.right = right + "px";
-    el.style.width = Math.min(w, span + HZ_NOWX) + "px";
+    el.style.width = Math.min(w, span + NOWX) + "px";
     el.style.display = "flex";
     const hot = d0 <= 0 && d1 > 0;
     el.className = "hchip" + (hot ? " hot" : "") + (b.c ? "" : " silent");
@@ -623,6 +646,15 @@ function pulseLamp(down){
    מדריך
    ═══════════════════════════════════════════════════════════════ */
 let prevMode = "start";
+const narrow = () => window.matchMedia("(max-width:820px)").matches;
+let wasNarrow = narrow(), rzT;
+window.addEventListener("resize", ()=>{
+  clearTimeout(rzT);
+  rzT = setTimeout(()=>{
+    const n = narrow();
+    if(n !== wasNarrow){ wasNarrow = n; if(mode==="main"){ renderMain(); paint(true); } }
+  }, 220);
+});
 
 function renderGuide(){
   $("ttl").textContent = "מדריך";
@@ -721,11 +753,26 @@ function renderGuide(){
       <div>
         <h3>ניגון ותרגול</h3>
         <ul>
+          <li><b>דיאגרמת האצבעות</b> מציירת יד ממש: כף יד, אצבעות שמתעקלות מהפרקים אל המיתר, וברה כאצבע שוכבת. המספר על קצה כל אצבע אומר באיזו אצבע ללחוץ — 1 מורה, 4 זרת.</li>
           <li><b>מסלול האקורדים</b> בראש המסך — האקורדים הבאים נעים לעבר קו ההווה, וכל בלוק ברוחב אורכו בפועל. זה נותן לך את ההתראה שהאצבעות צריכות, לפני שהאקורד מגיע.</li>
           <li><b>מהירות 50% או 75%</b> — יוטיוב שומר על הגובה, כך שהשיר איטי אבל באותו סולם.</li>
           <li><b>טונים ±6</b> — מזיז את האקורדים המוצגים כדי לנגן בסולם נוח. שים לב: זה משנה את מה שכתוב, לא את מה שנשמע.</li>
           <li><b>הצעת קאפו</b> מופיעה מעל הלוח כשיש קאפו שהופך את רוב האקורדים לפתוחים — הדרך לעקוף ברה.</li>
           <li>לחיצה על מידה או על שורת מילים <b>קופצת לשם</b> בשיר.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">📱</div>
+      <div>
+        <h3>בטלפון</h3>
+        <p>במסך צר הפריסה משתנה מעצמה: <b>הווידאו ופס האקורדים ננעלים לראש המסך</b>, וכל השאר — לוח המידות, הבקרות, ההגדרות — נגלל מתחתיהם. אפשר לגלול לתקן אקורד בלי לאבד את הווידאו מהעין.</p>
+        <p>פס האקורדים נע לרוחב: האקורד הנוכחי דולק על קו ההווה, הבאים זורמים לעברו, ו<b>דיאגרמת האצבעות יושבת בקצה הפס עצמו</b> — כך ששלושת הדברים שאתה צריך תוך כדי נגינה נמצאים באותה רצועה אחת.</p>
+        <ul>
+          <li>עם <b>קליפ מילים</b> אתה מקבל מילים ואקורדים באותו מבט — בלי לגלול בכלל.</li>
+          <li>הנעילה משתחררת בסיבוב לרוחב, כדי לא לחנוק את המסך.</li>
+          <li>הנח את הטלפון על סטנד במרחק זרוע. הגופנים מוגדלים בהתאם.</li>
         </ul>
       </div>
     </div>
@@ -923,34 +970,105 @@ function suggestCapo(){
   return (best && best.cap>0 && best.n>best.total*0.6) ? best : null;
 }
 
-function diagram(name,size){
-  const sh=shapeOf(name), W=size||140, H=W*1.22;
+function diagram(name, size, opt){
+  const hand = !(opt && opt.hand === false);
+  const sh = shapeOf(name);
+  const W = size || 140;
+  const BH = W*1.22;                       // גובה הלוח בלבד
+  const H  = hand ? W*1.52 : BH;           // מקום לכף היד מתחת
   if(!sh) return `<svg class="dgm" width="${W}" height="${H}"></svg>`;
-  const nums=sh.f.split("").map(c=>c==="x"?-1:parseInt(c,36));
-  const played=nums.filter(n=>n>0);
-  const minF=played.length?Math.min(...played):1, maxF=played.length?Math.max(...played):4;
-  const base=(maxF<=4)?1:minF, fing=(sh.g||"------").split("");
-  const L=24,T=28,sp=(W-2*L)/5,fh=(H-T-22)/5;
-  let s=`<svg class="dgm" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
-  if(base===1) s+=`<rect x="${L-1}" y="${T-4}" width="${W-2*L+2}" height="4" fill="#DCE6E4"/>`;
-  else s+=`<text x="${L-8}" y="${T+fh*.7}" fill="#8FA7AB" font-size="10.5" font-family="monospace" text-anchor="end">${base}fr</text>`;
-  for(let i=0;i<6;i++) s+=`<line x1="${L+i*sp}" y1="${T}" x2="${L+i*sp}" y2="${T+fh*4}" stroke="#2C4A52" stroke-width="1.3"/>`;
-  for(let i=0;i<=4;i++) s+=`<line x1="${L}" y1="${T+i*fh}" x2="${W-L}" y2="${T+i*fh}" stroke="#2C4A52" stroke-width="1.1"/>`;
-  if(sh.b && sh.b.fr>=base && sh.b.fr<base+4){
-    const y=T+(sh.b.fr-base+.5)*fh, x1=L+(6-sh.b.from)*sp, x2=L+(6-sh.b.to)*sp;
-    s+=`<line x1="${Math.min(x1,x2)}" y1="${y}" x2="${Math.max(x1,x2)}" y2="${y}" stroke="#CBA255" stroke-width="${fh*.5}" stroke-linecap="round" opacity=".92"/>`;
-  }
+
+  const nums = sh.f.split("").map(c => c==="x" ? -1 : parseInt(c,36));
+  const fing = (sh.g||"------").split("");
+  const played = nums.filter(n=>n>0);
+  const minF = played.length?Math.min(...played):1, maxF = played.length?Math.max(...played):4;
+  const base = (maxF<=4)?1:minF;
+  const L=W*0.17, T=W*0.20, sp=(W-2*L)/5, fh=(BH-T-W*0.16)/5;
+  const boardBottom = T + fh*4;
+
+  const X = i => L + i*sp;
+  const Y = n => T + (n-base+0.5)*fh;
+
+  let s = `<svg class="dgm" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-label="${esc(name)}">`;
+  s += `<defs>
+    <linearGradient id="sk${W}" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F3DCBE"/><stop offset="1" stop-color="#C9A277"/>
+    </linearGradient>
+  </defs>`;
+
+  /* --- הלוח --- */
+  if(base===1) s += `<rect x="${L-1}" y="${T-4}" width="${W-2*L+2}" height="4" rx="1" fill="#DCE6E4"/>`;
+  else s += `<text x="${L-7}" y="${T+fh*0.72}" fill="#8FA7AB" font-size="${W*0.075}" font-family="monospace" text-anchor="end">${base}fr</text>`;
+  for(let i=0;i<6;i++) s += `<line x1="${X(i)}" y1="${T}" x2="${X(i)}" y2="${boardBottom}" stroke="#2C4A52" stroke-width="1.3"/>`;
+  for(let k=0;k<=4;k++) s += `<line x1="${L}" y1="${T+k*fh}" x2="${W-L}" y2="${T+k*fh}" stroke="#2C4A52" stroke-width="1.1"/>`;
+
+  /* --- סימוני מיתר פתוח וממותת --- */
   for(let i=0;i<6;i++){
-    const x=L+i*sp, n=nums[i];
-    if(n===-1){ s+=`<text x="${x}" y="${T-9}" fill="#8FA7AB" font-size="11.5" text-anchor="middle">✕</text>`; continue; }
-    if(n===0){ s+=`<circle cx="${x}" cy="${T-12}" r="4.2" fill="none" stroke="#DCE6E4" stroke-width="1.4"/>`; continue; }
-    if(n<base||n>=base+4) continue;
-    const y=T+(n-base+.5)*fh;
-    s+=`<circle cx="${x}" cy="${y}" r="${fh*.31}" fill="#CBA255"/>`;
-    const g=fing[i];
-    if(g&&g!=="-") s+=`<text x="${x}" y="${y+4.4}" fill="#14212A" font-size="${fh*.42}" font-weight="700" text-anchor="middle" font-family="sans-serif">${g}</text>`;
+    if(nums[i]===-1) s += `<text x="${X(i)}" y="${T-8}" fill="#8FA7AB" font-size="${W*0.085}" text-anchor="middle">✕</text>`;
+    else if(nums[i]===0) s += `<circle cx="${X(i)}" cy="${T-11}" r="${W*0.032}" fill="none" stroke="#DCE6E4" stroke-width="1.4"/>`;
   }
-  return s+"</svg>";
+
+  /* --- אצבעות --- */
+  const tips = [];
+  for(let i=0;i<6;i++){
+    const n = nums[i];
+    if(n<=0 || n<base || n>=base+4) continue;
+    const f = fing[i]==="-" ? 0 : parseInt(fing[i],10)||0;
+    tips.push({i, x:X(i), y:Y(n), f});
+  }
+
+  if(hand && tips.length){
+    /* פרקי האצבעות מסודרים מתחת ללוח — אצבע 1 קרובה לאגוז, 4 רחוקה */
+    const kY  = boardBottom + fh*0.85;
+    const kX  = f => L + sp*(5.05 - (f-1)*1.08);
+    const fw  = sp*0.50;
+
+    /* כף היד */
+    s += `<path d="M ${kX(4)-fw*0.9} ${kY-fw*0.2}
+                   L ${kX(1)+fw*1.0} ${kY-fw*0.2}
+                   Q ${W*0.99} ${kY+fh*0.9} ${W*0.80} ${H-2}
+                   L ${W*0.26} ${H-2}
+                   Q ${W*0.05} ${kY+fh*0.7} ${kX(4)-fw*0.9} ${kY-fw*0.2} Z"
+             fill="url(#sk${W})" opacity=".30"/>`;
+
+    /* ברה — אצבע שוכבת לרוחב */
+    if(sh.b && sh.b.fr>=base && sh.b.fr<base+4){
+      const by = Y(sh.b.fr);
+      const x1 = X(6-sh.b.from), x2 = X(6-sh.b.to);
+      const a = Math.min(x1,x2), b = Math.max(x1,x2);
+      s += `<line x1="${a}" y1="${by}" x2="${b+fw*0.1}" y2="${by}" stroke="url(#sk${W})"
+              stroke-width="${fw*1.15}" stroke-linecap="round" opacity=".62"/>`;
+      s += `<line x1="${a}" y1="${by-fw*0.16}" x2="${b}" y2="${by-fw*0.16}" stroke="#F6E3C8"
+              stroke-width="${fw*0.30}" stroke-linecap="round" opacity=".30"/>`;
+    }
+
+    /* אצבע לכל לחיצה — קימור טבעי מהפרק אל קצה האצבע */
+    const drawn = {};
+    tips.forEach(t=>{
+      const f = t.f || 1;
+      if(sh.b && f===1 && drawn[1]) return;         // בברה מציירים אצבע אחת בלבד
+      drawn[f] = true;
+      const bx = kX(f), by = kY;
+      const cx = bx + (t.x-bx)*0.42, cy = by - (by-t.y)*0.72;
+      const d = `M ${bx} ${by} Q ${cx} ${cy} ${t.x} ${t.y}`;
+      s += `<path d="${d}" fill="none" stroke="url(#sk${W})" stroke-width="${fw*1.12}" stroke-linecap="round" opacity=".55"/>`;
+      s += `<path d="${d}" fill="none" stroke="#F6E3C8" stroke-width="${fw*0.30}" stroke-linecap="round" opacity=".26"/>`;
+    });
+  }
+
+  /* --- קצות האצבעות עם מספר, תמיד מעל הכול --- */
+  if(sh.b && sh.b.fr>=base && sh.b.fr<base+4 && !hand){
+    const by = Y(sh.b.fr), x1 = X(6-sh.b.from), x2 = X(6-sh.b.to);
+    s += `<line x1="${Math.min(x1,x2)}" y1="${by}" x2="${Math.max(x1,x2)}" y2="${by}" stroke="#CBA255"
+            stroke-width="${fh*0.5}" stroke-linecap="round" opacity=".92"/>`;
+  }
+  tips.forEach(t=>{
+    s += `<circle cx="${t.x}" cy="${t.y}" r="${fh*0.315}" fill="#F0A83C" stroke="#7A5417" stroke-width=".8"/>`;
+    if(t.f) s += `<text x="${t.x}" y="${t.y+fh*0.155}" fill="#241705" font-size="${fh*0.44}"
+                    font-weight="700" text-anchor="middle" font-family="sans-serif">${t.f}</text>`;
+  });
+
+  return s+`</svg>`;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1122,6 +1240,7 @@ function renderMain(){
         <div class="fadeout"></div>
         <div class="nowline"></div>
         <div class="nowcap">NOW</div>
+        <div class="nowdgm" id="hzDgm"></div>
       </div>`;
   const B_STAGE = `      <div class="stage">
         <div>
@@ -1143,11 +1262,14 @@ function renderMain(){
         <div id="lbox"></div>
       </div>`;
 
-  app.innerHTML = S.cinema ? `
+  const stacked = S.cinema || narrow();
+  app.innerHTML = stacked ? `
   <div class="main cinema">
     <div>
-      ${B_YT}
-      ${B_HZ}
+      <div class="stickytop">
+        ${B_YT}
+        ${B_HZ}
+      </div>
       ${B_STAGE}
       ${B_TR}
       ${B_TIME}
@@ -1415,7 +1537,8 @@ function paint(force){
     el.textContent=c||"–"; el.classList.toggle("none",!c);
     $("nextc").textContent=nx?nx.c:"–";
     $("bn").textContent=bi>=0?bi+1:"–";
-    $("dgm").innerHTML=diagram(c,140);
+    const dg=$("dgm"); if(dg) dg.innerHTML=diagram(c,140);
+    const hd=$("hzDgm"); if(hd) hd.innerHTML=diagram(c, narrow()?70:84, {hand:false});
     document.querySelectorAll(".bc.cur").forEach(x=>x.classList.remove("cur"));
     const cell=document.querySelector(`.bc[data-b="${bi}"]`);
     if(cell){ cell.classList.add("cur"); if(!force) cell.scrollIntoView({block:"nearest",behavior:"smooth"}); }
