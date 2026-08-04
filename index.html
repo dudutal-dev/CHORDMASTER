@@ -94,7 +94,7 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .note.rust strong{color:var(--ruby)} .note.sage strong{color:var(--jade)}
 
 /* ═══ SIGNATURE — מסלול האקורדים הנע ═══ */
-.horizon{position:relative;height:104px;border-radius:8px;overflow:hidden;margin-bottom:12px;
+.horizon{position:relative;height:112px;border-radius:8px;overflow:hidden;margin-bottom:12px;
   background:
     repeating-linear-gradient(45deg, rgba(255,255,255,.02) 0 1px, transparent 1px 5px),
     repeating-linear-gradient(-45deg, rgba(0,0,0,.3) 0 1px, transparent 1px 5px),
@@ -114,9 +114,11 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .hchip.hot{background:linear-gradient(180deg,#F5BE5C,#D8912E);border-color:#F5C36B;color:#241705;
   box-shadow:0 0 22px var(--tungsten-glow)}
 .hchip.silent{opacity:.28;font-size:16px;color:var(--dim)}
-.horizon .nowdgm{position:absolute;top:2px;right:4px;width:88px;z-index:4;
+.horizon .nowdgm{position:absolute;top:8px;right:4px;width:82px;z-index:4;
   display:flex;align-items:center;justify-content:center}
-.horizon .nowdgm svg{max-height:100px}
+.horizon .nowdgm svg{height:96px;width:auto;max-width:100%}
+.horizon .hzbeats{position:absolute;left:10px;bottom:6px;z-index:3;gap:4px;margin:0}
+.horizon .hzbeats i{width:18px;height:4px}
 .horizon .fadeout{position:absolute;top:0;bottom:0;left:0;width:70px;z-index:2;
   background:linear-gradient(90deg,#1A1512,transparent);pointer-events:none}
 
@@ -129,15 +131,22 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .main.cinema .ytbox{box-shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 1px var(--edge)}
 .stickytop{background:var(--tolex)}
 @media(max-width:820px){
-  .stickytop{position:sticky;top:44px;z-index:25;padding-bottom:7px;
+  .top-in{padding:6px 10px;gap:7px}
+  .brand{font-size:16px}
+  .ttl{display:none}
+  .top .right{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;max-width:100%;padding-bottom:1px}
+  .top .right::-webkit-scrollbar{display:none}
+  .top .right .btn{padding:4px 9px;font-size:12.5px;flex:0 0 auto}
+  .stickytop{position:sticky;top:var(--topH,44px);z-index:25;padding-bottom:6px;
     box-shadow:0 10px 18px -8px rgba(11,9,8,.95)}
   .stickytop .ytbox{border-radius:0 0 6px 6px}
-  .horizon{height:86px;margin-bottom:0}
-  .main.cinema .horizon{margin-top:7px}
-  .hchip{top:20px;height:46px;font-size:20px}
-  .horizon .nowdgm{width:74px}
-  .horizon .nowline{right:82px}
-  .horizon .nowcap{right:66px;font-size:8px}
+  .horizon{height:112px;margin-bottom:0}
+  .main.cinema .horizon{margin-top:6px}
+  .hchip{top:30px;height:52px;font-size:21px}
+  .horizon .nowdgm{width:82px;top:8px}
+  .horizon .nowline{right:90px}
+  .horizon .nowcap{right:74px;font-size:8px;top:2px}
   .stage{padding:13px}
   .nowc{font-size:clamp(42px,15vw,64px)}
   .bc{width:60px}
@@ -290,8 +299,8 @@ const SONGBOOK = [
     sec:{ main:["D","C","G","G"] },
     arr:[["main",16]] },
 
-  { a:"Lynyrd Skynyrd", t:"Simple Man", y:1973, key:"C", diff:1,
-    note:"לולאה אחת לכל השיר. אידיאלי לתרגול מעברים.",
+  { a:"Lynyrd Skynyrd", t:"Simple Man", yt:"8eNoms9wsGc", y:1973, key:"C", diff:1,
+    note:"לולאה אחת לכל השיר, אידיאלי לתרגול מעברים. שים לב: בהקלטה הגיטרות מכוונות חצי טון מטה — בכיוון רגיל לא תהיה בסולם עם ההקלטה. כוון Eb, או השתמש בטונים −1.",
     sec:{ main:["C","G","Am","Am"] },
     arr:[["main",16]] },
 
@@ -365,7 +374,7 @@ const SONGBOOK = [
     sec:{ verse:["Em","C","D","G"], chorus:["D","C","G","G","D","C","G","G"] },
     arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
 
-  { a:"Eric Clapton", t:"Wonderful Tonight", y:1977, key:"G", diff:2,
+  { a:"Eric Clapton", t:"Wonderful Tonight", yt:"b78RfUCw_fU", y:1977, key:"G", diff:2,
     note:"המהלך פשוט; מה שעושה את השיר הוא הליקים בין האקורדים.",
     sec:{ verse:["G","D","C","D"], chorus:["C","D","G","G","C","D","G","G"] },
     arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
@@ -393,12 +402,12 @@ const SONGBOOK = [
     sec:{ main:["A","A","D","A","A","A","E","A"] },
     arr:[["main",12]] },
 
-  { a:"Bob Marley & The Wailers", t:"No Woman No Cry", y:1974, key:"C", diff:2,
-    note:"בהקלטה יש בס יורד C–G/B–Am–F. הגרסה כאן מפושטת.",
+  { a:"Bob Marley & The Wailers", t:"No Woman No Cry", yt:"IT8XvzIfi4U", y:1974, key:"C", diff:2,
+    note:"בהקלטה יש בס יורד C–G/B–Am–F; הגרסה כאן מפושטת. הקישור הרשמי הוא ההקלטה החיה מ-1975 — הגרסה המוכרת, אך איטית יותר מגרסת האולפן.",
     sec:{ main:["C","G","Am","F","C","F","C","G"] },
     arr:[["main",12]] },
 
-  { a:"Steve Miller Band", t:"The Joker", y:1973, key:"G", diff:1,
+  { a:"Steve Miller Band", t:"The Joker", yt:"dV3AziKTBUo", y:1973, key:"G", diff:1,
     note:"לולאה אחת לכל השיר, עם גליסנדו מפורסם בין האקורדים.",
     sec:{ main:["G","C","D","C"] },
     arr:[["main",16]] },
@@ -408,7 +417,7 @@ const SONGBOOK = [
     sec:{ main:["C","G","Am","G"] },
     arr:[["main",16]] },
 
-  { a:"Jimi Hendrix", t:"All Along the Watchtower", y:1968, key:"Am", diff:1,
+  { a:"Jimi Hendrix", t:"All Along the Watchtower", yt:"TLV4_xaYynY", y:1968, key:"Am", diff:1,
     note:"מקורו של השיר בדילן. שלושה אקורדים, i–bVII–bVI ובחזרה.",
     sec:{ main:["Am","G","F","G"] },
     arr:[["main",16]] },
@@ -422,7 +431,7 @@ const SONGBOOK = [
     sec:{ verse:["G","C","G","D"], chorus:["C","D","G","Em","C","D","G","G"] },
     arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
 
-  { a:"Lynyrd Skynyrd", t:"Free Bird", y:1973, key:"G", diff:3,
+  { a:"Lynyrd Skynyrd", t:"Free Bird", yt:"0LwcvjNJTuM", y:1973, key:"G", diff:3,
     note:"מהלך האינטרו והבתים. הסולו בסוף הוא פרק אחר לגמרי ואינו כלול כאן.",
     sec:{ verse:["G","D","Em","F","C","D"] },
     arr:[["verse",10]] },
@@ -584,7 +593,7 @@ function pickSong(entry){
    הכול נגזר מאותו שעון: אין אנימציית CSS עצמאית שיכולה להתפצל.
    ═══════════════════════════════════════════════════════════════ */
 const HZ_LOOK = 9;              // שניות קדימה שנראות במסלול
-const hzNowX = () => narrow() ? 82 : 96;   // חייב להתאים למיקום קו ההווה ב-CSS
+const hzNowX = () => narrow() ? 90 : 96;   // חייב להתאים למיקום קו ההווה ב-CSS
 let hzPool = [];
 
 function paintHorizon(now){
@@ -647,11 +656,17 @@ function pulseLamp(down){
    ═══════════════════════════════════════════════════════════════ */
 let prevMode = "start";
 const narrow = () => window.matchMedia("(max-width:820px)").matches;
+function syncTopH(){
+  const t = document.querySelector(".top");
+  if(t) document.documentElement.style.setProperty("--topH", Math.round(t.getBoundingClientRect().height)+"px");
+}
+window.addEventListener("orientationchange", ()=>setTimeout(syncTopH,300));
 let wasNarrow = narrow(), rzT;
 window.addEventListener("resize", ()=>{
   clearTimeout(rzT);
   rzT = setTimeout(()=>{
     const n = narrow();
+    syncTopH();
     if(n !== wasNarrow){ wasNarrow = n; if(mode==="main"){ renderMain(); paint(true); } }
   }, 220);
 });
@@ -768,7 +783,7 @@ function renderGuide(){
       <div>
         <h3>בטלפון</h3>
         <p>במסך צר הפריסה משתנה מעצמה: <b>הווידאו ופס האקורדים ננעלים לראש המסך</b>, וכל השאר — לוח המידות, הבקרות, ההגדרות — נגלל מתחתיהם. אפשר לגלול לתקן אקורד בלי לאבד את הווידאו מהעין.</p>
-        <p>פס האקורדים נע לרוחב: האקורד הנוכחי דולק על קו ההווה, הבאים זורמים לעברו, ו<b>דיאגרמת האצבעות יושבת בקצה הפס עצמו</b> — כך ששלושת הדברים שאתה צריך תוך כדי נגינה נמצאים באותה רצועה אחת.</p>
+        <p>בנייד הבלוק הגדול של האקורד יורד לגמרי — <b>הכול מרוכז בפס אחד</b>: האקורד הנוכחי דולק על קו ההווה, הבאים זורמים לעברו, דיאגרמת האצבעות בקצה הפס, ונקודות הפעמה בתחתיתו. פחות מסך, יותר מידע במבט אחד.</p>
         <ul>
           <li>עם <b>קליפ מילים</b> אתה מקבל מילים ואקורדים באותו מבט — בלי לגלול בכלל.</li>
           <li>הנעילה משתחררת בסיבוב לרוחב, כדי לא לחנוק את המסך.</li>
@@ -1241,6 +1256,7 @@ function renderMain(){
         <div class="nowline"></div>
         <div class="nowcap">NOW</div>
         <div class="nowdgm" id="hzDgm"></div>
+        <div class="hzbeats beats" id="hzDots"></div>
       </div>`;
   const B_STAGE = `      <div class="stage">
         <div>
@@ -1270,7 +1286,7 @@ function renderMain(){
         ${B_YT}
         ${B_HZ}
       </div>
-      ${B_STAGE}
+      ${narrow() ? "" : B_STAGE}
       ${B_TR}
       ${B_TIME}
       ${B_CHORD}
@@ -1341,7 +1357,7 @@ function renderMain(){
   const ci=$("cine"); if(ci) ci.onclick=()=>{ S.cinema=!S.cinema; renderMain();
     toast(S.cinema?"מצב קליפ מילים — המילים מגיעות מהווידאו":"חזרה לתצוגה רגילה"); };
 
-  buildGrid(); if(!S.cinema) buildLyrics(); paint(true);
+  buildGrid(); if(!S.cinema) buildLyrics(); syncTopH(); paint(true);
   if(ready && player.setPlaybackRate) player.setPlaybackRate(lastRate);
 }
 
@@ -1526,7 +1542,7 @@ document.addEventListener("keydown",e=>{
 const LEAD=0.10;   // פיצוי על השהיית הדגימה של getCurrentTime
 
 function paint(force){
-  if(mode!=="main" || !$("nowc")) return;
+  if(mode!=="main" || !$("hzLane")) return;
   const t=T()+LEAD;
   const bi=barAtTime(t);
 
@@ -1534,11 +1550,11 @@ function paint(force){
     cur.bar=bi;
     const c=chordAt(bi), nx=nextChordFrom(bi);
     const el=$("nowc");
-    el.textContent=c||"–"; el.classList.toggle("none",!c);
-    $("nextc").textContent=nx?nx.c:"–";
-    $("bn").textContent=bi>=0?bi+1:"–";
+    if(el){ el.textContent=c||"–"; el.classList.toggle("none",!c); }
+    const nc2=$("nextc"); if(nc2) nc2.textContent=nx?nx.c:"–";
+    const bn=$("bn"); if(bn) bn.textContent=bi>=0?bi+1:"–";
     const dg=$("dgm"); if(dg) dg.innerHTML=diagram(c,140);
-    const hd=$("hzDgm"); if(hd) hd.innerHTML=diagram(c, narrow()?70:84, {hand:false});
+    const hd=$("hzDgm"); if(hd) hd.innerHTML=diagram(c, narrow()?78:88, {hand:false});
     document.querySelectorAll(".bc.cur").forEach(x=>x.classList.remove("cur"));
     const cell=document.querySelector(`.bc[data-b="${bi}"]`);
     if(cell){ cell.classList.add("cur"); if(!force) cell.scrollIntoView({block:"nearest",behavior:"smooth"}); }
@@ -1550,11 +1566,11 @@ function paint(force){
     if(k!==cur.beat||force){
       cur.beat=k;
       pulseLamp(k===0);
-      const d=$("dots");
-      if(d){
+      [$("dots"), $("hzDots")].forEach(d=>{
+        if(!d) return;
         if(d.children.length!==S.beatsPerBar) d.innerHTML=Array.from({length:S.beatsPerBar},()=>"<i></i>").join("");
         [...d.children].forEach((x,i)=>x.className=i===k?(k===0?"down":"on"):"");
-      }
+      });
     }
     const nx=nextChordFrom(bi);
     const ni=$("nexti");
