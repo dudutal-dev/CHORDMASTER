@@ -193,6 +193,19 @@ svg.dgm{display:block}
 .time{font-family:var(--mono);font-size:12.5px;color:var(--cream-2)}
 
 /* ---- bar grid ---- */
+.chipA{background:linear-gradient(180deg,#2C2520,#221C19);border:1px solid var(--edge);color:var(--cream);
+  border-radius:20px;padding:6px 13px;font-size:14px;display:inline-flex;gap:7px;align-items:baseline;transition:.14s}
+.chipA:hover{border-color:var(--tungsten-d);color:var(--tungsten)}
+.chipA span{font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.abcredit{background:linear-gradient(180deg,#2C231A,#201A16);border:1px solid var(--edge);
+  border-inline-start:3px solid var(--tungsten);border-radius:8px;padding:20px 22px;margin:26px 0 8px;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 6px 20px rgba(0,0,0,.4)}
+.abname{font-family:var(--disp);font-size:clamp(26px,6vw,38px);color:var(--tungsten);
+  line-height:1.1;margin:8px 0 6px;text-shadow:0 0 30px rgba(240,168,60,.28)}
+.abrole{color:var(--cream-2);font-size:13.5px;line-height:1.7}
+.grouphead{display:flex;align-items:baseline;gap:9px;font-family:var(--disp);font-size:19px;
+  color:var(--tungsten);margin:22px 0 2px;padding-bottom:5px;border-bottom:1px solid var(--edge)}
+.grouphead span{font-family:var(--mono);font-size:11px;color:var(--dim)}
 .grid{display:flex;flex-wrap:wrap;gap:4px}
 .bc{width:66px;background:linear-gradient(180deg,#2C2520,#221C19);border:1px solid var(--edge);
   border-radius:4px;padding:5px 3px;text-align:center;transition:.1s;color:var(--cream)}
@@ -248,6 +261,35 @@ kbd{font-family:var(--mono);font-size:12px;background:#120F0D;border:1px solid v
 .gtable td b{color:var(--tungsten);font-weight:500}
 
 /* ---- overlays ---- */
+#splash{position:fixed;inset:0;z-index:200;background:#171310;overflow:hidden;
+  transition:opacity 1.05s ease, transform 1.05s ease}
+#splash[hidden]{display:none}
+#splash.go{opacity:0;transform:scale(1.045);pointer-events:none}
+#splashCv{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.sp-ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-end;pointer-events:none;text-align:center;padding:20px 20px 7vh}
+@media(min-width:900px){ .sp-ui{justify-content:center;align-items:flex-end;padding-inline-end:6vw} }
+.sp-mark{font-family:var(--mono);font-size:11px;letter-spacing:.34em;color:var(--tungsten);
+  opacity:0;animation:spIn .9s .25s forwards}
+.sp-title{font-family:var(--disp);font-size:clamp(46px,13vw,104px);line-height:1;margin:12px 0 0;
+  color:var(--cream);text-shadow:0 0 42px rgba(240,168,60,.32),0 6px 26px rgba(0,0,0,.7);
+  opacity:0;animation:spIn 1s .45s forwards}
+.sp-sub{color:var(--cream-2);font-size:clamp(14px,3.6vw,17px);margin:14px 0 0;
+  text-shadow:0 2px 12px rgba(0,0,0,.8);opacity:0;animation:spIn 1s .75s forwards}
+.sp-go{pointer-events:auto;margin-top:34px;font-family:var(--disp);font-size:20px;
+  background:linear-gradient(180deg,#F5BE5C,#D8912E);color:#241705;border:1px solid #F5C36B;
+  border-radius:6px;padding:13px 46px;box-shadow:0 0 34px rgba(240,168,60,.34),0 6px 18px rgba(0,0,0,.5);
+  opacity:0;animation:spIn .8s 1.05s forwards;transition:transform .12s,box-shadow .2s}
+.sp-go:hover{box-shadow:0 0 50px rgba(240,168,60,.5),0 6px 18px rgba(0,0,0,.5)}
+.sp-go:active{transform:translateY(2px)}
+.sp-hint{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;color:var(--dim);
+  margin-top:26px;opacity:0;animation:spIn 1s 1.6s forwards}
+@keyframes spIn{to{opacity:1}}
+body.locked{overflow:hidden}
+@media (prefers-reduced-motion:reduce){
+  .sp-mark,.sp-title,.sp-sub,.sp-go,.sp-hint{animation:none;opacity:1}
+  #splash{transition:none}
+}
 .toast{position:fixed;bottom:16px;inset-inline-start:16px;background:#2B241E;
   border:1px solid var(--tungsten-d);color:var(--tungsten);padding:10px 15px;border-radius:5px;
   z-index:95;font-size:14px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
@@ -264,7 +306,18 @@ kbd{font-family:var(--mono);font-size:12px;background:#120F0D;border:1px solid v
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div id="splash">
+  <canvas id="splashCv"></canvas>
+  <div class="sp-ui">
+    <div class="sp-mark">PLAY ALONG</div>
+    <h1 class="sp-title">נגן־יחד</h1>
+    <p class="sp-sub">אקורדים ומילים שרצים עם השיר</p>
+    <button class="sp-go" id="splashGo">כניסה</button>
+    <div class="sp-hint">העבר אצבע על המיתרים · Enter לכניסה</div>
+  </div>
+</div>
 
 <header class="top">
   <div class="top-in">
@@ -420,8 +473,10 @@ function renderImport(){
 
   bookIndex = bookIndex || bookLoad();
   const q = bookQuery.trim().toLowerCase();
-  const list = bookIndex ? bookIndex.filter(x =>
-    !q || (x.t+" "+x.a).toLowerCase().includes(q)).slice(0, 60) : [];
+  const artists = bookIndex ? groupByArtist(bookIndex, x=>x.a) : [];
+  const matches = !bookIndex ? []
+    : bookArtist ? bookIndex.filter(x => (x.a||"ללא אמן").trim() === bookArtist)
+    : bookIndex.filter(x => !q || (x.t+" "+x.a).toLowerCase().includes(q));
 
   app.innerHTML = `
   <div class="guide">
@@ -446,19 +501,39 @@ function renderImport(){
     </div>
 
     ${bookIndex ? `
-      <input type="text" id="ibQ" placeholder="חיפוש שיר או אמן…" value="${esc(bookQuery)}" style="width:100%;margin-bottom:14px">
-      ${list.length ? list.map((x,i)=>`
-        <div class="gstep" style="grid-template-columns:1fr;padding:11px 0">
-          <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
-            <strong style="font-size:16px">${esc(x.t)}</strong>
-            <span class="stamp">${esc(x.a)} · עמוד ${x.p}</span>
-            <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}"
-              style="margin-inline-start:auto">טען אקורדים</button>
-          </div>
-        </div>`).join("")
-        : `<div class="note">אין תוצאה תואמת.</div>`}
-      ${bookIndex.filter(x=>!q||(x.t+" "+x.a).toLowerCase().includes(q)).length>60
-        ? `<p class="stamp" style="margin-top:12px">מוצגות 60 הראשונות — צמצם את החיפוש</p>`:""}
+      <input type="text" id="ibQ" placeholder="חיפוש שיר או אמן…" value="${esc(bookQuery)}" style="width:100%;margin-bottom:12px">
+      ${bookArtist ? `
+        <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:6px">
+          <button class="btn sm" id="ibAll">← כל האמנים</button>
+          <span class="grouphead" style="margin:0;border:0;padding:0">${esc(bookArtist)}<span>${matches.length}</span></span>
+        </div>
+        ${matches.map(x=>`
+          <div class="gstep" style="grid-template-columns:1fr;padding:10px 0">
+            <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+              <strong style="font-size:16px">${esc(x.t)}</strong>
+              <span class="stamp">עמוד ${x.p}</span>
+              <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}"
+                style="margin-inline-start:auto">טען אקורדים</button>
+            </div>
+          </div>`).join("")}
+      ` : (q ? `
+        ${matches.slice(0,60).map(x=>`
+          <div class="gstep" style="grid-template-columns:1fr;padding:10px 0">
+            <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+              <strong style="font-size:16px">${esc(x.t)}</strong>
+              <span class="stamp">${esc(x.a)} · עמוד ${x.p}</span>
+              <button class="btn sm primary" data-bp="${x.p}" data-bt="${esc(x.t)}" data-ba="${esc(x.a)}"
+                style="margin-inline-start:auto">טען אקורדים</button>
+            </div>
+          </div>`).join("") || `<div class="note">אין תוצאה תואמת.</div>`}
+        ${matches.length>60?`<p class="stamp" style="margin-top:12px">מוצגות 60 מתוך ${matches.length} — צמצם את החיפוש</p>`:""}
+      ` : `
+        <p class="stamp" style="margin-bottom:10px">${artists.length} אמנים · ${bookIndex.length} שירים — בחר אמן או חפש</p>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${artists.map(([a,songs])=>`
+            <button class="chipA" data-ba2="${esc(a)}">${esc(a)}<span>${songs.length}</span></button>`).join("")}
+        </div>
+      `)}
     ` : `<div class="note">עדיין לא נטען ספר. הסריקה של ספר גדול אורכת דקה-שתיים, ומתבצעת פעם אחת.</div>`}
   </div>`;
 
@@ -468,8 +543,11 @@ function renderImport(){
     if(!confirm("למחוק את האינדקס? הקובץ עצמו לא ייפגע.")) return;
     localStorage.removeItem(BOOK_KEY); bookIndex=null; pdfDoc=null; renderImport();
   };
+  const ia = $("ibAll"); if(ia) ia.onclick = ()=>{ bookArtist=null; renderImport(); };
+  app.querySelectorAll("[data-ba2]").forEach(b=>b.onclick=()=>{
+    bookArtist = b.dataset.ba2; bookQuery=""; renderImport(); });
   const qi = $("ibQ");
-  if(qi) qi.oninput = ()=>{ const p=qi.selectionStart; bookQuery=qi.value; renderImport();
+  if(qi) qi.oninput = ()=>{ const p=qi.selectionStart; bookQuery=qi.value; bookArtist=null; renderImport();
     const n2=$("ibQ"); n2.focus(); n2.setSelectionRange(p,p); };
 
   app.querySelectorAll("[data-bp]").forEach(b=>b.onclick=()=>{
@@ -760,41 +838,38 @@ function expandSong(entry){
   return {bars, marks};
 }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   קיטלוג לפי אמן — משותף לספר השירים, לספרייה האישית ולאינדקס הספר
+   ═══════════════════════════════════════════════════════════════ */
+const heCmp = (a,b) => String(a).localeCompare(String(b), "he");
+function groupByArtist(items, artistOf){
+  const m = new Map();
+  items.forEach(x=>{
+    const a = (artistOf(x) || "ללא אמן").trim();
+    if(!m.has(a)) m.set(a, []);
+    m.get(a).push(x);
+  });
+  return [...m.entries()].sort((x,y)=>heCmp(x[0], y[0]));
+}
+/* בספרייה הכותרת נשמרת כ־«אמן — שיר»; מפרידים בחזרה */
+function splitTitle(t){
+  const i = String(t).indexOf(" — ");
+  return i > 0 ? {a: t.slice(0,i), t: t.slice(i+3)} : {a: "", t: String(t)};
+}
+let sbGroup = true, libGroup = true, bookArtist = null;
+
 let sbQuery = "", sbPick = null;
 
-function renderBook(){
-  $("ttl").textContent = "ספר השירים";
-  $("topRight").innerHTML = `<button class="btn sm primary" id="sbBack">חזרה</button>`;
-  $("sbBack").onclick = ()=>{ sbPick = null; mode = "start"; render(); };
-
-  const q = sbQuery.trim().toLowerCase();
-  const list = SONGBOOK.filter(s => !q ||
-    (s.t+" "+s.a).toLowerCase().includes(q) || String(s.y).includes(q) || s.key.toLowerCase()===q);
-
-  app.innerHTML = `
-  <div class="guide">
-    <div class="stamp">מהלכי אקורדים ומבנה · ${SONGBOOK.length} ערכים</div>
-    <h2 style="margin:8px 0 10px">ספר השירים</h2>
-    <p class="lead" style="margin-bottom:18px">בחר שיר — האקורדים והמבנה ייטענו מוכנים, ויישאר לך רק לחבר קישור יוטיוב ולכייל את הרשת.</p>
-
-    <div class="note rust"><strong>קרא לפני שאתה סומך על זה:</strong> אלה הגרסאות האקוסטיות המקובלות, אקורד אחד למידה — לא תמלול של ההקלטה. ספטימות, סלאש וקישוטים הושמטו, ומספר החזרות הוא הערכה. <b>אמת מול האוזן ותקן בלוח המידות</b> — לשם כך הוא קיים.</p></div>
-
-    <div style="display:flex;gap:8px;margin:18px 0 10px;flex-wrap:wrap">
-      <button class="btn" id="sbImport">📕 ייבוא מספר אקורדים שלך (PDF)</button>
-    </div>
-    <div style="display:flex;gap:8px;margin:0 0 14px">
-      <input type="text" id="sbQ" placeholder="חיפוש לפי שיר, אמן, שנה או סולם…" value="${esc(sbQuery)}" style="flex:1">
-    </div>
-
-    ${list.length ? list.map((s,i)=>{
-      const idx = SONGBOOK.indexOf(s);
-      const chords = [...new Set(Object.values(s.sec).flat())];
-      return `
+function songCard(s){
+  const idx = SONGBOOK.indexOf(s);
+  const chords = [...new Set(Object.values(s.sec).flat())];
+  return `
       <div class="gstep" style="grid-template-columns:1fr;padding:15px 0">
         <div>
           <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
             <h3 style="margin:0">${esc(s.t)}</h3>
-            <span class="stamp">${esc(s.a)}${s.y?" · "+s.y:""}${s.key!=="?"?" · "+esc(s.key):""}${s.capo?" · קאפו "+s.capo:""}${s.diff?" · רמה "+s.diff:""}</span>
+            <span class="stamp">${sbGroup?"":esc(s.a)+" · "}${s.y?s.y:""}${s.key!=="?"?" · "+esc(s.key):""}${s.capo?" · קאפו "+s.capo:""}${s.diff?" · רמה "+s.diff:""}</span>
             ${s.ytl?`<span class="stamp" style="color:var(--jade)">✔ קליפ מילים</span>`:s.yt?`<span class="stamp" style="color:var(--tungsten)">✔ קישור מוכן</span>`:""}
             ${chords.length?"":`<span class="stamp" style="color:var(--ruby)">אקורדים להזנה</span>`}
             <button class="btn sm primary" data-pick="${idx}" style="margin-inline-start:auto">טען</button>
@@ -805,7 +880,45 @@ function renderBook(){
           </div>
           ${s.note?`<p style="margin:0;font-size:13.5px">${esc(s.note)}</p>`:""}
         </div>
-      </div>`;}).join("")
+      </div>`;
+}
+
+function renderBook(){
+  $("ttl").textContent = "ספר השירים";
+  $("topRight").innerHTML = `
+    <button class="btn sm primary" id="sbBack">חזרה</button>
+    <button class="btn sm" id="sbImp2">📕 ייבוא</button>
+    <button class="btn sm" id="sbGuide2">מדריך</button>`;
+  $("sbImp2").onclick = ()=>{ mode="import"; render(); };
+  $("sbGuide2").onclick = ()=>{ prevMode="book"; mode="guide"; render(); };
+  $("sbBack").onclick = ()=>{ sbPick = null; mode = "start"; render(); };
+
+  const q = sbQuery.trim().toLowerCase();
+  const list = SONGBOOK.filter(s => !q ||
+    (s.t+" "+s.a).toLowerCase().includes(q) || String(s.y).includes(q) || s.key.toLowerCase()===q);
+
+  app.innerHTML = `
+  <div class="guide">
+    <div class="stamp">מהלכי אקורדים ומבנה · ${SONGBOOK.length} ערכים</div>
+    <h2 style="margin:8px 0 10px">ספר השירים</h2>
+    <p class="lead" style="margin-bottom:18px">בחר שיר — האקורדים והמבנה ייטענו מוכנים, ויישאר לך רק לחבר קישור יוטיוב ולכייל את הרשת. הרשימה מקובצת לפי אמן; אפשר להחליף לרשימה רציפה.</p>
+
+    <div class="note rust"><strong>קרא לפני שאתה סומך על זה:</strong> אלה הגרסאות האקוסטיות המקובלות, אקורד אחד למידה — לא תמלול של ההקלטה. ספטימות, סלאש וקישוטים הושמטו, ומספר החזרות הוא הערכה. <b>אמת מול האוזן ותקן בלוח המידות</b> — לשם כך הוא קיים.</p></div>
+
+    <div style="display:flex;gap:8px;margin:18px 0 10px;flex-wrap:wrap">
+      <button class="btn" id="sbImport">📕 ייבוא מספר אקורדים שלך (PDF)</button>
+      <button class="btn ${sbGroup?"on":""}" id="sbGroupTog">${sbGroup?"מקובץ לפי אמן":"רשימה רציפה"}</button>
+    </div>
+    <div style="display:flex;gap:8px;margin:0 0 14px">
+      <input type="text" id="sbQ" placeholder="חיפוש לפי שיר, אמן, שנה או סולם…" value="${esc(sbQuery)}" style="flex:1">
+    </div>
+
+    ${list.length
+      ? (sbGroup
+          ? groupByArtist(list, x=>x.a).map(([artist, songs]) => `
+              <div class="grouphead">${esc(artist)}<span>${songs.length}</span></div>
+              ${songs.map(songCard).join("")}`).join("")
+          : list.map(songCard).join(""))
       : `<div class="note">לא נמצא ערך תואם. אפשר תמיד לפתוח שיר ריק ולהזין אקורדים ידנית.</div>`}
   </div>`;
 
@@ -813,6 +926,7 @@ function renderBook(){
   qi.oninput = ()=>{ sbQuery = qi.value; const p=qi.selectionStart; renderBook();
     const n=$("sbQ"); n.focus(); n.setSelectionRange(p,p); };
   $("sbImport").onclick = ()=>{ mode="import"; render(); };
+  $("sbGroupTog").onclick = ()=>{ sbGroup = !sbGroup; renderBook(); };
   app.querySelectorAll("[data-pick]").forEach(b => b.onclick = ()=> pickSong(SONGBOOK[+b.dataset.pick]));
 }
 
@@ -973,10 +1087,88 @@ window.addEventListener("resize", ()=>{
   }, 220);
 });
 
+
+function renderAbout(){
+  $("ttl").textContent = "אודות";
+  $("topRight").innerHTML = `<button class="btn sm primary" id="abBack">חזרה</button>`;
+  $("abBack").onclick = ()=>{ mode = ["main","book"].includes(prevMode) ? prevMode : "start"; render(); };
+
+  app.innerHTML = `
+  <div class="guide">
+    <div class="stamp">אודות · נגן־יחד</div>
+    <h2 style="margin:8px 0 6px">כלי אחד שעושה דבר אחד היטב</h2>
+    <p class="lead">להראות את האקורד הנכון ברגע הנכון, מתחילת השיר ועד סופו — כדי שאפשר יהיה פשוט לנגן.</p>
+
+    <div class="abcredit">
+      <div class="stamp">פיתוח</div>
+      <div class="abname">דודו טל</div>
+      <div class="abrole">רעיון · אפיון · עיצוב חוויה · בדיקות שדה</div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">✦</div>
+      <div>
+        <h3>למה הוא נבנה</h3>
+        <p>כל צ'ארט אקורדים באינטרנט אומר לך <b>מה</b> לנגן. אף אחד מהם לא אומר <b>מתי</b>. הפער הזה הוא כל ההבדל בין לקרוא שיר לבין לנגן אותו, והכלי הזה נבנה כדי לסגור אותו.</p>
+        <p>הוא נולד מתוך צורך אמיתי — ללמד ילד לנגן שירים שהוא אוהב, בלי שיצטרך לעצור כל שתי שניות כדי לחפש איפה הוא נמצא.</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">⏱</div>
+      <div>
+        <h3>העיקרון שמחזיק את הכול</h3>
+        <p>כל מה שרץ על המסך הוא פונקציה של שעון אחד — השעון של נגן היוטיוב. <b>אין טיימר פנימי ואין אנימציה עצמאית.</b> זו הסיבה שהתצוגה לא יכולה להתפצל מהשיר: עצירה, קפיצה אחורה או האטה ל־50% פשוט מזיזים את אותו שעון יחיד.</p>
+        <p>רשת הזמן היא פונקציה לינארית־למקטעים של עוגנים שאתה מקיש, עם שיערוך טמפו בריבועים פחותים להשלמה מעבר לעוגן האחרון. הדיוק שנמדד: <b>15 מילישניות</b> בממוצע בכיול מלא.</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">⚙</div>
+      <div>
+        <h3>איך הוא בנוי</h3>
+        <ul>
+          <li><b>קובץ HTML אחד.</b> אפס תלויות — אין npm, אין באנדלר, אין פריימוורק. הכול נפתח בדפדפן.</li>
+          <li><b>הגיטרה בפתיחה</b> היא מודל תלת־ממד שנבנה מאפס: מתאר גוף שנמשך לעומק, הקרנה בפרספקטיבה, מיון פאות והצללה לפי זווית האור.</li>
+          <li><b>הצליל מסונתז ולא מוקלט</b> — Karplus-Strong דרך עיוות וסינון, עם קול ליד שיודע בנד, ויברטו וסאסטיין. אין בפרויקט שום קובץ שמע.</li>
+          <li><b>דיאגרמות האצבעות</b> משורטטות ב-SVG בזמן ריצה, כולל כף יד ואצבעות מעוקלות.</li>
+          <li><b>הנתונים אצלך.</b> ספרייה ומילים נשמרות ב-localStorage במכשיר בלבד, וניתנות לייצוא.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">©</div>
+      <div>
+        <h3>זכויות ותוכן</h3>
+        <p>הכלי <b>אינו כולל ואינו מוריד</b> מילות שיר, הקלטות או צ'ארטים מסחריים. הווידאו מוגש מנגן היוטיוב הרשמי; מילים מודבקות על ידך ונשמרות במכשיר שלך בלבד.</p>
+        <p>מהלכי האקורדים שבספר הם הגרסאות המקובלות — עובדות הרמוניות, לא תמלול של הקלטה. ספר אקורדים אישי שאתה מייבא נסרק בדפדפן שלך ואינו נשמר בפרויקט.</p>
+        <p class="stamp" style="margin-top:12px">הקוד: רישיון MIT · השירים: כל הזכויות ליוצריהם</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">♪</div>
+      <div>
+        <h3>תודות</h3>
+        <p>לכל מי שכתב את השירים שבספר — 1963 עד 1980, התקופה שבה שלושה אקורדים פתוחים הספיקו כדי לשנות משהו.</p>
+        <p>ובעיקר לנגן הראשון שהכלי הזה נבנה בשבילו.</p>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--edge);margin-top:26px;padding-top:20px;text-align:center">
+      <div class="stamp" style="margin-bottom:12px">נגן־יחד · גרסה 1.0</div>
+      <button class="btn primary" id="abBack2">חזרה לאפליקציה</button>
+    </div>
+  </div>`;
+  $("abBack2").onclick = ()=>{ mode = ["main","book"].includes(prevMode) ? prevMode : "start"; render(); };
+  window.scrollTo({top:0});
+}
+
 function renderGuide(){
   $("ttl").textContent = "מדריך";
   $("topRight").innerHTML = `<button class="btn sm primary" id="gBack">חזרה</button>`;
-  $("gBack").onclick = ()=>{ mode = prevMode === "main" ? "main" : "start"; render(); };
+  $("gBack").onclick = ()=>{ mode = ["main","book"].includes(prevMode) ? prevMode : "start"; render(); };
 
   app.innerHTML = `
   <div class="guide">
@@ -985,6 +1177,18 @@ function renderGuide(){
     <p class="lead">האפליקציה עושה דבר אחד היטב: מציגה את האקורד הנכון ברגע הנכון, לכל אורך השיר. כדי שזה יקרה צריך לספר לה שני דברים — <b>איפה המידות</b> ו<b>מה האקורדים</b>. שניהם נעשים פעם אחת לשיר, ונשמרים.</p>
 
     <div class="note"><strong>העיקרון שמאחורי הכול:</strong> כל מה שרץ על המסך נגזר משעון הנגן של יוטיוב, ולא מטיימר פנימי. לכן אין מצב שהאקורדים והמילים "יתנתקו" מהשיר — גם אם עצרת, קפצת אחורה או האטת.</div>
+
+    <div class="gstep">
+      <div class="gnum">0</div>
+      <div>
+        <h3>מסך הפתיחה</h3>
+        <p>הגיטרה בפתיחה היא <b>מודל תלת־ממד אמיתי</b> — גוף שנמשך לעומק, פאות שממוינות לפי מרחק ומוצללות לפי זווית האור, וסריגים במרווחים הנכונים. היא מסתובבת לאט כדי להראות את הנפח.</p>
+        <p>ששת המיתרים חיים: <b>העבר עליהם אצבע והם ייפרטו</b>, בתמונה ובצליל. הכיוון רגיל, מ-E נמוך ל-E גבוה.</p>
+        <p><b>כניסה</b> (או <kbd>Enter</kbd>, או נגיעה בכל מקום) מנגנת פרזת גיטרה של כשבע שניות ונכנסת לאפליקציה. הצליל ממשיך לצלצל גם אחרי שהמסך התחלף.</p>
+        <div class="note"><strong>על הפרזה:</strong> מהלך מלווה במינור עם בנדים שלמים, ויברטו וסאסטיין ארוך — הקול של סולו מתמשך. המנגינה נכתבה לכלי הזה; מהלכי אקורדים וסולמות הם עובדות מוזיקליות, אבל סולו מסוים הוא יצירה של מי שניגן אותו, ולכן אין כאן ציטוט של אף הקלטה.</div>
+        <div class="note"><strong>הצליל מסונתז, לא מוקלט.</strong> כל מיתר נוצר בזמן אמת בשיטת Karplus-Strong — רעש שמסתובב בקו השהיה באורך מחזור הצליל ומתמצע בכל סיבוב — ועובר עיוות והדהוד. אין באפליקציה שום קובץ שמע.</div>
+      </div>
+    </div>
 
     <div class="gstep">
       <div class="gnum">1</div>
@@ -1078,6 +1282,7 @@ function renderGuide(){
         <p>יש לך ספר אקורדים כקובץ? בספר השירים לחץ <b>«ייבוא מספר אקורדים שלך»</b>, בחר את הקובץ, והאפליקציה תסרוק אותו <b>בדפדפן שלך בלבד</b>. היא בונה אינדקס של השירים — שם, אמן ומספר עמוד — ומאפשרת לטעון את האקורדים של כל שיר ישירות ללוח.</p>
         <ul>
           <li>הסריקה מתבצעת פעם אחת ואורכת דקה-שתיים בספר גדול. האינדקס נשמר, החיפוש אחריו מיידי.</li>
+          <li><b>הכול מקוטלג לפי אמן.</b> אחרי הסריקה מוצגת רשימת האמנים עם מספר השירים של כל אחד; לחיצה על אמן פותחת את השירים שלו. חיפוש חופשי עוקף את הקיטלוג ומחפש בשם השיר ובשם האמן גם יחד.</li>
           <li>נשמר מקומית <b>רק האינדקס</b> — שמות ועמודים. הקובץ עצמו לא נשמר ולא נשלח לשום מקום, ולכן צריך לבחור אותו מחדש כשרוצים לשלוף עמוד אחרי רענון.</li>
           <li>לפני הטעינה מוצגת תצוגה מקדימה של האקורדים הראשונים. אם הסדר יוצא הפוך — בטל, ונסה שוב עם כיוון הפוך.</li>
         </ul>
@@ -1185,9 +1390,11 @@ function renderGuide(){
 
     <div style="border-top:1px solid var(--edge);margin-top:26px;padding-top:20px;text-align:center">
       <button class="btn primary" id="gBack2">חזרה לאפליקציה</button>
+      <button class="btn" id="gAbout" style="margin-inline-start:9px">אודות</button>
     </div>
   </div>`;
-  $("gBack2").onclick = ()=>{ mode = prevMode === "main" ? "main" : "start"; render(); };
+  $("gBack2").onclick = ()=>{ mode = ["main","book"].includes(prevMode) ? prevMode : "start"; render(); };
+  $("gAbout").onclick = ()=>{ mode="about"; render(); };
   window.scrollTo({top:0});
 }
 
@@ -1528,6 +1735,7 @@ function render(){
   if(mode==="guide") renderGuide();
   else if(mode==="book") renderBook();
   else if(mode==="import") renderImport();
+  else if(mode==="about") renderAbout();
   else if(mode==="start") renderStart();
   else renderMain();
 }
@@ -1540,8 +1748,22 @@ function libSave(){
   catch(e){ toast("השמירה נכשלה — ייצא לקובץ"); }
 }
 
+function libRow(x, grouped){
+  const sp = splitTitle(x.title || x.ytId);
+  return `<div class="libitem">
+    <b>${esc(grouped ? sp.t : (x.title || x.ytId))}</b>
+    <small>${x.bars.filter(b=>b.c).length}/${x.bars.length} מידות${x.lyrics.length?" · "+x.lyrics.length+" שורות":""}${x.anchors&&x.anchors.length?" · מכויל":""}</small>
+    <button class="btn sm" data-open="${x.id}">פתח</button>
+    <button class="btn sm" data-del="${x.id}">✕</button>
+  </div>`;
+}
+
 function renderStart(){
-  $("topRight").innerHTML="";
+  $("topRight").innerHTML=`
+    <button class="btn sm primary" id="hBook">ספר השירים</button>
+    <button class="btn sm" id="hGuide">מדריך</button>
+    <button class="btn sm" id="hImport">📕 ייבוא</button>
+    <button class="btn sm" id="hAbout">אודות</button>`;
   $("ttl").textContent="נגן־יחד";
   const L=lib();
   app.innerHTML=`
@@ -1557,13 +1779,18 @@ function renderStart(){
       <button class="btn sm" id="gGuide">איך זה עובד — מדריך</button>
     </div>
     <div class="note rust" style="text-align:start"><strong>מה שאי אפשר:</strong> יוטיוב לא מאפשר גישה לאודיו עצמו, ולכן זיהוי אקורדים אוטומטי בלתי אפשרי כאן. את האקורדים אתה מזין או מדביק פעם אחת — ואז הם נשמרים לתמיד.</div>
-    ${L.length?`<div class="lib"><h3 style="font-size:15px;font-weight:500;margin:0 0 10px;color:var(--muted)">בספרייה שלך</h3>
-      ${L.map(x=>`<div class="libitem">
-        <b>${esc(x.title||x.ytId)}</b>
-        <small>${x.bars.length} מידות · ${x.lyrics.length} שורות</small>
-        <button class="btn sm" data-open="${x.id}">פתח</button>
-        <button class="btn sm" data-del="${x.id}">✕</button>
-      </div>`).join("")}</div>`:""}
+    ${L.length?`<div class="lib">
+      <div style="display:flex;align-items:baseline;gap:10px;margin-bottom:10px">
+        <h3 style="font-size:15px;font-weight:500;margin:0;color:var(--muted)">בספרייה שלך</h3>
+        <span class="stamp">${L.length} שירים</span>
+        <button class="btn sm ${libGroup?"on":""}" id="libTog" style="margin-inline-start:auto">${libGroup?"לפי אמן":"רשימה"}</button>
+      </div>
+      ${libGroup
+        ? groupByArtist(L, x=>splitTitle(x.title||x.ytId).a).map(([artist, songs])=>`
+            <div class="grouphead" style="font-size:16px;margin:16px 0 6px">${esc(artist)}<span>${songs.length}</span></div>
+            ${songs.map(x=>libRow(x, true)).join("")}`).join("")
+        : L.map(x=>libRow(x, false)).join("")}
+    </div>`:""}
   </div>`;
   $("go").onclick=()=>{
     const id=ytId($("url").value);
@@ -1573,6 +1800,11 @@ function renderStart(){
   $("url").onkeydown=e=>{ if(e.key==="Enter") $("go").click(); };
   $("gGuide").onclick=()=>{ prevMode="start"; mode="guide"; render(); };
   $("gBook").onclick=()=>{ mode="book"; render(); };
+  $("hBook").onclick=()=>{ mode="book"; render(); };
+  const lt=$("libTog"); if(lt) lt.onclick=()=>{ libGroup=!libGroup; renderStart(); };
+  $("hGuide").onclick=()=>{ prevMode="start"; mode="guide"; render(); };
+  $("hImport").onclick=()=>{ mode="import"; render(); };
+  $("hAbout").onclick=()=>{ prevMode="start"; mode="about"; render(); };
   app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
     const x=lib().find(y=>y.id===b.dataset.open);
     if(x){ S=Object.assign(newSong(),x); open_(); }
@@ -1598,6 +1830,7 @@ function renderMain(){
     ${(S.cinema || narrow()) ? `<button class="btn sm" id="toStrip" title="חזרה לפס האקורדים">↑ לפס</button>` : ""}
     <button class="btn sm" id="bBook">ספר השירים</button>
     <button class="btn sm" id="bGuide">מדריך</button>
+    <button class="btn sm" id="bAbout">אודות</button>
     <button class="btn sm" id="bSave">שמור</button>
     <button class="btn sm" id="bExp">ייצוא</button>
     <button class="btn sm" id="bBack">ספרייה</button>`;
@@ -1739,6 +1972,7 @@ function renderMain(){
   };
   $("bBook").onclick=()=>{ mode="book"; render(); };
   $("bGuide").onclick=()=>{ prevMode="main"; mode="guide"; render(); };
+  $("bAbout").onclick=()=>{ prevMode="main"; mode="about"; render(); };
   $("bSave").onclick=libSave;
   $("bExp").onclick=exportSong;
   $("bBack").onclick=()=>{ if(player&&player.stopVideo) player.stopVideo(); mode="start"; render(); };
@@ -2085,6 +2319,379 @@ function exportSong(){
 }
 
 mode="start"; render(); loop();
+
+
+/* ═══════════════════════════════════════════════════════════════
+   מסך פתיחה — גיטרה חשמלית בתלת־ממד
+   אין כאן ספריית 3D. הגוף מוגדר כמצולע דו־ממדי שנמשך לעומק,
+   כל פאה מוקרנת בפרספקטיבה, ממוינת לפי עומק ומוצללת לפי זווית האור.
+   המיתרים הם גלים עומדים מחושבים, והצליל מסונתז ב-Karplus-Strong.
+   ═══════════════════════════════════════════════════════════════ */
+(function(){
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const cv = document.getElementById("splashCv");
+  if(!cv) return;
+  const g = cv.getContext("2d");
+
+  const BODY = [
+    [-0.62, 0.60],[-0.44, 0.71],[-0.14, 0.76],[ 0.20, 0.73],[ 0.50, 0.60],
+    [ 0.70, 0.36],[ 0.78, 0.06],[ 0.74,-0.26],[ 0.58,-0.53],[ 0.32,-0.70],
+    [ 0.00,-0.76],[-0.30,-0.70],[-0.50,-0.55],[-0.58,-0.36],[-0.44,-0.20],
+    [-0.34,-0.08],[-0.33, 0.08],[-0.42, 0.24],[-0.56, 0.40]
+  ];
+  const TH = 0.11;
+  const NECK_X0 = -0.33, NECK_X1 = -1.92, NUT = -1.92, HEAD = -2.34;
+  const NECK_Y0 = 0.085, NECK_Y1 = 0.062, NECK_TH = 0.055;
+  const HEADS = [
+    [NUT, 0.075],[-2.06, 0.16],[-2.30, 0.17],[HEAD, 0.09],
+    [HEAD,-0.05],[-2.24,-0.13],[-2.02,-0.09],[NUT,-0.075]
+  ];
+  const OPEN = [82.41, 110.00, 146.83, 196.00, 246.94, 329.63];
+  const strings = OPEN.map((f,i)=>({ f, i, amp:0, phase:0, t0:-99, decay:1.9+(5-i)*0.3 }));
+
+  let W=0,H=0,dpr=1,S=1,cx=0,cy=0;
+  function resize(){
+    dpr = Math.min(2, window.devicePixelRatio||1);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width=Math.round(W*dpr); cv.height=Math.round(H*dpr);
+    g.setTransform(dpr,0,0,dpr,0,0);
+    S = Math.min(W/3.6, H/2.0);
+    cx = W*0.5 + S*0.55; cy = H*0.5;
+  }
+  window.addEventListener("resize", resize);
+
+  let ang=0, tilt=0;
+  const F = 6.2;
+  function proj(x,y,z){
+    const ca=Math.cos(ang), sa=Math.sin(ang);
+    let X = x*ca + z*sa, Z = -x*sa + z*ca;
+    const ct=Math.cos(tilt), st=Math.sin(tilt);
+    const Y = y*ct - Z*st; Z = y*st + Z*ct;
+    const k = F/(F-Z);
+    return {x: cx + X*k*S, y: cy - Y*k*S, z: Z, k};
+  }
+  function facing(p){
+    let a=0;
+    for(let i=0;i<p.length;i++){ const q=p[(i+1)%p.length]; a += (q.x-p[i].x)*(q.y+p[i].y); }
+    return a;
+  }
+  function poly(pts, fill, stroke, lw){
+    g.beginPath();
+    pts.forEach((p,i)=> i?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));
+    g.closePath();
+    if(fill){ g.fillStyle=fill; g.fill(); }
+    if(stroke){ g.strokeStyle=stroke; g.lineWidth=lw||1; g.stroke(); }
+  }
+  const shade = (b,l)=>{ const c=Math.max(0.05,Math.min(1,l));
+    return `rgb(${Math.round(b[0]*c)},${Math.round(b[1]*c)},${Math.round(b[2]*c)})`; };
+
+  function faces(t){
+    const out=[], ca=Math.cos(ang);
+    const lf = 0.42 + 0.60*Math.max(0,ca);
+    const front = BODY.map(([x,y])=>proj(x,y,TH));
+    const back  = BODY.map(([x,y])=>proj(x,y,-TH));
+
+    for(let i=0;i<BODY.length;i++){
+      const j=(i+1)%BODY.length;
+      const q=[front[i],front[j],back[j],back[i]];
+      if(facing(q)>0) continue;
+      const nx=BODY[j][1]-BODY[i][1], ny=-(BODY[j][0]-BODY[i][0]);
+      const len=Math.hypot(nx,ny)||1;
+      const l=0.30+0.5*Math.max(0,(nx/len)*ca+0.4);
+      out.push({z:(q[0].z+q[2].z)/2, draw:()=>poly(q, shade([196,120,44], l*0.85), "rgba(0,0,0,.45)",1)});
+    }
+    out.push({z: back.reduce((a,p)=>a+p.z,0)/back.length-0.02,
+      draw:()=>poly(back, shade([120,70,26],0.4), "rgba(0,0,0,.5)",1)});
+
+    const nq=z=>[proj(NECK_X0,NECK_Y0,z),proj(NECK_X1,NECK_Y1,z),
+                 proj(NECK_X1,-NECK_Y1,z),proj(NECK_X0,-NECK_Y0,z)];
+    const nf=nq(NECK_TH), nb=nq(-NECK_TH);
+    out.push({z: nb.reduce((a,p)=>a+p.z,0)/4-0.01, draw:()=>poly(nb, shade([70,44,22],0.5),null)});
+    [[0,1],[1,2],[2,3],[3,0]].forEach(([a,b])=>{
+      const q=[nf[a],nf[b],nb[b],nb[a]];
+      if(facing(q)>0) return;
+      out.push({z:(q[0].z+q[2].z)/2, draw:()=>poly(q, shade([96,60,30],0.62),"rgba(0,0,0,.4)",1)});
+    });
+    out.push({z: nf.reduce((a,p)=>a+p.z,0)/4, draw:()=>{
+      poly(nf, shade([84,52,26], 0.52+0.45*Math.max(0,ca)), "rgba(0,0,0,.4)",1);
+      for(let n=1;n<=19;n++){
+        const u=1-Math.pow(2,-n/12);
+        const x=NECK_X0+(NECK_X1-NECK_X0)*u, yy=NECK_Y0+(NECK_Y1-NECK_Y0)*u;
+        const a1=proj(x,yy,NECK_TH+0.002), a2=proj(x,-yy,NECK_TH+0.002);
+        g.beginPath(); g.moveTo(a1.x,a1.y); g.lineTo(a2.x,a2.y);
+        g.strokeStyle="rgba(226,206,170,.5)"; g.lineWidth=Math.max(0.7,1.3*a1.k*S/300); g.stroke();
+        if([3,5,7,9,15,17,12].includes(n)){
+          const um=1-Math.pow(2,-(n-0.5)/12), xm=NECK_X0+(NECK_X1-NECK_X0)*um;
+          (n===12?[0.032,-0.032]:[0]).forEach(dy=>{
+            const p=proj(xm,dy,NECK_TH+0.003);
+            g.beginPath(); g.arc(p.x,p.y, Math.max(1.2,2.4*p.k*S/300),0,7);
+            g.fillStyle="rgba(238,228,206,.5)"; g.fill();
+          });
+        }
+      }
+    }});
+
+    const hf=HEADS.map(([x,y])=>proj(x,y,NECK_TH*0.9));
+    out.push({z: hf.reduce((a,p)=>a+p.z,0)/hf.length, draw:()=>{
+      poly(hf, shade([64,40,20], 0.5+0.4*Math.max(0,ca)), "rgba(0,0,0,.45)",1);
+      [[-2.02,0.13],[-2.16,0.15],[-2.28,0.14],[-2.26,-0.10],[-2.14,-0.11],[-2.02,-0.09]]
+        .forEach(([x,y])=>{
+          const p=proj(x,y,NECK_TH*1.6);
+          g.beginPath(); g.arc(p.x,p.y, Math.max(1.4,3*p.k*S/300),0,7);
+          g.fillStyle="rgba(214,198,168,.85)"; g.fill();
+        });
+    }});
+
+    const plate=(x0,x1,y0,y1,z,col,l)=>{
+      const q=[proj(x0,y0,z),proj(x1,y0,z),proj(x1,y1,z),proj(x0,y1,z)];
+      out.push({z:(q[0].z+q[2].z)/2+0.001, draw:()=>poly(q, shade(col,l),"rgba(0,0,0,.4)",1)});
+    };
+    plate(-0.02,0.06,-0.26,0.26, TH+0.012,[32,30,28], lf);
+    plate( 0.14,0.21,-0.28,0.28, TH+0.012,[32,30,28], lf);
+    plate( 0.30,0.37,-0.30,0.30, TH+0.012,[32,30,28], lf);
+    plate( 0.44,0.56,-0.22,0.22, TH+0.010,[186,178,160], lf);
+    [[0.50,-0.40],[0.63,-0.31],[0.62,-0.52]].forEach(([x,y])=>{
+      const p=proj(x,y,TH+0.03);
+      out.push({z:p.z+0.002, draw:()=>{
+        g.beginPath(); g.arc(p.x,p.y, Math.max(3,6.5*p.k*S/300),0,7);
+        g.fillStyle=shade([222,214,196], lf); g.fill();
+        g.strokeStyle="rgba(0,0,0,.45)"; g.lineWidth=1; g.stroke();
+      }});
+    });
+
+    strings.forEach((s,i)=>{
+      const age=t-s.t0;
+      const a=(age>=0&&age<s.decay)? s.amp*Math.exp(-age*3.0/s.decay) : 0;
+      const idle = reduce?0:0.9*Math.sin(t*1.25+i);
+      const yB=-0.085+i*0.034, yN=-0.052+i*0.0208;
+      const pts=[], N=26;
+      for(let k=0;k<=N;k++){
+        const u=k/N, x=0.50+(NUT-0.50)*u, y0=yB+(yN-yB)*u;
+        const env=Math.sin(Math.PI*u);
+        const d1=Math.sin(2*Math.PI*(s.f/16)*age+s.phase)*env;
+        const d2=0.3*Math.sin(2*Math.PI*(s.f/8)*age+s.phase*1.6)*Math.sin(2*Math.PI*u);
+        pts.push(proj(x, y0+(a*(d1+d2)+idle*env)*0.02, TH+0.055));
+      }
+      const lit=Math.min(1,a/16);
+      out.push({z: pts[13].z+0.004, idx:i, mid:pts[13], draw:()=>{
+        g.beginPath(); pts.forEach((p,k)=> k?g.lineTo(p.x,p.y):g.moveTo(p.x,p.y));
+        g.strokeStyle=`rgba(${228+lit*27},${212+lit*32},${178+lit*54},${0.6+0.35*lit})`;
+        g.lineWidth=Math.max(0.7,(2.6-i*0.3)*S/300);
+        g.shadowBlur=4+lit*20; g.shadowColor=`rgba(240,168,60,${0.2+0.65*lit})`;
+        g.stroke(); g.shadowBlur=0;
+      }});
+    });
+    return out;
+  }
+
+  const motes=Array.from({length:reduce?0:44},()=>({
+    x:Math.random(),y:Math.random(),v:0.018+Math.random()*0.05,
+    r:0.4+Math.random()*1.3,o:0.12+Math.random()*0.32}));
+  let start=performance.now(), raf=0, leaving=0, hits=[], entered=false;
+
+  function frame(now){
+    const t=(now-start)/1000;
+    ang  = reduce ? -0.42 : -0.34 + 0.46*Math.sin(t*0.29) + (entered?0.55*Math.min(1,(now-leaving)/800):0);
+    tilt = reduce ?  0.16 : 0.15 + 0.07*Math.sin(t*0.21);
+
+    g.clearRect(0,0,W,H);
+    const warm=Math.min(1,t/2.0);
+    const rg=g.createRadialGradient(W*0.5,H*0.5,0,W*0.5,H*0.5,Math.max(W,H)*0.66);
+    rg.addColorStop(0,`rgba(104,68,26,${0.5*warm})`);
+    rg.addColorStop(0.5,`rgba(38,27,16,${0.34*warm})`);
+    rg.addColorStop(1,"rgba(12,10,9,0)");
+    g.fillStyle=rg; g.fillRect(0,0,W,H);
+
+    g.globalAlpha=0.04*warm; g.strokeStyle="#F0E6D2"; g.lineWidth=1;
+    for(let x=-H;x<W+H;x+=8){ g.beginPath(); g.moveTo(x,0); g.lineTo(x+H,H); g.stroke(); }
+    g.globalAlpha=1;
+
+    motes.forEach(m=>{
+      m.y-=m.v/60; if(m.y<-0.02){ m.y=1.02; m.x=Math.random(); }
+      const d=Math.hypot(m.x-0.5,m.y-0.5);
+      g.fillStyle=`rgba(240,200,140,${m.o*warm*(1-d)})`;
+      g.beginPath(); g.arc(m.x*W,m.y*H,m.r,0,7); g.fill();
+    });
+
+    const fs=faces(t);
+    fs.sort((a,b)=>a.z-b.z).forEach(f=>f.draw());
+    hits=fs.filter(f=>f.mid);
+
+    if(leaving){
+      const p=Math.min(1,(now-leaving)/1400);
+      g.fillStyle=`rgba(23,19,16,${p})`; g.fillRect(0,0,W,H);
+    }
+    raf=requestAnimationFrame(frame);
+  }
+
+  let ac=null, chain=null;
+  function audio(){
+    if(ac) return ac;
+    ac=new (window.AudioContext||window.webkitAudioContext)();
+    const sh=ac.createWaveShaper(), n=2048, c=new Float32Array(n), k=7.5;
+    for(let i=0;i<n;i++){ const x=i*2/n-1; c[i]=(1+k)*x/(1+k*Math.abs(x)); }
+    sh.curve=c; sh.oversample="4x";
+    const pre=ac.createGain(); pre.gain.value=2.2;
+    const lo=ac.createBiquadFilter(); lo.type="lowpass"; lo.frequency.value=3600; lo.Q.value=0.8;
+    const pk=ac.createBiquadFilter(); pk.type="peaking"; pk.frequency.value=900; pk.gain.value=3.5; pk.Q.value=1.1;
+    const hi=ac.createBiquadFilter(); hi.type="highpass"; hi.frequency.value=90;
+    const dl=ac.createDelay(0.6); dl.delayTime.value=0.135;
+    const fb=ac.createGain(); fb.gain.value=0.3;
+    const wet=ac.createGain(); wet.gain.value=0.26;
+    const out=ac.createGain(); out.gain.value=0.26;
+    pre.connect(sh); sh.connect(lo); lo.connect(pk); pk.connect(hi);
+    hi.connect(out); hi.connect(dl); dl.connect(fb); fb.connect(dl); dl.connect(wet); wet.connect(out);
+    out.connect(ac.destination);
+    chain=pre; return ac;
+  }
+  function ks(freq,dur,damp){
+    const sr=ac.sampleRate, N=Math.floor(sr*dur), d=Math.max(2,Math.round(sr/freq));
+    const buf=ac.createBuffer(1,N,sr), o=buf.getChannelData(0);
+    const ring=new Float32Array(d);
+    for(let i=0;i<d;i++) ring[i]=Math.random()*2-1;
+    let idx=0,prev=0; const dp=damp||0.9968;
+    for(let i=0;i<N;i++){ const cur=ring[idx]; o[i]=cur; ring[idx]=(cur+prev)*0.5*dp; prev=cur; idx=(idx+1)%d; }
+    const at=Math.min(N,Math.floor(sr*0.0035));
+    for(let i=0;i<at;i++) o[i]*=i/at;
+    const rel=Math.min(N,Math.floor(sr*0.08));
+    for(let i=0;i<rel;i++) o[N-1-i]*=i/rel;
+    return buf;
+  }
+  function note(freq,when,gain,dur,damp){
+    try{
+      audio();
+      if(ac.state==="suspended") ac.resume();
+      const src=ac.createBufferSource(); src.buffer=ks(freq,dur||2.4,damp);
+      const gn=ac.createGain(); gn.gain.value=gain==null?1:gain;
+      src.connect(gn); gn.connect(chain);
+      src.start(ac.currentTime+(when||0));
+    }catch(e){}
+  }
+
+  /* קול ליד: מיתר עם סאסטיין ארוך, בנד וויברטו — הקול שיוצר
+     תחושת סולו מתמשך. הבנד מיושם כשינוי קצב הדגימה מגובה
+     ההתחלה אל גובה היעד; הוויברטו הוא LFO על ה-detune. */
+  function lead(target, when, dur, opt){
+    try{
+      audio();
+      if(ac.state==="suspended") ac.resume();
+      const o = opt||{};
+      const t0 = ac.currentTime + (when||0);
+      const src = ac.createBufferSource();
+      src.buffer = ks(target, dur, o.damp || 0.99935);
+      if(o.bendFrom){
+        src.playbackRate.setValueAtTime(o.bendFrom/target, t0);
+        src.playbackRate.linearRampToValueAtTime(1, t0 + (o.bendTime||0.20));
+      }
+      let lfo=null, lg=null;
+      if(src.detune && o.vib !== 0){
+        lfo = ac.createOscillator(); lfo.frequency.value = o.vibRate || 5.4;
+        lg  = ac.createGain(); lg.gain.value = 0;
+        lg.gain.setValueAtTime(0, t0);
+        lg.gain.linearRampToValueAtTime(o.vib || 22, t0 + (o.vibIn || 0.35));
+        lfo.connect(lg); lg.connect(src.detune);
+        lfo.start(t0); lfo.stop(t0 + dur);
+      }
+      const gn = ac.createGain();
+      const peak = o.gain==null ? 1 : o.gain;
+      gn.gain.setValueAtTime(peak*0.55, t0);
+      gn.gain.linearRampToValueAtTime(peak, t0 + (o.swell||0.09));   // נפיחת עוצמה קלה
+      gn.gain.setValueAtTime(peak, t0 + dur*0.72);
+      gn.gain.linearRampToValueAtTime(0.0001, t0 + dur);
+      src.connect(gn); gn.connect(chain);
+      src.start(t0);
+    }catch(e){}
+  }
+
+  function pluckVisual(i,amp){
+    const s=strings[i]; if(!s) return;
+    s.amp=amp; s.phase=Math.random()*6.28; s.t0=(performance.now()-start)/1000;
+  }
+
+  function nearest(e){
+    const r=cv.getBoundingClientRect();
+    const px=(e.touches?e.touches[0].clientX:e.clientX)-r.left;
+    const py=(e.touches?e.touches[0].clientY:e.clientY)-r.top;
+    let best=-1,bd=1e9;
+    hits.forEach(f=>{ const d=Math.hypot(f.mid.x-px,f.mid.y-py); if(d<bd){bd=d;best=f.idx;} });
+    return bd < S*0.30 ? best : -1;
+  }
+  let last=-1;
+  function touch(e){
+    const i=nearest(e);
+    if(i>=0 && i!==last){ last=i; pluckVisual(i,14); note(strings[i].f,0,0.85,2.4); }
+  }
+  cv.addEventListener("mousemove",touch);
+  cv.addEventListener("mousedown",touch);
+  cv.addEventListener("touchmove",e=>{ e.preventDefault(); touch(e); },{passive:false});
+  cv.addEventListener("touchstart",e=>touch(e),{passive:true});
+  cv.addEventListener("mouseleave",()=>last=-1);
+  cv.addEventListener("touchend",()=>last=-1);
+
+  /* פרזה מקורית ב-B מינור פנטטוני מעל וואמפ Bm–A–G–Em.
+     מהלך אקורדים וסולם הם עובדות מוזיקליות; המנגינה כאן נכתבה
+     לכלי הזה ואינה ציטוט של אף הקלטה. */
+  function riff(){
+    const B2=123.47, A2=110.00, G2=98.00, E2=82.41;
+    const Fs3=185.00, B3=246.94, D4=293.66, E4=329.63, Fs4=369.99, A4=440.00, B4=493.88;
+
+    /* וואמפ מלווה — רך, מאחור */
+    const vamp = [[B2,0.00],[A2,0.95],[G2,1.90],[E2,2.85]];
+    vamp.forEach(([f,w])=>{
+      note(f,        w, 0.42, 3.4, 0.9986);
+      note(f*1.5,    w+0.05, 0.24, 3.0, 0.9984);
+      note(f*2,      w+0.09, 0.20, 2.8, 0.9982);
+    });
+
+    /* הפרזה */
+    lead(Fs4, 0.30, 1.05, {bendFrom:E4, bendTime:0.22, vib:26, gain:0.95});
+    lead(E4,  1.30, 0.55, {vib:14, gain:0.8});
+    lead(D4,  1.72, 0.50, {vib:14, gain:0.8});
+    lead(B3,  2.10, 0.85, {vib:20, gain:0.85});
+    lead(A4,  2.90, 1.30, {bendFrom:Fs4, bendTime:0.26, vib:30, gain:1.0});
+    lead(B4,  4.05, 3.20, {vib:34, vibRate:5.0, gain:1.0, damp:0.99955});
+    lead(Fs3, 4.12, 3.00, {vib:0,  gain:0.45, damp:0.9995});
+
+    /* המיתרים על המסך נעים עם הפרזה */
+    [[0,0],[1,0.95],[2,1.90],[0,2.85]].forEach(([i,w])=>
+      setTimeout(()=>pluckVisual(i,16), w*1000));
+    [[5,0.30],[4,1.30],[4,1.72],[3,2.10],[5,2.90],[5,4.05]].forEach(([i,w])=>
+      setTimeout(()=>pluckVisual(i,28), w*1000));
+  }
+
+  function enter(){
+    if(entered) return;
+    entered=true;
+    audio(); riff();
+    leaving=performance.now();
+    document.getElementById("splash").classList.add("go");
+    setTimeout(()=>{
+      document.getElementById("splash").hidden=true;
+      cancelAnimationFrame(raf);
+      document.body.classList.remove("locked");
+      if(typeof syncTopH==="function") syncTopH();
+    },1500);
+    /* המנוע נסגר רק אחרי שהצליל סיים — כאן הוא נקטע קודם */
+    /* הצליל האחרון מסתיים ב-7.25 שניות — סוגרים אחריו, לא לפניו */
+    setTimeout(()=>{ try{ ac && ac.close(); ac=null; }catch(e){} }, 8200);
+  }
+
+  document.getElementById("splashGo").onclick=enter;
+  document.getElementById("splash").addEventListener("click",e=>{
+    if(e.target===cv||e.target.id==="splash") enter();
+  });
+  document.addEventListener("keydown",e=>{
+    if(!entered&&(e.key==="Enter"||e.code==="Space")){ e.preventDefault(); enter(); }
+  });
+
+  resize();
+  if(reduce) frame(performance.now());
+  else{
+    raf=requestAnimationFrame(frame);
+    strings.forEach((_,i)=> setTimeout(()=>pluckVisual(i,10-i*0.7), 900+i*100));
+  }
+})();
+
 </script>
 </body>
 </html>
