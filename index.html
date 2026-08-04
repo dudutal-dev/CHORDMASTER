@@ -117,6 +117,10 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .horizon .nowdgm{position:absolute;top:8px;right:4px;width:82px;z-index:4;
   display:flex;align-items:center;justify-content:center}
 .horizon .nowdgm svg{height:96px;width:auto;max-width:100%}
+.horizon .hzhold{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;
+  background:rgba(11,9,8,.86);backdrop-filter:blur(2px)}
+.horizon .hzhold span{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--tungsten);
+  border:1px solid var(--tungsten-d);border-radius:4px;padding:7px 14px;text-align:center;line-height:1.6}
 .horizon .hzbeats{position:absolute;left:10px;bottom:6px;z-index:3;gap:4px;margin:0}
 .horizon .hzbeats i{width:18px;height:4px}
 .horizon .fadeout{position:absolute;top:0;bottom:0;left:0;width:70px;z-index:2;
@@ -783,12 +787,23 @@ function renderGuide(){
       <div>
         <h3>בטלפון</h3>
         <p>במסך צר הפריסה משתנה מעצמה: <b>הווידאו ופס האקורדים ננעלים לראש המסך</b>, וכל השאר — לוח המידות, הבקרות, ההגדרות — נגלל מתחתיהם. אפשר לגלול לתקן אקורד בלי לאבד את הווידאו מהעין.</p>
+        <p><b>לוח המידות מקופל בנייד</b> כברירת מחדל, כדי שלא ידחוף את הנגן. פתח אותו רק כשצריך לתקן אקורד, וסגור אחר כך.</p>
         <p>בנייד הבלוק הגדול של האקורד יורד לגמרי — <b>הכול מרוכז בפס אחד</b>: האקורד הנוכחי דולק על קו ההווה, הבאים זורמים לעברו, דיאגרמת האצבעות בקצה הפס, ונקודות הפעמה בתחתיתו. פחות מסך, יותר מידע במבט אחד.</p>
         <ul>
           <li>עם <b>קליפ מילים</b> אתה מקבל מילים ואקורדים באותו מבט — בלי לגלול בכלל.</li>
           <li>הנעילה משתחררת בסיבוב לרוחב, כדי לא לחנוק את המסך.</li>
           <li>הנח את הטלפון על סטנד במרחק זרוע. הגופנים מוגדלים בהתאם.</li>
         </ul>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">⏸</div>
+      <div>
+        <h3>פרסומות והקפאת סנכרון</h3>
+        <p>כשיוטיוב מכניס פרסומת, השעון שהאפליקציה קוראת הוא של הפרסומת — והאקורדים מתחילים לזוז לחינם. האפליקציה <b>מזהה את זה לבד ומקפיאה</b>: בזמן פרסומת יוטיוב מדווח על אורך קצר בהרבה מאורך השיר, וזה הסימן. על הפס מופיע «פרסומת · הסנכרון יחזור לבד», והכול חוזר מעצמו כשהשיר מתחיל.</p>
+        <p>יש גם <b>הקפא סנכרון</b> ידני בשורת הבקרה — לכל מצב שבו אתה רוצה שהאקורדים יעמדו במקום: פרסומת שלא זוהתה, שיחת טלפון, או סתם רגע להסתכל על האצבעות.</p>
+        <div class="note"><strong>מקרה קצה יחיד:</strong> פרסומת שמתחילה לפני שהנגן הספיק לדווח את אורך השיר לא תזוהה. אז פשוט לחץ על ההקפאה הידנית.</div>
       </div>
     </div>
 
@@ -884,6 +899,7 @@ let S = newSong();
 let player=null, ready=false, mode="idle", sel=-1;
 let cal={on:false, kind:"", bar:0, taps:[], line:0, step:4};
 let calStep=4;
+let gridOpen=false, holdSync=false, songDur=0, adOn=false;
 let tapT=[];
 let manualBpm=0;
 let cur={bar:-1, beat:-1, line:-1};
@@ -1110,7 +1126,9 @@ async function mountPlayer(){
     videoId: S.ytId,
     playerVars:{rel:0, modestbranding:1, playsinline:1},
     events:{
-      onReady: ()=>{ ready=true; if(!S.title){ try{ S.title=player.getVideoData().title||"" ; $("ttl").textContent=S.title; }catch(e){} } },
+      onReady: ()=>{ ready=true;
+        (function grab(n){ const d=player.getDuration&&player.getDuration();
+          if(d>0){ songDur=Math.max(songDur,d); } else if(n<20) setTimeout(()=>grab(n+1),250); })(0); if(!S.title){ try{ S.title=player.getVideoData().title||"" ; $("ttl").textContent=S.title; }catch(e){} } },
       onError: ()=> toast("הסרטון אינו זמין להטמעה — נסה קישור אחר")
     }
   });
@@ -1183,7 +1201,7 @@ function renderStart(){
 
 function open_(){
   if(!S.bars.length) S.bars=Array.from({length:64},()=>({c:null}));
-  mode="main"; ready=false; player=null;
+  mode="main"; ready=false; player=null; songDur=0; adOn=false; holdSync=false;
   cur={bar:-1,beat:-1,line:-1};
   render();
   mountPlayer();
@@ -1209,6 +1227,7 @@ function renderMain(){
         <div class="grp"><label>טונים</label>
           <select id="tr">${Array.from({length:13},(_,i)=>i-6).map(v=>`<option value="${v}" ${v===S.transpose?"selected":""}>${v>0?"+"+v:v}</option>`).join("")}</select></div>
         <div class="grp"><label>מידות</label><span class="time" id="binfo">–</span></div>
+        <button class="btn sm ${holdSync?"on":""}" id="hold" title="מקפיא את האקורדים במקום — לפרסומות או להפסקה">${holdSync?"⏸ מוקפא":"הקפא סנכרון"}</button>
         <button class="btn sm ${S.cinema?"on":""}" id="cine" title="הווידאו גדול והאקורדים מתחתיו — לקליפים שהמילים כבר בתוכם">מצב קליפ מילים</button>
       </div>`;
   const B_TIME = `      <div class="panel">
@@ -1239,8 +1258,13 @@ function renderMain(){
             : `<div class="note rust"><strong>כיסוי ${cov}% בלבד.</strong> מעבר למידה ${last+1} (המקווקוות) הרשת משוערת, והסטייה תגדל ככל שמתרחקים. המשך את הכיול עד סוף השיר — זה ההבדל בין סנכרון מדויק למתפרק.</div>`; })()}
       </div>`;
   const B_CHORD = `      <div class="panel">
-        <h3>אקורדים</h3>
-        <p class="sub">לחץ על מידה, הקלד אקורד ואנטר — הסמן מתקדם למידה הבאה. מידה ריקה ממשיכה את האקורד הקודם.</p>
+        <div style="display:flex;align-items:center;gap:10px">
+          <h3>לוח המידות</h3>
+          <button class="btn sm" id="gridTog" style="margin-inline-start:auto">${gridOpen?"הסתר":"הצג ועריכה"}</button>
+        </div>
+        <p class="sub" style="margin:6px 0 0">${gridOpen?"לחץ על מידה, הקלד אקורד ואנטר — הסמן מתקדם למידה הבאה. מידה ריקה ממשיכה את האקורד הקודם."
+          :"הלוח מקופל כדי לא לדחוף את הנגן. פתח אותו רק כשצריך לתקן אקורד."}</p>
+        <div id="gridWrap" class="${gridOpen?"":"hidden"}" style="margin-top:13px">
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;align-items:center">
           <input type="text" id="chIn" placeholder="G / Am / F#m" style="width:130px">
           <button class="btn sm" id="chPaste">הדבקת רצף</button>
@@ -1249,6 +1273,7 @@ function renderMain(){
           ${capo?`<span class="time">הצעה: קאפו ${capo.cap} → ${capo.n} מתוך ${capo.total} אקורדים פתוחים</span>`:""}
         </div>
         <div class="grid" id="grid"></div>
+        </div>
       </div>`;
   const B_HZ = `      <div class="horizon">
         <div class="lane" id="hzLane"></div>
@@ -1257,6 +1282,7 @@ function renderMain(){
         <div class="nowcap">NOW</div>
         <div class="nowdgm" id="hzDgm"></div>
         <div class="hzbeats beats" id="hzDots"></div>
+        <div class="hzhold hidden" id="hzHold"><span></span></div>
       </div>`;
   const B_STAGE = `      <div class="stage">
         <div>
@@ -1341,9 +1367,9 @@ function renderMain(){
     startCal("one");
   };
   $("clrAnch").onclick=()=>{ S.anchors=[]; toast("העוגנים נוקו"); renderMain(); };
-  $("addBars").onclick=()=>{ for(let i=0;i<16;i++) S.bars.push({c:null}); buildGrid(); };
-  $("delBars").onclick=()=>{ S.bars=S.bars.slice(0,Math.max(8,S.bars.length-16)); buildGrid(); };
-  $("chIn").onkeydown=e=>{
+  if($("addBars")) $("addBars").onclick=()=>{ for(let i=0;i<16;i++) S.bars.push({c:null}); buildGrid(); };
+  if($("delBars")) $("delBars").onclick=()=>{ S.bars=S.bars.slice(0,Math.max(8,S.bars.length-16)); buildGrid(); };
+  if($("chIn")) $("chIn").onkeydown=e=>{
     if(e.key!=="Enter") return;
     if(sel<0){ toast("בחר מידה קודם"); return; }
     const v=$("chIn").value.trim();
@@ -1353,7 +1379,10 @@ function renderMain(){
     sel=Math.min(S.bars.length-1, sel+1);
     $("chIn").value=""; buildGrid(); paint(true);
   };
-  $("chPaste").onclick=pasteProg;
+  if($("chPaste")) $("chPaste").onclick=pasteProg;
+  $("gridTog").onclick=()=>{ gridOpen=!gridOpen; renderMain(); paint(true); };
+  const hb=$("hold"); if(hb) hb.onclick=()=>{ holdSync=!holdSync; renderMain(); paint(true);
+    toast(holdSync?"הסנכרון מוקפא — האקורדים לא יזוזו":"הסנכרון חזר"); };
   const ci=$("cine"); if(ci) ci.onclick=()=>{ S.cinema=!S.cinema; renderMain();
     toast(S.cinema?"מצב קליפ מילים — המילים מגיעות מהווידאו":"חזרה לתצוגה רגילה"); };
 
@@ -1373,7 +1402,7 @@ function buildGrid(){
   el.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{
     sel=+b.dataset.b;
     if(ready && S.anchors.length>=2) player.seekTo(timeOfBar(sel), true);
-    buildGrid(); $("chIn").focus();
+    buildGrid(); if($("chIn")) $("chIn").focus();
   });
   const bi=$("binfo"); if(bi) bi.textContent=S.bars.length;
   const ai=$("anchInfo"); if(ai) ai.textContent=S.anchors.length?`${S.anchors.length} עוגנים`:"";
@@ -1541,8 +1570,33 @@ document.addEventListener("keydown",e=>{
    ═══════════════════════════════════════════════════════════════ */
 const LEAD=0.10;   // פיצוי על השהיית הדגימה של getCurrentTime
 
+/* יוטיוב לא מדווח במפורש על פרסומת, אבל בזמן פרסומת getDuration מחזיר
+   את אורך הפרסומת ולא את אורך השיר. פער משמעותי = כמעט תמיד פרסומת. */
+function adPlaying(){
+  if(!ready) return false;
+  const d = DUR();
+  if(!songDur || !d) return false;
+  return (songDur - d) > 3;          // פרסומת תמיד קצרה מהשיר
+}
 function paint(force){
   if(mode!=="main" || !$("hzLane")) return;
+
+  const d = DUR();
+  if(d > songDur) songDur = d;       // האורך האמיתי = הארוך ביותר שנצפה
+
+  const ad = adPlaying();
+  if(ad !== adOn){ adOn = ad; if(ad) toast("זוהתה פרסומת — הסנכרון מוקפא אוטומטית"); }
+  const frozen = holdSync || ad;
+  const hh = $("hzHold");
+  if(hh){
+    hh.classList.toggle("hidden", !frozen);
+    if(frozen) hh.firstElementChild.textContent = ad ? "פרסומת · הסנכרון יחזור לבד" : "מוקפא · לחץ «הקפא סנכרון» לשחרור";
+  }
+  if(frozen){
+    const pp0=$("pp"); if(pp0) pp0.textContent=playing()?"עצור":"נגן";
+    return;
+  }
+
   const t=T()+LEAD;
   const bi=barAtTime(t);
 
