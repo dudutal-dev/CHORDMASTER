@@ -1,0 +1,1307 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#171310">
+<meta name="description" content="נגן־יחד — אקורדים ומילים מסונכרנים לסרטון יוטיוב, עם דיאגרמות אצבעות, האטה והעברת טונים.">
+<title>נגן־יחד · אקורדים בזמן אמת</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Suez+One&family=Heebo:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════════
+   נגן־יחד — שפה חזותית: מגבר שסתומים משנות השבעים.
+   טולקס כהה, בד גריל ארוג, סילקסקרין שמנת, מנורת פיילוט טונגסטן.
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --tolex:#171310; --tolex-2:#1F1917; --grille:#241E1A; --panel:#221C18;
+  --edge:#3A302A; --edge-2:#4A3E35;
+  --cream:#F0E6D2; --cream-2:#B5A896; --dim:#7D7166;
+  --tungsten:#F0A83C; --tungsten-d:#8A5F1E; --tungsten-glow:rgba(240,168,60,.5);
+  --ruby:#D8503C; --jade:#7FB89A;
+  --disp:"Suez One","Arial Hebrew",Georgia,serif;
+  --body:"Heebo","Segoe UI",-apple-system,sans-serif;
+  --mono:"Space Mono",ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--tolex); color:var(--cream); font-family:var(--body); font-weight:300;
+  -webkit-text-size-adjust:100%; overflow-x:hidden;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.014) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.22) 0 1px, transparent 1px 4px),
+    radial-gradient(120% 80% at 50% -10%, #241D18 0%, #171310 55%);
+  background-attachment:fixed;
+  min-height:100vh;
+}
+button{font-family:inherit;font-size:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:inherit}
+:focus-visible{outline:2px solid var(--tungsten);outline-offset:2px}
+h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.25;margin:0;letter-spacing:-.01em}
+
+/* ---- chassis / top ---- */
+.top{position:sticky;top:0;z-index:50;
+  background:linear-gradient(180deg,#241D18 0%,#1B1613 100%);
+  border-bottom:1px solid #0C0A09; box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 6px 18px rgba(0,0,0,.5)}
+.top-in{max-width:1560px;margin:0 auto;padding:9px 14px;display:flex;gap:11px;align-items:center;flex-wrap:wrap}
+.lamp{width:13px;height:13px;border-radius:50%;flex:0 0 13px;
+  background:radial-gradient(circle at 35% 32%, #FFD891, #C87A1A 60%, #5C3A0E);
+  box-shadow:0 0 9px var(--tungsten-glow), inset 0 0 4px rgba(0,0,0,.5); transition:.07s}
+.lamp.beat{box-shadow:0 0 20px var(--tungsten), 0 0 34px var(--tungsten-glow), inset 0 0 4px rgba(0,0,0,.4)}
+.lamp.down{background:radial-gradient(circle at 35% 32%, #FFF0C8, #F0A83C 55%, #8A5F1E)}
+.brand{font-family:var(--disp);font-size:19px;letter-spacing:.01em}
+.ttl{font-size:14px;color:var(--cream-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:34vw;
+  border-inline-start:1px solid var(--edge);padding-inline-start:11px}
+.top .right{margin-inline-start:auto;display:flex;gap:6px;flex-wrap:wrap}
+
+/* ---- controls ---- */
+.btn{background:linear-gradient(180deg,#2E2622,#231D19);color:var(--cream);
+  border:1px solid var(--edge);border-radius:5px;padding:7px 13px;transition:.14s;white-space:nowrap;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset}
+.btn:hover{border-color:var(--tungsten-d);color:var(--tungsten)}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(180deg,#F5BE5C,#D8912E);border-color:#F5C36B;color:#241705;font-weight:700}
+.btn.primary:hover{background:linear-gradient(180deg,#FFD07A,#E5A03B);color:#241705}
+.btn.on{background:linear-gradient(180deg,#8FCBAB,#5D9B7E);border-color:#9FD9BA;color:#0E1F17;font-weight:700}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn:disabled{opacity:.34;cursor:not-allowed}
+input[type=text],select,textarea{background:#120F0D;color:var(--cream);
+  border:1px solid var(--edge);border-radius:5px;padding:9px 11px;
+  box-shadow:inset 0 2px 5px rgba(0,0,0,.45)}
+input[type=text]:focus,textarea:focus,select:focus{border-color:var(--tungsten-d);outline:none}
+textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
+
+.wrap{max-width:1560px;margin:0 auto;padding:16px 14px 70px}
+
+/* ---- panel = amp faceplate ---- */
+.panel{background:linear-gradient(180deg,#262019 0%,#201A16 100%);
+  border:1px solid var(--edge);border-radius:8px;padding:16px;margin-bottom:12px;
+  box-shadow:0 1px 0 rgba(255,255,255,.045) inset, 0 5px 16px rgba(0,0,0,.35)}
+.panel h3{font-size:16px;margin:0 0 4px}
+.panel .sub{color:var(--cream-2);font-size:13px;margin:0 0 13px;line-height:1.6}
+.stamp{font-family:var(--mono);font-size:10px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
+
+.note{border-inline-start:2px solid var(--tungsten-d);background:rgba(240,168,60,.06);
+  padding:10px 13px;border-radius:0 5px 5px 0;font-size:13.5px;margin:11px 0;line-height:1.65}
+.note.rust{border-color:var(--ruby);background:rgba(216,80,60,.09)}
+.note.sage{border-color:var(--jade);background:rgba(127,184,154,.09)}
+.note strong{color:var(--tungsten);font-weight:500}
+.note.rust strong{color:var(--ruby)} .note.sage strong{color:var(--jade)}
+
+/* ═══ SIGNATURE — מסלול האקורדים הנע ═══ */
+.horizon{position:relative;height:104px;border-radius:8px;overflow:hidden;margin-bottom:12px;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.02) 0 1px, transparent 1px 5px),
+    repeating-linear-gradient(-45deg, rgba(0,0,0,.3) 0 1px, transparent 1px 5px),
+    linear-gradient(180deg,#2B241E,#1A1512);
+  border:1px solid var(--edge); box-shadow:inset 0 3px 12px rgba(0,0,0,.55)}
+.horizon .lane{position:absolute;inset:0;direction:ltr}
+.horizon .nowline{position:absolute;top:0;bottom:0;right:96px;width:2px;
+  background:linear-gradient(180deg,transparent,var(--tungsten) 18%,var(--tungsten) 82%,transparent);
+  box-shadow:0 0 14px var(--tungsten-glow);z-index:3}
+.horizon .nowcap{position:absolute;top:5px;right:78px;font-family:var(--mono);font-size:9px;
+  letter-spacing:.18em;color:var(--tungsten);z-index:3}
+.hchip{position:absolute;top:26px;height:52px;border-radius:5px;
+  background:linear-gradient(180deg,#3A3028,#2A2320);border:1px solid var(--edge-2);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--disp);font-size:23px;color:var(--cream);
+  transition:opacity .2s;white-space:nowrap;overflow:hidden;box-shadow:0 2px 7px rgba(0,0,0,.4)}
+.hchip.hot{background:linear-gradient(180deg,#F5BE5C,#D8912E);border-color:#F5C36B;color:#241705;
+  box-shadow:0 0 22px var(--tungsten-glow)}
+.hchip.silent{opacity:.28;font-size:16px;color:var(--dim)}
+.horizon .fadeout{position:absolute;top:0;bottom:0;left:0;width:70px;z-index:2;
+  background:linear-gradient(90deg,#1A1512,transparent);pointer-events:none}
+
+/* ---- stage ---- */
+.main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,430px);gap:13px;align-items:start}
+@media(max-width:1020px){.main{grid-template-columns:1fr}}
+.ytbox{position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;
+  border:1px solid var(--edge);box-shadow:0 6px 22px rgba(0,0,0,.5)}
+.ytbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+
+.stage{background:linear-gradient(180deg,#2A231D,#1D1815);border:1px solid var(--edge);border-radius:8px;
+  padding:16px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;margin-bottom:12px;
+  box-shadow:0 1px 0 rgba(255,255,255,.05) inset}
+@media(max-width:520px){.stage{grid-template-columns:1fr}}
+.nowc{font-family:var(--disp);font-size:clamp(50px,12vw,82px);line-height:1;color:var(--tungsten);
+  margin:3px 0 4px;text-shadow:0 0 26px rgba(240,168,60,.3)}
+.nowc.none{color:var(--dim);text-shadow:none;opacity:.4}
+.nextr{display:flex;gap:9px;align-items:baseline;color:var(--cream-2);font-size:14px}
+.nextr b{color:var(--cream);font-size:25px;font-weight:500;font-family:var(--disp)}
+.beats{display:flex;gap:5px;margin-top:11px}
+.beats i{width:26px;height:5px;background:#3A302A;border-radius:2px;transition:.06s}
+.beats i.on{background:var(--tungsten)} .beats i.down{background:var(--jade)}
+svg.dgm{display:block}
+
+/* ---- transport ---- */
+.tr{background:linear-gradient(180deg,#262019,#1D1814);border:1px solid var(--edge);border-radius:8px;
+  padding:11px 14px;display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.tr label{font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim);text-transform:uppercase}
+.tr .grp{display:flex;gap:5px;align-items:center}
+.time{font-family:var(--mono);font-size:12.5px;color:var(--cream-2)}
+
+/* ---- bar grid ---- */
+.grid{display:flex;flex-wrap:wrap;gap:4px}
+.bc{width:66px;background:linear-gradient(180deg,#2C2520,#221C19);border:1px solid var(--edge);
+  border-radius:4px;padding:5px 3px;text-align:center;transition:.1s;color:var(--cream)}
+.bc:hover{border-color:var(--tungsten-d)}
+.bc.cur{border-color:var(--tungsten);background:linear-gradient(180deg,#4A3A22,#33281A);
+  box-shadow:0 0 12px rgba(240,168,60,.25)}
+.bc.sel{border-color:var(--jade)}
+.bc.anch{box-shadow:inset 0 2px 0 var(--jade)}
+.bc.ext{opacity:.45;border-style:dashed}
+.bc .n{font-family:var(--mono);font-size:9px;color:var(--dim);display:block}
+.bc .c{font-family:var(--disp);font-size:15px;display:block;line-height:1.35}
+.bc .c.none{color:var(--dim);opacity:.4}
+
+/* ---- lyrics ---- */
+.lyr{max-height:400px;overflow:auto;padding-inline-end:5px}
+.ll{padding:6px 9px;border-radius:5px;transition:.12s}
+.ll.cur{background:linear-gradient(90deg,rgba(240,168,60,.16),transparent)}
+.ll .lc{font-family:var(--mono);font-size:12.5px;color:var(--tungsten);letter-spacing:.08em;min-height:16px}
+.ll .lx{font-size:16.5px;line-height:1.45}
+.ll.cur .lx{color:var(--tungsten)}
+.ll.unset{opacity:.42}
+.ll .lb{font-family:var(--mono);font-size:10px;color:var(--dim);margin-inline-start:6px}
+
+/* ---- start screen ---- */
+.start{max-width:660px;margin:6vh auto;text-align:center}
+.hero-amp{font-family:var(--disp);font-size:clamp(28px,6vw,46px);line-height:1.15;margin:0 0 6px}
+.hero-amp em{font-style:normal;color:var(--tungsten);text-shadow:0 0 30px rgba(240,168,60,.35)}
+.start p{color:var(--cream-2);font-size:15.5px;line-height:1.75;margin:14px 0 26px}
+.urlrow{display:flex;gap:8px}.urlrow input{flex:1;text-align:start}
+.lib{margin-top:28px;text-align:start}
+.libitem{display:flex;gap:10px;align-items:center;padding:10px 12px;
+  background:linear-gradient(180deg,#262019,#1E1815);border:1px solid var(--edge);border-radius:5px;margin-bottom:7px}
+.libitem b{font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.libitem small{font-family:var(--mono);font-size:11px;color:var(--dim)}
+
+/* ---- guide ---- */
+.guide{max-width:860px;margin:0 auto}
+.guide h2{font-size:clamp(24px,4.4vw,34px);margin:0 0 8px}
+.guide .lead{color:var(--cream-2);font-size:16px;line-height:1.75;margin:0 0 28px}
+.gstep{display:grid;grid-template-columns:52px 1fr;gap:16px;padding:20px 0;border-top:1px solid var(--edge)}
+.gnum{font-family:var(--disp);font-size:30px;color:var(--tungsten);line-height:1;opacity:.85}
+.gstep h3{font-size:19px;margin:0 0 7px}
+.gstep p{margin:0 0 9px;line-height:1.75;color:var(--cream-2);font-size:14.5px}
+.gstep p b,.gstep li b{color:var(--cream);font-weight:500}
+.gstep ul{margin:8px 0 0;padding-inline-start:18px;color:var(--cream-2);font-size:14.5px;line-height:1.7}
+.gstep li{margin-bottom:6px}
+kbd{font-family:var(--mono);font-size:12px;background:#120F0D;border:1px solid var(--edge-2);
+  border-bottom-width:2px;border-radius:4px;padding:2px 7px;color:var(--tungsten)}
+.gtable{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+.gtable th,.gtable td{border:1px solid var(--edge);padding:8px 10px;text-align:start;vertical-align:top}
+.gtable th{background:rgba(255,255,255,.03);font-weight:500;font-family:var(--mono);font-size:11px;
+  letter-spacing:.1em;color:var(--dim);text-transform:uppercase}
+.gtable td b{color:var(--tungsten);font-weight:500}
+
+/* ---- overlays ---- */
+.toast{position:fixed;bottom:16px;inset-inline-start:16px;background:#2B241E;
+  border:1px solid var(--tungsten-d);color:var(--tungsten);padding:10px 15px;border-radius:5px;
+  z-index:95;font-size:14px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+.big{position:fixed;inset:0;background:rgba(11,9,8,.95);z-index:80;display:grid;place-items:center;
+  text-align:center;padding:20px;backdrop-filter:blur(3px)}
+.big[hidden]{display:none}
+.big .k{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--tungsten);text-transform:uppercase}
+.big .v{font-family:var(--disp);font-size:clamp(64px,19vw,160px);line-height:1;margin:12px 0;
+  color:var(--cream);text-shadow:0 0 44px rgba(240,168,60,.28)}
+.big .h{color:var(--cream-2);font-size:15px;line-height:1.8;max-width:440px;margin:0 auto}
+.big .h b{color:var(--tungsten)}
+.hidden{display:none !important}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-in">
+    <span class="lamp" id="lamp"></span>
+    <span class="brand">נגן־יחד</span>
+    <span class="ttl" id="ttl">אקורדים בזמן אמת</span>
+    <div class="right" id="topRight"></div>
+  </div>
+</header>
+
+<main class="wrap" id="app"></main>
+
+<div class="big" id="calOverlay" hidden>
+  <div>
+    <div class="k" id="calKind">כיול רשת</div>
+    <div class="v" id="calNum">1</div>
+    <div class="h" id="calHint"></div>
+    <button class="btn primary" id="calStop" style="margin-top:24px">סיום כיול</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+/* ═══════════════════════════════════════════════════════════════
+   ספר השירים — מהלכי אקורדים ומבנה בלבד.
+   אין כאן מילים, אין הקלטות ואין מזהי וידאו: מהלך אקורדים הוא
+   עובדה פונקציונלית, וכל השאר מוגן או משתנה.
+   כל מהלך הוא הגרסה האקוסטית המקובלת — אקורד אחד למידה.
+   ═══════════════════════════════════════════════════════════════ */
+const SONGBOOK = [
+  { a:"Bob Dylan", t:"Knockin' on Heaven's Door", y:1973, key:"G", diff:1,
+    note:"שני מהלכים חוזרים לאורך כל השיר. שיר ראשון מצוין — ארבעה אקורדים פתוחים.",
+    sec:{ main:["G","D","Am","Am","G","D","C","C"] },
+    arr:[["main",8]] },
+
+  { a:"America", t:"A Horse with No Name", y:1972, key:"Em", diff:1,
+    note:"שני אקורדים בלבד. השני בהקלטה הוא D6/9 (xx0200) — D רגיל עובד, אבל הצליל האופייני מגיע מהוויסינג.",
+    sec:{ main:["Em","D","Em","D"] },
+    arr:[["main",16]] },
+
+  { a:"Lynyrd Skynyrd", t:"Sweet Home Alabama", y:1974, key:"D", diff:1,
+    note:"D–C–G לאורך כל השיר. זו קדנצת המיקסולידי הרוקית בצורתה הנקייה.",
+    sec:{ main:["D","C","G","G"] },
+    arr:[["main",16]] },
+
+  { a:"Lynyrd Skynyrd", t:"Simple Man", y:1973, key:"C", diff:1,
+    note:"לולאה אחת לכל השיר. אידיאלי לתרגול מעברים.",
+    sec:{ main:["C","G","Am","Am"] },
+    arr:[["main",16]] },
+
+  { a:"Creedence Clearwater Revival", t:"Bad Moon Rising", y:1969, key:"D", diff:1,
+    note:"קצב שאפל קליל. הפזמון הופך את סדר האקורדים.",
+    sec:{ verse:["D","A","G","D"], chorus:["G","G","D","D","A","A","D","D"] },
+    arr:[["verse",4],["chorus",1],["verse",4],["chorus",1]] },
+
+  { a:"Creedence Clearwater Revival", t:"Have You Ever Seen the Rain", y:1971, key:"C", diff:2,
+    sec:{ verse:["Am","F","C","G"], chorus:["F","G","C","Am","F","G","C","C"] },
+    arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
+
+  { a:"The Beatles", t:"Let It Be", y:1970, key:"C", diff:2,
+    note:"מקורו בפסנתר. הבס היורד בין C ל-Am הוא מה שנותן לו את התנועה.",
+    sec:{ verse:["C","G","Am","F","C","G","F","C"], chorus:["Am","G","F","C","C","G","F","C"] },
+    arr:[["verse",2],["chorus",1],["verse",1],["chorus",1]] },
+
+  { a:"The Beatles", t:"Here Comes the Sun", y:1969, key:"D", capo:7, diff:3,
+    note:"קאפו 7 — עם הקאפו מנגנים צורות D–G–A ונשמעים ב-A. בלי קאפו זה שיר אחר לגמרי.",
+    sec:{ verse:["D","G","A","D"], chorus:["G","D","A","A"] },
+    arr:[["verse",4],["chorus",2],["verse",4]] },
+
+  { a:"Eagles", t:"Take It Easy", y:1972, key:"G", diff:2,
+    sec:{ verse:["G","G","D","C","G","G","D","C"], chorus:["C","G","D","D","C","G","D","G"] },
+    arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
+
+  { a:"Eagles", t:"Hotel California", y:1976, key:"Bm", diff:4,
+    note:"שמונה אקורדים במחזור אחד. Bm ו-F#m דורשים ברה — קאפו 2 עם צורות Am מקל מאוד.",
+    sec:{ main:["Bm","F#","A","E","G","D","Em","F#"] },
+    arr:[["main",12]] },
+
+  { a:"Pink Floyd", t:"Wish You Were Here", y:1975, key:"G", diff:3,
+    note:"האינטרו מנוגן על גיטרה אקוסטית עם ריף שזור בין האקורדים.",
+    sec:{ main:["C","D","Am","G","D","C","Am","G","C","D","Am","G","D","C","G","G"] },
+    arr:[["main",6]] },
+
+  { a:"Pink Floyd", t:"Comfortably Numb", y:1979, key:"Bm", diff:3,
+    sec:{ verse:["Bm","A","G","Em","Bm","Bm","Bm","Bm"], chorus:["D","A","C","G","D","A","C","G"] },
+    arr:[["verse",2],["chorus",2],["verse",2],["chorus",2]] },
+
+  { a:"Pink Floyd", t:"Another Brick in the Wall, Pt. 2", y:1979, key:"Dm", diff:1,
+    note:"שני אקורדים. הגרוב הוא כל השיר — תרגל את הפריטה, לא את האקורדים.",
+    sec:{ main:["Dm","Dm","G","G"] },
+    arr:[["main",16]] },
+
+  { a:"Led Zeppelin", t:"Rock and Roll", y:1971, key:"A", diff:2,
+    note:"בלוז 12 מידות קלאסי ב-A. בהקלטה פאוור אקורדים, לא אקורדים פתוחים.",
+    sec:{ blues:["A","A","A","A","D","D","A","A","E","D","A","A"] },
+    arr:[["blues",6]] },
+
+  { a:"Deep Purple", t:"Smoke on the Water", y:1972, key:"Gm", diff:2,
+    note:"הריף מנוגן בקווינטות על שני מיתרים, לא כאקורדים מלאים. הנה ההיגיון ההרמוני שמתחת.",
+    sec:{ riff:["G","G","Bb","C","G","G","Bb","Db"], verse:["G","G","G","G"] },
+    arr:[["riff",2],["verse",4],["riff",2]] },
+
+  { a:"AC/DC", t:"Highway to Hell", y:1979, key:"A", diff:2,
+    note:"בהקלטה יש D/F# בין D ל-G. פאוור אקורדים בגיטרה חשמלית.",
+    sec:{ main:["A","D","G","D"] },
+    arr:[["main",16]] },
+
+  { a:"Dire Straits", t:"Sultans of Swing", y:1978, key:"Dm", diff:3,
+    sec:{ verse:["Dm","C","Bb","A","Dm","C","Bb","A"], chorus:["F","C","Bb","Bb","F","C","Bb","Bb"] },
+    arr:[["verse",3],["chorus",2],["verse",3]] },
+
+  { a:"Rod Stewart", t:"Maggie May", y:1971, key:"D", diff:2,
+    sec:{ verse:["D","Em","G","D","D","Em","G","D"], chorus:["A","G","D","D","A","G","D","D"] },
+    arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
+
+  { a:"Neil Young", t:"Heart of Gold", y:1972, key:"Em", diff:2,
+    note:"הרמוניקה מנגנת את המהלך לפני שהשירה נכנסת — נקודת התחלה טובה לכיול.",
+    sec:{ verse:["Em","C","D","G"], chorus:["D","C","G","G","D","C","G","G"] },
+    arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
+
+  { a:"Eric Clapton", t:"Wonderful Tonight", y:1977, key:"G", diff:2,
+    note:"המהלך פשוט; מה שעושה את השיר הוא הליקים בין האקורדים.",
+    sec:{ verse:["G","D","C","D"], chorus:["C","D","G","G","C","D","G","G"] },
+    arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
+
+  { a:"The Allman Brothers Band", t:"Ramblin' Man", y:1973, key:"G", diff:2,
+    sec:{ verse:["G","D","C","G"], chorus:["C","G","D","G"] },
+    arr:[["verse",4],["chorus",2],["verse",4]] },
+
+  { a:"The Rolling Stones", t:"Dead Flowers", y:1971, key:"D", diff:1,
+    sec:{ verse:["D","A","G","D"], chorus:["A","G","D","D"] },
+    arr:[["verse",4],["chorus",2],["verse",4]] },
+
+  { a:"Cat Stevens", t:"Wild World", y:1970, key:"Am", diff:3,
+    note:"בהקלטה יש ספטימות (D7, E7) — הגרסה כאן פשוטה. מהלך יורד יפה לתרגול מעברים.",
+    sec:{ verse:["Am","D","G","C","F","Dm","E","E"] },
+    arr:[["verse",8]] },
+
+  { a:"John Lennon", t:"Imagine", y:1971, key:"C", diff:2,
+    note:"פסנתר במקור. הבית הוא C–F חוזר; הפזמון מסובך יותר ולא נכלל כאן.",
+    sec:{ verse:["C","F","C","F","C","F","C","F"] },
+    arr:[["verse",8]] },
+
+  /* ---- תבניות גנריות ---- */
+  { a:"תבנית", t:"בלוז 12 מידות · A", y:0, key:"A", diff:1, tpl:true,
+    note:"הצורה שמתחת לחלק גדול מהרוק המוקדם. I–IV–V.",
+    sec:{ blues:["A","A","A","A","D","D","A","A","E","D","A","E"] }, arr:[["blues",8]] },
+
+  { a:"תבנית", t:"בלוז 12 מידות · E", y:0, key:"E", diff:1, tpl:true,
+    sec:{ blues:["E","E","E","E","A","A","E","E","B","A","E","B"] }, arr:[["blues",8]] },
+
+  { a:"תבנית", t:"מיקסולידי רוקי · I–bVII–IV", y:0, key:"G", diff:1, tpl:true,
+    note:"G–F–C. הקדנצה שלא נפתרת — ומשם הכוח שלה.",
+    sec:{ main:["G","F","C","C"] }, arr:[["main",16]] },
+
+  { a:"תבנית", t:"אאולי · i–bVI–bVII", y:0, key:"Am", diff:1, tpl:true,
+    note:"Am–F–G. האווירה המינורית של התקופה.",
+    sec:{ main:["Am","F","G","G"] }, arr:[["main",16]] },
+
+  { a:"תבנית", t:"בס יורד · G–D/F#–Em", y:0, key:"G", diff:2, tpl:true,
+    note:"אקורדי הסלאש מפושטים כאן ל-D. הצליל של הבלדה הרוקית.",
+    sec:{ main:["G","D","Em","C"] }, arr:[["main",16]] }
+];
+
+function expandSong(entry){
+  const bars = [];
+  const marks = [];
+  entry.arr.forEach(([name, times]) => {
+    const prog = entry.sec[name];
+    if(!prog) return;
+    for(let r=0; r<times; r++){
+      marks.push({name, bar:bars.length});
+      prog.forEach(c => bars.push({c: c==="-" ? null : c}));
+    }
+  });
+  while(bars.length < 32) bars.push({c:null});
+  return {bars, marks};
+}
+
+let sbQuery = "", sbPick = null;
+
+function renderBook(){
+  $("ttl").textContent = "ספר השירים";
+  $("topRight").innerHTML = `<button class="btn sm primary" id="sbBack">חזרה</button>`;
+  $("sbBack").onclick = ()=>{ sbPick = null; mode = "start"; render(); };
+
+  const q = sbQuery.trim().toLowerCase();
+  const list = SONGBOOK.filter(s => !q ||
+    (s.t+" "+s.a).toLowerCase().includes(q) || String(s.y).includes(q) || s.key.toLowerCase()===q);
+
+  app.innerHTML = `
+  <div class="guide">
+    <div class="stamp">מהלכי אקורדים ומבנה · ${SONGBOOK.length} ערכים</div>
+    <h2 style="margin:8px 0 10px">ספר השירים</h2>
+    <p class="lead" style="margin-bottom:18px">בחר שיר — האקורדים והמבנה ייטענו מוכנים, ויישאר לך רק לחבר קישור יוטיוב ולכייל את הרשת.</p>
+
+    <div class="note rust"><strong>קרא לפני שאתה סומך על זה:</strong> אלה הגרסאות האקוסטיות המקובלות, אקורד אחד למידה — לא תמלול של ההקלטה. ספטימות, סלאש וקישוטים הושמטו, ומספר החזרות הוא הערכה. <b>אמת מול האוזן ותקן בלוח המידות</b> — לשם כך הוא קיים.</p></div>
+
+    <div style="display:flex;gap:8px;margin:18px 0 14px">
+      <input type="text" id="sbQ" placeholder="חיפוש לפי שיר, אמן, שנה או סולם…" value="${esc(sbQuery)}" style="flex:1">
+    </div>
+
+    ${list.length ? list.map((s,i)=>{
+      const idx = SONGBOOK.indexOf(s);
+      const chords = [...new Set(Object.values(s.sec).flat())];
+      return `
+      <div class="gstep" style="grid-template-columns:1fr;padding:15px 0">
+        <div>
+          <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
+            <h3 style="margin:0">${esc(s.t)}</h3>
+            <span class="stamp">${esc(s.a)}${s.y?" · "+s.y:""} · ${esc(s.key)}${s.capo?" · קאפו "+s.capo:""} · רמה ${s.diff}</span>
+            <button class="btn sm primary" data-pick="${idx}" style="margin-inline-start:auto">טען</button>
+          </div>
+          <div style="font-family:var(--mono);font-size:13px;color:var(--tungsten);letter-spacing:.08em;margin:8px 0 6px">
+            ${chords.map(esc).join("  ·  ")}
+          </div>
+          ${s.note?`<p style="margin:0;font-size:13.5px">${esc(s.note)}</p>`:""}
+        </div>
+      </div>`;}).join("")
+      : `<div class="note">לא נמצא ערך תואם. אפשר תמיד לפתוח שיר ריק ולהזין אקורדים ידנית.</div>`}
+  </div>`;
+
+  const qi = $("sbQ");
+  qi.oninput = ()=>{ sbQuery = qi.value; const p=qi.selectionStart; renderBook();
+    const n=$("sbQ"); n.focus(); n.setSelectionRange(p,p); };
+  app.querySelectorAll("[data-pick]").forEach(b => b.onclick = ()=> pickSong(SONGBOOK[+b.dataset.pick]));
+}
+
+function pickSong(entry){
+  const search = "https://www.youtube.com/results?search_query=" +
+    encodeURIComponent(entry.a==="תבנית" ? entry.t : entry.a+" "+entry.t+" official");
+  $("ttl").textContent = entry.t;
+  $("topRight").innerHTML = `<button class="btn sm" id="sbBack2">חזרה לספר</button>`;
+  $("sbBack2").onclick = ()=>{ mode="book"; render(); };
+
+  app.innerHTML = `
+  <div class="start">
+    <div class="stamp">${esc(entry.a)}${entry.y?" · "+entry.y:""}</div>
+    <h1 class="hero-amp" style="margin-top:10px">${esc(entry.t)}</h1>
+    <p>האקורדים והמבנה מוכנים. מה שנשאר: קישור יוטיוב לגרסה שאתה רוצה לנגן איתה.</p>
+    ${entry.capo?`<div class="note"><strong>קאפו ${entry.capo}.</strong> ${esc(entry.note||"")}</div>`:""}
+    <div class="urlrow">
+      <input type="text" id="sbUrl" placeholder="https://www.youtube.com/watch?v=…">
+      <button class="btn primary" id="sbGo">פתח</button>
+    </div>
+    <p style="margin:14px 0 0;font-size:14px">
+      <a href="${search}" target="_blank" rel="noopener" style="color:var(--tungsten)">חיפוש השיר ביוטיוב ↗</a>
+      — העתק את הקישור מהגרסה הרשמית והדבק כאן.
+    </p>
+  </div>`;
+
+  const go = ()=>{
+    const id = ytId($("sbUrl").value);
+    if(!id){ toast("לא זיהיתי קישור יוטיוב תקין"); return; }
+    const ex = expandSong(entry);
+    S = newSong();
+    S.ytId = id; S.title = entry.a==="תבנית" ? entry.t : entry.a+" — "+entry.t;
+    S.bars = ex.bars; S.capo = entry.capo || 0;
+    open_();
+    toast(`${ex.bars.length} מידות נטענו — עכשיו כיול רשת`);
+  };
+  $("sbGo").onclick = go;
+  $("sbUrl").onkeydown = e => { if(e.key==="Enter") go(); };
+  $("sbUrl").focus();
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   מסלול האקורדים הנע — אלמנט החתימה.
+   כל אקורד הוא בלוק שרוחבו כאורכו בפועל, והוא נע לעבר קו ההווה.
+   הכול נגזר מאותו שעון: אין אנימציית CSS עצמאית שיכולה להתפצל.
+   ═══════════════════════════════════════════════════════════════ */
+const HZ_LOOK = 9;              // שניות קדימה שנראות במסלול
+const HZ_NOWX = 96;             // מיקום קו ההווה מהקצה הימני
+let hzPool = [];
+
+function paintHorizon(now){
+  const lane = $("hzLane");
+  if(!lane){ hzPool = []; return; }
+  const W = lane.clientWidth;
+  if(W < 40) return;
+  const span = W - HZ_NOWX - 8;
+  const bi = Math.max(0, cur.bar);
+
+  /* איחוד מידות רצופות בעלות אותו אקורד לבלוק אחד */
+  const blocks = [];
+  let i = bi;
+  while(i < S.bars.length){
+    const t0 = timeOfBar(i);
+    if(t0 > now + HZ_LOOK) break;
+    const c = chordAt(i);
+    let j = i + 1;
+    while(j < S.bars.length && chordAt(j) === c && timeOfBar(j) <= now + HZ_LOOK) j++;
+    blocks.push({c, t0, t1: timeOfBar(j)});
+    i = j;
+    if(blocks.length >= 14) break;
+  }
+
+  while(hzPool.length < blocks.length){
+    const d = document.createElement("div");
+    d.className = "hchip";
+    lane.appendChild(d);
+    hzPool.push(d);
+  }
+
+  blocks.forEach((b, k) => {
+    const el = hzPool[k];
+    const d0 = (b.t0 - now) / HZ_LOOK * span;
+    const d1 = (b.t1 - now) / HZ_LOOK * span;
+    const right = HZ_NOWX + Math.max(d0, -HZ_NOWX + 2);
+    const w = Math.max(26, d1 - Math.max(d0, -HZ_NOWX + 2));
+    el.style.right = right + "px";
+    el.style.width = Math.min(w, span + HZ_NOWX) + "px";
+    el.style.display = "flex";
+    const hot = d0 <= 0 && d1 > 0;
+    el.className = "hchip" + (hot ? " hot" : "") + (b.c ? "" : " silent");
+    const txt = b.c || "·";
+    if(el.textContent !== txt) el.textContent = txt;
+  });
+  for(let k = blocks.length; k < hzPool.length; k++) hzPool[k].style.display = "none";
+}
+
+let lampT;
+function pulseLamp(down){
+  const l = $("lamp"); if(!l) return;
+  l.className = "lamp beat" + (down ? " down" : "");
+  clearTimeout(lampT);
+  lampT = setTimeout(()=>{ l.className = "lamp"; }, 95);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   מדריך
+   ═══════════════════════════════════════════════════════════════ */
+let prevMode = "start";
+
+function renderGuide(){
+  $("ttl").textContent = "מדריך";
+  $("topRight").innerHTML = `<button class="btn sm primary" id="gBack">חזרה</button>`;
+  $("gBack").onclick = ()=>{ mode = prevMode === "main" ? "main" : "start"; render(); };
+
+  app.innerHTML = `
+  <div class="guide">
+    <div class="stamp">מדריך הפעלה · גרסה 1.0</div>
+    <h2 style="margin-top:8px">איך גורמים לשיר להתנגן איתך</h2>
+    <p class="lead">האפליקציה עושה דבר אחד היטב: מציגה את האקורד הנכון ברגע הנכון, לכל אורך השיר. כדי שזה יקרה צריך לספר לה שני דברים — <b>איפה המידות</b> ו<b>מה האקורדים</b>. שניהם נעשים פעם אחת לשיר, ונשמרים.</p>
+
+    <div class="note"><strong>העיקרון שמאחורי הכול:</strong> כל מה שרץ על המסך נגזר משעון הנגן של יוטיוב, ולא מטיימר פנימי. לכן אין מצב שהאקורדים והמילים "יתנתקו" מהשיר — גם אם עצרת, קפצת אחורה או האטת.</div>
+
+    <div class="gstep">
+      <div class="gnum">1</div>
+      <div>
+        <h3>פתיחת שיר</h3>
+        <p>הדבק קישור יוטיוב של השיר — <b>הגרסה הרשמית של האמן או האלבום</b>. כל צורת קישור עובדת: <span class="stamp">youtube.com/watch?v=…</span> · <span class="stamp">youtu.be/…</span> · או מזהה הסרטון בלבד.</p>
+        <p>אם מתקבלת הודעה שהסרטון אינו זמין להטמעה — זו הגבלה של בעל הזכויות על אותו סרטון מסוים. חפש העלאה רשמית אחרת של אותו שיר.</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">2</div>
+      <div>
+        <h3>כיול רשת הזמן — הצעד היחיד שבאמת קובע</h3>
+        <p>לחץ <b>כיול מידות</b>. השיר מתחיל מההתחלה, והמסך עובר למצב כיול. עכשיו הקש <kbd>רווח</kbd> בכל תחילת מידה — כלומר על ה"אחת", הפעמה החזקה שאתה מנענע אליה את הראש.</p>
+        <p>בורר <b>«כל 4»</b> ליד הכפתור קובע כל כמה מידות להקיש. ברירת המחדל היא אחת ל־4 מידות, ולרוב השירים היא הנכונה.</p>
+        <div class="note rust"><strong>הכלל החשוב ביותר במדריך הזה:</strong> המשך להקיש <b>עד סוף השיר</b>. עדיף עשרים הקשות פרושות על כל השיר מאשר מאה הקשות בהתחלה. הקלטות אמיתיות נושמות ומשנות קצב, ולכן רשת שנפרשה רק על ההתחלה נסחפת — וזו בדיוק הסיבה שאקורדים "מתנתקים" בסוף.</div>
+        <table class="gtable">
+          <tr><th>צפיפות ההקשה</th><th>סטייה ממוצעת</th><th>סטייה מרבית</th></tr>
+          <tr><td><b>כל מידה</b> לאורך השיר</td><td>15 מ״ש</td><td>30 מ״ש</td></tr>
+          <tr><td><b>כל 4 מידות</b> לאורך השיר</td><td>15 מ״ש</td><td>144 מ״ש</td></tr>
+          <tr><td><b>כל 8 מידות</b> לאורך השיר</td><td>26 מ״ש</td><td>372 מ״ש</td></tr>
+          <tr><td>24 מידות בהתחלה בלבד</td><td style="color:var(--ruby)">2.7 שניות</td><td style="color:var(--ruby)">6 שניות</td></tr>
+        </table>
+        <p style="margin-top:10px">בסיום — <kbd>Esc</kbd> או «סיום כיול». בלוח המידות, כל מידה שמעבר לעוגן האחרון מסומנת <b>במסגרת מקווקוות</b>: שם הרשת משוערת ולא מדודה. השאיפה היא שלא יישארו מקווקוות.</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">3</div>
+      <div>
+        <h3>הזנת האקורדים</h3>
+        <p>שתי דרכים, ואפשר לשלב:</p>
+        <ul>
+          <li><b>אחד־אחד:</b> לחץ על מידה בלוח, הקלד את האקורד בתיבה והקש <kbd>Enter</kbd>. הסמן קופץ למידה הבאה, כך שאפשר לרוץ על כל השיר במקלדת בלבד.</li>
+          <li><b>הדבקת רצף:</b> לחץ <b>הדבקת רצף</b> והדבק את כל המהלך בבת אחת — <span class="stamp">G | D | Em | C</span>. כל אקורד תופס מידה אחת. נקודה או מקף מדלגים על מידה בלי לשנות אותה.</li>
+        </ul>
+        <p><b>מידה ריקה ממשיכה את האקורד הקודם.</b> אם אקורד נמשך ארבע מידות, מספיק להקליד אותו פעם אחת ולהשאיר את השלוש הבאות ריקות.</p>
+        <p>נתמכים מז'ור ומינור: <span class="stamp">G · Am · F#m · Bb · C#m</span>.</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">4</div>
+      <div>
+        <h3>מילים</h3>
+        <p>הדבק את מילות השיר בתיבה — שורה אחת בכל שורה — ולחץ <b>טעינה</b>. אחר כך <b>יישור שורות</b>: השיר מתנגן, ואתה מקיש <kbd>רווח</kbd> ברגע שכל שורה מתחילה להישמע.</p>
+        <p>מרגע שהשורות מיושרות, האקורדים של כל שורה מופיעים <b>מעליה</b> אוטומטית — נגזרים מרשת המידות, לא מוקלדים בנפרד. השורה הפעילה מודגשת וגוללת מעצמה.</p>
+        <div class="note"><strong>למה המילים לא מגיעות מהאפליקציה:</strong> מילות שיר מוגנות בזכויות יוצרים. אתה מדביק את הגרסה שלך, והיא נשמרת מקומית במכשיר שלך בלבד.</div>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">5</div>
+      <div>
+        <h3>ניגון ותרגול</h3>
+        <ul>
+          <li><b>מסלול האקורדים</b> בראש המסך — האקורדים הבאים נעים לעבר קו ההווה, וכל בלוק ברוחב אורכו בפועל. זה נותן לך את ההתראה שהאצבעות צריכות, לפני שהאקורד מגיע.</li>
+          <li><b>מהירות 50% או 75%</b> — יוטיוב שומר על הגובה, כך שהשיר איטי אבל באותו סולם.</li>
+          <li><b>טונים ±6</b> — מזיז את האקורדים המוצגים כדי לנגן בסולם נוח. שים לב: זה משנה את מה שכתוב, לא את מה שנשמע.</li>
+          <li><b>הצעת קאפו</b> מופיעה מעל הלוח כשיש קאפו שהופך את רוב האקורדים לפתוחים — הדרך לעקוף ברה.</li>
+          <li>לחיצה על מידה או על שורת מילים <b>קופצת לשם</b> בשיר.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">6</div>
+      <div>
+        <h3>כשמשהו לא מדויק</h3>
+        <p>אם האקורד מקדים או מאחר בקטע מסוים — אל תכייל הכול מחדש. נגן עד לנקודה, ובדיוק ברגע שהמידה הנוכחית מתחילה לחץ <b>תיקון נקודתי</b>. הרשת מתעגנת מחדש מאותה נקודה והלאה, וכל השאר נשמר.</p>
+        <p>אם הסטייה קבועה לאורך כל השיר — כנראה הקשת בכיול חצי מידה מוקדם או מאוחר. נקה עוגנים וכייל שוב, הפעם עם ההקשה מדויקת על ה"אחת".</p>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">7</div>
+      <div>
+        <h3>שמירה</h3>
+        <p><b>שמור</b> שומר את השיר בספרייה בדפדפן — הוא יופיע במסך הפתיחה בפעם הבאה. <b>ייצוא</b> מוריד קובץ JSON עם הכול: רשת, אקורדים ומילים.</p>
+        <div class="note rust"><strong>ניקוי נתוני הדפדפן מוחק את הספרייה.</strong> ייצא שירים שהשקעת בהם.</div>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">⌘</div>
+      <div>
+        <h3>מקשים</h3>
+        <table class="gtable">
+          <tr><th>מקש</th><th>בניגון רגיל</th><th>במצב כיול</th></tr>
+          <tr><td><kbd>רווח</kbd></td><td>נגן / עצור</td><td><b>הקשת עוגן</b> או שורה</td></tr>
+          <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>קפיצה של 5 שניות</td><td>—</td></tr>
+          <tr><td><kbd>Esc</kbd></td><td>—</td><td>סיום הכיול</td></tr>
+          <tr><td><kbd>Enter</kbd></td><td>אישור אקורד והתקדמות למידה הבאה</td><td>—</td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="gstep">
+      <div class="gnum">?</div>
+      <div>
+        <h3>מגבלות שכדאי להכיר מראש</h3>
+        <ul>
+          <li><b>אין זיהוי אקורדים אוטומטי.</b> יוטיוב לא מאפשר גישה לאודיו עצמו מהדפדפן, ולכן אי אפשר לנתח את ההקלטה. את האקורדים מזינים פעם אחת.</li>
+          <li><b>מז'ור ומינור בלבד.</b> אקורדי 7, sus וסלאש אינם נתמכים בתצוגת האצבעות בגרסה זו.</li>
+          <li><b>העברת טונים משנה את הכתוב ולא את הנשמע.</b> אם ההקלטה מכוונת חצי טון מטה — וזה נפוץ ברוק של שנות השבעים — כוון את הגיטרה בהתאם או השתמש בטונים כדי להתאים את הכתוב לאוזן.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="border-top:1px solid var(--edge);margin-top:26px;padding-top:20px;text-align:center">
+      <button class="btn primary" id="gBack2">חזרה לאפליקציה</button>
+    </div>
+  </div>`;
+  $("gBack2").onclick = ()=>{ mode = prevMode === "main" ? "main" : "start"; render(); };
+  window.scrollTo({top:0});
+}
+
+"use strict";
+
+/* ═══════════════════════════════════════════════════════════════
+   נגן־יחד — הכול נגזר משעון אחד: player.getCurrentTime()
+   אין טיימר עצמאי. אין setInterval שמקדם אקורדים.
+   רשת המידות היא פונקציה לינארית־למקטעים של עוגנים.
+   ═══════════════════════════════════════════════════════════════ */
+
+const PC_SHARP=["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
+const PC_FLAT =["C","Db","D","Eb","E","F","Gb","G","Ab","A","Bb","B"];
+const SHAPES={
+ "C":{f:"x32010",g:"-32-1-"},"Cm":{f:"x35543",g:"-13421",b:{fr:3,from:5,to:1}},
+ "C#":{f:"x46664",g:"-13331",b:{fr:4,from:5,to:1}},"C#m":{f:"x46654",g:"-13421",b:{fr:4,from:5,to:1}},
+ "D":{f:"xx0232",g:"---132"},"Dm":{f:"xx0231",g:"---231"},
+ "D#":{f:"x68886",g:"-13331",b:{fr:6,from:5,to:1}},"D#m":{f:"x68876",g:"-13421",b:{fr:6,from:5,to:1}},
+ "E":{f:"022100",g:"-231--"},"Em":{f:"022000",g:"-23---"},
+ "F":{f:"133211",g:"134211",b:{fr:1,from:6,to:1}},"Fm":{f:"133111",g:"134111",b:{fr:1,from:6,to:1}},
+ "F#":{f:"244322",g:"134211",b:{fr:2,from:6,to:1}},"F#m":{f:"244222",g:"134111",b:{fr:2,from:6,to:1}},
+ "G":{f:"320003",g:"21---3"},"Gm":{f:"355333",g:"134111",b:{fr:3,from:6,to:1}},
+ "G#":{f:"466544",g:"134211",b:{fr:4,from:6,to:1}},"G#m":{f:"466444",g:"134111",b:{fr:4,from:6,to:1}},
+ "A":{f:"x02220",g:"--123-"},"Am":{f:"x02210",g:"--231-"},
+ "A#":{f:"x13331",g:"-13331",b:{fr:1,from:5,to:1}},"A#m":{f:"x13321",g:"-13421",b:{fr:1,from:5,to:1}},
+ "B":{f:"x24442",g:"-13331",b:{fr:2,from:5,to:1}},"Bm":{f:"x24432",g:"-13421",b:{fr:2,from:5,to:1}}
+};
+const ALIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
+const OPEN = new Set(["C","A","G","E","D","Am","Em","Dm"]);
+
+/* ---------- מצב ---------- */
+const KEY="playalong-lib-v1";
+function newSong(){ return {
+  id:"s"+Date.now(), title:"", ytId:"", beatsPerBar:4,
+  anchors:[],            // [{bar, t}] ממוין לפי bar
+  bars:[],               // [{c:"G"|null}]
+  lyrics:[],             // [{text, bar|null}]
+  transpose:0, flats:false, capo:0
+};}
+let S = newSong();
+let player=null, ready=false, mode="idle", sel=-1;
+let cal={on:false, kind:"", bar:0, taps:[], line:0, step:4};
+let calStep=4;
+let cur={bar:-1, beat:-1, line:-1};
+let lastRate=1;
+
+const $=id=>document.getElementById(id), app=$("app");
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt=s=>{ if(!isFinite(s)||s<0) return "0:00"; return Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0"); };
+let tT; function toast(m){ const t=$("toast"); t.textContent=m; t.classList.add("on"); clearTimeout(tT); tT=setTimeout(()=>t.classList.remove("on"),2400); }
+
+/* ═══════════════════════════════════════════════════════════════
+   1. רשת המידות — לינארית למקטעים בין עוגנים
+   ═══════════════════════════════════════════════════════════════ */
+/* שיערוך משך מידה בריבועים פחותים על כל העוגנים.
+   הקשה אנושית מדויקת בערך ל-30 מילישניות; שימוש בשני העוגנים
+   האחרונים בלבד מגביר את הרעש פי כמה ומייצר סחיפה בסוף השיר.
+   התאמה גלובלית ממצעת את הרעידה ומחזירה את הטמפו האמיתי. */
+function fitBarDur(){
+  const a=S.anchors, n=a.length;
+  if(n<2) return 2;
+  let sx=0, sy=0, sxx=0, sxy=0;
+  for(const p of a){ sx+=p.bar; sy+=p.t; sxx+=p.bar*p.bar; sxy+=p.bar*p.t; }
+  const d=n*sxx-sx*sx;
+  if(Math.abs(d)<1e-9) return 2;
+  const slope=(n*sxy-sx*sy)/d;
+  return slope>0.05 ? slope : 2;
+}
+function barDur(){ return fitBarDur(); }
+function timeOfBar(i){
+  const a=S.anchors;
+  if(!a.length) return i*barDur();
+  if(a.length===1) return a[0].t + (i-a[0].bar)*barDur();
+  if(i<=a[0].bar) return a[0].t - (a[0].bar-i)*barDur();
+  for(let k=0;k<a.length-1;k++){
+    if(i>=a[k].bar && i<=a[k+1].bar){
+      const span=a[k+1].bar-a[k].bar;
+      return a[k].t + (i-a[k].bar)*((a[k+1].t-a[k].t)/span);
+    }
+  }
+  const last=a[a.length-1];
+  return last.t + (i-last.bar)*barDur();
+}
+function barAtTime(t){
+  const n=S.bars.length; if(!n) return -1;
+  let lo=0, hi=n-1, r=-1;
+  while(lo<=hi){ const m=(lo+hi)>>1;
+    if(timeOfBar(m)<=t){ r=m; lo=m+1; } else hi=m-1; }
+  return r;
+}
+function addAnchor(bar,t){
+  S.anchors = S.anchors.filter(a=>a.bar!==bar);
+  S.anchors.push({bar,t});
+  S.anchors.sort((a,b)=>a.bar-b.bar);
+}
+function bpmNow(){
+  const d=barDur(); return d>0 ? Math.round(60/(d/S.beatsPerBar)) : 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   2. אקורדים
+   ═══════════════════════════════════════════════════════════════ */
+function parseChord(txt){
+  const m=String(txt).trim().match(/^([A-Ga-g][#b]?)(m|min)?$/);
+  if(!m) return null;
+  let root=m[1][0].toUpperCase()+(m[1][1]||"");
+  root=ALIAS[root]||root;
+  const pc=PC_SHARP.indexOf(root);
+  if(pc<0) return null;
+  return {pc, q:m[2]?"m":""};
+}
+function shift(c){
+  if(!c) return null;
+  const p=parseChord(c); if(!p) return c;
+  const pc=((p.pc+S.transpose)%12+12)%12;
+  return (S.flats?PC_FLAT:PC_SHARP)[pc]+p.q;
+}
+function chordAt(i){ const b=S.bars[i]; return b&&b.c ? shift(b.c) : null; }
+function nextChordFrom(i){
+  const c=chordAt(i);
+  for(let k=i+1;k<S.bars.length;k++){ const n=chordAt(k); if(n && n!==c) return {c:n, bar:k}; }
+  return null;
+}
+function shapeOf(name){
+  if(!name) return null;
+  const p=parseChord(name); if(!p) return null;
+  return SHAPES[PC_SHARP[p.pc]+p.q]||null;
+}
+function suggestCapo(){
+  const used=[...new Set(S.bars.map(b=>b.c).filter(Boolean))];
+  if(!used.length) return null;
+  let best=null;
+  for(let cap=0; cap<=7; cap++){
+    let n=0;
+    used.forEach(c=>{ const p=parseChord(c); if(!p) return;
+      const pc=((p.pc+S.transpose-cap)%12+12)%12;
+      if(OPEN.has(PC_SHARP[pc]+p.q)) n++; });
+    if(!best || n>best.n) best={cap,n,total:used.length};
+  }
+  return (best && best.cap>0 && best.n>best.total*0.6) ? best : null;
+}
+
+function diagram(name,size){
+  const sh=shapeOf(name), W=size||140, H=W*1.22;
+  if(!sh) return `<svg class="dgm" width="${W}" height="${H}"></svg>`;
+  const nums=sh.f.split("").map(c=>c==="x"?-1:parseInt(c,36));
+  const played=nums.filter(n=>n>0);
+  const minF=played.length?Math.min(...played):1, maxF=played.length?Math.max(...played):4;
+  const base=(maxF<=4)?1:minF, fing=(sh.g||"------").split("");
+  const L=24,T=28,sp=(W-2*L)/5,fh=(H-T-22)/5;
+  let s=`<svg class="dgm" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">`;
+  if(base===1) s+=`<rect x="${L-1}" y="${T-4}" width="${W-2*L+2}" height="4" fill="#DCE6E4"/>`;
+  else s+=`<text x="${L-8}" y="${T+fh*.7}" fill="#8FA7AB" font-size="10.5" font-family="monospace" text-anchor="end">${base}fr</text>`;
+  for(let i=0;i<6;i++) s+=`<line x1="${L+i*sp}" y1="${T}" x2="${L+i*sp}" y2="${T+fh*4}" stroke="#2C4A52" stroke-width="1.3"/>`;
+  for(let i=0;i<=4;i++) s+=`<line x1="${L}" y1="${T+i*fh}" x2="${W-L}" y2="${T+i*fh}" stroke="#2C4A52" stroke-width="1.1"/>`;
+  if(sh.b && sh.b.fr>=base && sh.b.fr<base+4){
+    const y=T+(sh.b.fr-base+.5)*fh, x1=L+(6-sh.b.from)*sp, x2=L+(6-sh.b.to)*sp;
+    s+=`<line x1="${Math.min(x1,x2)}" y1="${y}" x2="${Math.max(x1,x2)}" y2="${y}" stroke="#CBA255" stroke-width="${fh*.5}" stroke-linecap="round" opacity=".92"/>`;
+  }
+  for(let i=0;i<6;i++){
+    const x=L+i*sp, n=nums[i];
+    if(n===-1){ s+=`<text x="${x}" y="${T-9}" fill="#8FA7AB" font-size="11.5" text-anchor="middle">✕</text>`; continue; }
+    if(n===0){ s+=`<circle cx="${x}" cy="${T-12}" r="4.2" fill="none" stroke="#DCE6E4" stroke-width="1.4"/>`; continue; }
+    if(n<base||n>=base+4) continue;
+    const y=T+(n-base+.5)*fh;
+    s+=`<circle cx="${x}" cy="${y}" r="${fh*.31}" fill="#CBA255"/>`;
+    const g=fing[i];
+    if(g&&g!=="-") s+=`<text x="${x}" y="${y+4.4}" fill="#14212A" font-size="${fh*.42}" font-weight="700" text-anchor="middle" font-family="sans-serif">${g}</text>`;
+  }
+  return s+"</svg>";
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   3. יוטיוב
+   ═══════════════════════════════════════════════════════════════ */
+function ytId(u){
+  u=String(u).trim();
+  if(/^[\w-]{11}$/.test(u)) return u;
+  const m=u.match(/(?:v=|youtu\.be\/|\/embed\/|\/shorts\/|\/live\/)([\w-]{11})/);
+  return m?m[1]:null;
+}
+function loadYT(){
+  return new Promise(res=>{
+    if(window.YT && window.YT.Player) return res();
+    const t=document.createElement("script");
+    t.src="https://www.youtube.com/iframe_api";
+    window.onYouTubeIframeAPIReady=()=>res();
+    document.head.appendChild(t);
+  });
+}
+async function mountPlayer(){
+  await loadYT();
+  player = new YT.Player("ytFrame", {
+    videoId: S.ytId,
+    playerVars:{rel:0, modestbranding:1, playsinline:1},
+    events:{
+      onReady: ()=>{ ready=true; if(!S.title){ try{ S.title=player.getVideoData().title||"" ; $("ttl").textContent=S.title; }catch(e){} } },
+      onError: ()=> toast("הסרטון אינו זמין להטמעה — נסה קישור אחר")
+    }
+  });
+}
+const T = () => (ready && player && player.getCurrentTime) ? player.getCurrentTime() : 0;
+const DUR = () => (ready && player && player.getDuration) ? player.getDuration() : 0;
+const playing = () => ready && player.getPlayerState && player.getPlayerState()===1;
+
+/* ═══════════════════════════════════════════════════════════════
+   4. מסכים
+   ═══════════════════════════════════════════════════════════════ */
+function render(){
+  if(mode==="guide") renderGuide();
+  else if(mode==="book") renderBook();
+  else if(mode==="start") renderStart();
+  else renderMain();
+}
+
+function lib(){ try{ return JSON.parse(localStorage.getItem(KEY)||"[]"); }catch(e){ return []; } }
+function libSave(){
+  const l=lib().filter(x=>x.id!==S.id);
+  l.unshift(JSON.parse(JSON.stringify(S)));
+  try{ localStorage.setItem(KEY, JSON.stringify(l.slice(0,60))); toast("נשמר בספרייה"); }
+  catch(e){ toast("השמירה נכשלה — ייצא לקובץ"); }
+}
+
+function renderStart(){
+  $("topRight").innerHTML="";
+  $("ttl").textContent="נגן־יחד";
+  const L=lib();
+  app.innerHTML=`
+  <div class="start">
+    <h1 class="hero-amp">אקורדים ומילים<br><em>שרצים עם השיר</em></h1>
+    <p>הדבק קישור יוטיוב של הגרסה הרשמית, כייל את הרשת בהקשה אחת לאורך השיר, והזן את האקורדים. מכאן הכול רץ על השעון של הנגן — בלי סחיפה ובלי טיימר נפרד.</p>
+    <div class="urlrow">
+      <input type="text" id="url" placeholder="https://www.youtube.com/watch?v=…">
+      <button class="btn primary" id="go">פתח</button>
+    </div>
+    <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+      <button class="btn primary" id="gBook">ספר השירים · ${SONGBOOK.length} מהלכים מוכנים</button>
+      <button class="btn sm" id="gGuide">איך זה עובד — מדריך</button>
+    </div>
+    <div class="note rust" style="text-align:start"><strong>מה שאי אפשר:</strong> יוטיוב לא מאפשר גישה לאודיו עצמו, ולכן זיהוי אקורדים אוטומטי בלתי אפשרי כאן. את האקורדים אתה מזין או מדביק פעם אחת — ואז הם נשמרים לתמיד.</div>
+    ${L.length?`<div class="lib"><h3 style="font-size:15px;font-weight:500;margin:0 0 10px;color:var(--muted)">בספרייה שלך</h3>
+      ${L.map(x=>`<div class="libitem">
+        <b>${esc(x.title||x.ytId)}</b>
+        <small>${x.bars.length} מידות · ${x.lyrics.length} שורות</small>
+        <button class="btn sm" data-open="${x.id}">פתח</button>
+        <button class="btn sm" data-del="${x.id}">✕</button>
+      </div>`).join("")}</div>`:""}
+  </div>`;
+  $("go").onclick=()=>{
+    const id=ytId($("url").value);
+    if(!id){ toast("לא זיהיתי קישור יוטיוב תקין"); return; }
+    S=newSong(); S.ytId=id; open_();
+  };
+  $("url").onkeydown=e=>{ if(e.key==="Enter") $("go").click(); };
+  $("gGuide").onclick=()=>{ prevMode="start"; mode="guide"; render(); };
+  $("gBook").onclick=()=>{ mode="book"; render(); };
+  app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{
+    const x=lib().find(y=>y.id===b.dataset.open);
+    if(x){ S=Object.assign(newSong(),x); open_(); }
+  });
+  app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{
+    if(!confirm("למחוק מהספרייה?")) return;
+    localStorage.setItem(KEY, JSON.stringify(lib().filter(y=>y.id!==b.dataset.del)));
+    renderStart();
+  });
+}
+
+function open_(){
+  if(!S.bars.length) S.bars=Array.from({length:64},()=>({c:null}));
+  mode="main"; ready=false; player=null;
+  cur={bar:-1,beat:-1,line:-1};
+  render();
+  mountPlayer();
+}
+
+function renderMain(){
+  $("ttl").textContent=S.title||"נגן־יחד";
+  $("topRight").innerHTML=`
+    <button class="btn sm" id="bBook">ספר השירים</button>
+    <button class="btn sm" id="bGuide">מדריך</button>
+    <button class="btn sm" id="bSave">שמור</button>
+    <button class="btn sm" id="bExp">ייצוא</button>
+    <button class="btn sm" id="bBack">ספרייה</button>`;
+
+  const capo=suggestCapo();
+  app.innerHTML=`
+  <div class="main">
+    <div>
+      <div class="ytbox"><div id="ytFrame"></div></div>
+
+      <div class="tr" style="margin-top:13px">
+        <button class="btn primary" id="pp">נגן</button>
+        <span class="time" id="tc">0:00</span>
+        <div class="grp"><label>מהירות</label>
+          <select id="rate"><option value="0.5">50%</option><option value="0.75">75%</option>
+          <option value="1" selected>100%</option></select></div>
+        <div class="grp"><label>טונים</label>
+          <select id="tr">${Array.from({length:13},(_,i)=>i-6).map(v=>`<option value="${v}" ${v===S.transpose?"selected":""}>${v>0?"+"+v:v}</option>`).join("")}</select></div>
+        <div class="grp"><label>מידות</label><span class="time" id="binfo">–</span></div>
+      </div>
+
+      <div class="panel">
+        <h3>רשת הזמן</h3>
+        <p class="sub">כאן נקבע הסנכרון. הקש רווח על כל דאונביט — תחילת כל מידה — לאורך השיר. אפשר לעצור מתי שרוצים; המשך השיר יימשך מהקצב האחרון. אם ראית שהאקורד מקדים או מאחר, פשוט הקש שוב באותו רגע והרשת תתוקן משם והלאה.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <button class="btn primary" id="calBars">כיול מידות</button>
+          <select id="calStepSel" title="כל כמה מידות להקיש">
+            <option value="1">כל מידה</option><option value="2">כל 2</option>
+            <option value="4" selected>כל 4</option><option value="8">כל 8</option>
+          </select>
+          <button class="btn" id="reAnchor">תיקון נקודתי</button>
+          <button class="btn sm" id="clrAnch">ניקוי עוגנים</button>
+          <span class="time" id="anchInfo"></span>
+        </div>
+        ${S.anchors.length<2?`<div class="note"><strong>עדיין אין רשת.</strong> בלי שני עוגנים לפחות אין סנכרון — התחל ב«כיול מידות», הקש רווח בכל תחילת מידה במשך 16–32 מידות, ועצור.</div>`:
+        (()=>{ const last=S.anchors[S.anchors.length-1].bar, cov=Math.round(100*(last+1)/S.bars.length);
+          return cov>=90
+            ? `<div class="note sage"><strong>${S.anchors.length} עוגנים · ${bpmNow()} BPM · כיסוי ${cov}%.</strong> הרשת פרושה על כל השיר. סטייה צפויה: עשרות מילישניות.</div>`
+            : `<div class="note rust"><strong>כיסוי ${cov}% בלבד.</strong> מעבר למידה ${last+1} (המקווקוות) הרשת משוערת, והסטייה תגדל ככל שמתרחקים. המשך את הכיול עד סוף השיר — זה ההבדל בין סנכרון מדויק למתפרק.</div>`; })()}
+      </div>
+
+      <div class="panel">
+        <h3>אקורדים</h3>
+        <p class="sub">לחץ על מידה, הקלד אקורד ואנטר — הסמן מתקדם למידה הבאה. מידה ריקה ממשיכה את האקורד הקודם.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;align-items:center">
+          <input type="text" id="chIn" placeholder="G / Am / F#m" style="width:130px">
+          <button class="btn sm" id="chPaste">הדבקת רצף</button>
+          <button class="btn sm" id="addBars">+16 מידות</button>
+          <button class="btn sm" id="delBars">−16</button>
+          ${capo?`<span class="time">הצעה: קאפו ${capo.cap} → ${capo.n} מתוך ${capo.total} אקורדים פתוחים</span>`:""}
+        </div>
+        <div class="grid" id="grid"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="horizon">
+        <div class="lane" id="hzLane"></div>
+        <div class="fadeout"></div>
+        <div class="nowline"></div>
+        <div class="nowcap">NOW</div>
+      </div>
+      <div class="stage">
+        <div>
+          <div class="nl">אקורד נוכחי · מידה <span id="bn">–</span></div>
+          <div class="nowc" id="nowc">–</div>
+          <div class="nextr">הבא: <b id="nextc">–</b><span id="nexti" class="time"></span></div>
+          <div class="beats" id="dots"></div>
+        </div>
+        <div id="dgm">${diagram(null,140)}</div>
+      </div>
+
+      <div class="panel">
+        <h3>מילים</h3>
+        <p class="sub" id="lsub">הדבק את המילים שלך, שורה בכל שורה. הן נשמרות מקומית בלבד ואינן מגיעות מהאפליקציה.</p>
+        <div id="lbox"></div>
+      </div>
+    </div>
+  </div>`;
+
+  $("bBook").onclick=()=>{ mode="book"; render(); };
+  $("bGuide").onclick=()=>{ prevMode="main"; mode="guide"; render(); };
+  $("bSave").onclick=libSave;
+  $("bExp").onclick=exportSong;
+  $("bBack").onclick=()=>{ if(player&&player.stopVideo) player.stopVideo(); mode="start"; render(); };
+  $("pp").onclick=()=>{ if(!ready) return; playing()?player.pauseVideo():player.playVideo(); };
+  $("rate").onchange=e=>{ lastRate=+e.target.value; if(ready) player.setPlaybackRate(lastRate); };
+  $("tr").onchange=e=>{ S.transpose=+e.target.value;
+    S.flats=[1,3,6,8,10].includes(((S.transpose%12)+12)%12);
+    buildGrid(); paint(true); };
+  $("calBars").onclick=()=>startCal("bars");
+  const css=$("calStepSel"); if(css){ css.value=String(calStep); css.onchange=e=>{ calStep=+e.target.value; }; }
+  $("reAnchor").onclick=reAnchor;
+  $("clrAnch").onclick=()=>{ S.anchors=[]; toast("העוגנים נוקו"); renderMain(); };
+  $("addBars").onclick=()=>{ for(let i=0;i<16;i++) S.bars.push({c:null}); buildGrid(); };
+  $("delBars").onclick=()=>{ S.bars=S.bars.slice(0,Math.max(8,S.bars.length-16)); buildGrid(); };
+  $("chIn").onkeydown=e=>{
+    if(e.key!=="Enter") return;
+    if(sel<0){ toast("בחר מידה קודם"); return; }
+    const v=$("chIn").value.trim();
+    if(!v) S.bars[sel].c=null;
+    else{ const p=parseChord(v); if(!p){ toast("אקורד לא מזוהה — למשל G או Am"); return; }
+      S.bars[sel].c=PC_SHARP[((p.pc-S.transpose)%12+12)%12]+p.q; }
+    sel=Math.min(S.bars.length-1, sel+1);
+    $("chIn").value=""; buildGrid(); paint(true);
+  };
+  $("chPaste").onclick=pasteProg;
+
+  buildGrid(); buildLyrics(); paint(true);
+  if(ready && player.setPlaybackRate) player.setPlaybackRate(lastRate);
+}
+
+function buildGrid(){
+  const el=$("grid"); if(!el) return;
+  const anch=new Set(S.anchors.map(a=>a.bar));
+  el.innerHTML=S.bars.map((b,i)=>{
+    const c=chordAt(i);
+    const ext = S.anchors.length && i > S.anchors[S.anchors.length-1].bar;
+    return `<button class="bc ${i===sel?"sel":""} ${anch.has(i)?"anch":""} ${ext?"ext":""}" data-b="${i}">
+      <span class="n">${i+1}</span><span class="c ${c?"":"none"}">${c?esc(c):"·"}</span></button>`;
+  }).join("");
+  el.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{
+    sel=+b.dataset.b;
+    if(ready && S.anchors.length>=2) player.seekTo(timeOfBar(sel), true);
+    buildGrid(); $("chIn").focus();
+  });
+  const bi=$("binfo"); if(bi) bi.textContent=S.bars.length;
+  const ai=$("anchInfo"); if(ai) ai.textContent=S.anchors.length?`${S.anchors.length} עוגנים`:"";
+}
+
+function pasteProg(){
+  const t=prompt("הדבק רצף אקורדים — מופרד ברווח או בקו אנכי. כל אקורד תופס מידה.\nלמשל:  G | D | Em | C");
+  if(!t) return;
+  const toks=t.split(/[\s|,]+/).map(x=>x.trim()).filter(Boolean);
+  let i=Math.max(0,sel), bad=0;
+  toks.forEach(tok=>{
+    if(tok==="."||tok==="-"){ i++; return; }
+    const p=parseChord(tok);
+    if(!p){ bad++; return; }
+    while(i>=S.bars.length) S.bars.push({c:null});
+    S.bars[i].c=PC_SHARP[((p.pc-S.transpose)%12+12)%12]+p.q;
+    i++;
+  });
+  sel=Math.min(i,S.bars.length-1);
+  buildGrid(); paint(true);
+  toast(bad?`נטענו ${toks.length-bad} אקורדים, ${bad} לא זוהו`:`נטענו ${toks.length} אקורדים`);
+}
+
+/* ---------- מילים ---------- */
+function chordsOfLine(i){
+  const b0=S.lyrics[i].bar;
+  if(b0===null||b0===undefined) return "";
+  let b1=S.bars.length;
+  for(let k=i+1;k<S.lyrics.length;k++) if(S.lyrics[k].bar!==null){ b1=S.lyrics[k].bar; break; }
+  const out=[]; let prev=null;
+  for(let b=b0;b<b1 && b<S.bars.length;b++){
+    const c=chordAt(b);
+    if(c && c!==prev){ out.push(c); prev=c; }
+  }
+  return out.join("  ");
+}
+function buildLyrics(){
+  const box=$("lbox"); if(!box) return;
+  if(!S.lyrics.length){
+    box.innerHTML=`<textarea id="lin" placeholder="הדבק כאן את מילות השיר…"></textarea>
+      <button class="btn primary sm" id="lset" style="margin-top:9px">טעינה</button>`;
+    $("lset").onclick=()=>{
+      const r=$("lin").value.split("\n").map(s=>s.trim()).filter(Boolean);
+      if(!r.length){ toast("אין מה לטעון"); return; }
+      S.lyrics=r.map(t=>({text:t, bar:null}));
+      buildLyrics(); toast("נטען. עכשיו «יישור שורות» — הקש רווח בתחילת כל שורה");
+    };
+  } else {
+    box.innerHTML=`
+      <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:10px">
+        <button class="btn sm primary" id="lcal">יישור שורות</button>
+        <button class="btn sm" id="lreset">איפוס יישור</button>
+        <button class="btn sm" id="lclr">מחיקה</button>
+      </div>
+      <div class="lyr" id="llist">${S.lyrics.map((l,i)=>
+        `<div class="ll ${l.bar===null?"unset":""}" data-l="${i}">
+          <div class="lc">${esc(chordsOfLine(i))}</div>
+          <div class="lx">${esc(l.text)}${l.bar!==null?`<span class="lb">מ׳${l.bar+1}</span>`:""}</div>
+        </div>`).join("")}</div>`;
+    $("lcal").onclick=()=>startCal("lyrics");
+    $("lreset").onclick=()=>{ S.lyrics.forEach(l=>l.bar=null); buildLyrics(); };
+    $("lclr").onclick=()=>{ if(confirm("למחוק את המילים?")){ S.lyrics=[]; buildLyrics(); } };
+    $("llist").querySelectorAll("[data-l]").forEach(d=>d.onclick=()=>{
+      const l=S.lyrics[+d.dataset.l];
+      if(l.bar!==null && ready) player.seekTo(timeOfBar(l.bar), true);
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   5. כיול
+   ═══════════════════════════════════════════════════════════════ */
+function startCal(kind){
+  if(!ready){ toast("הנגן עוד נטען"); return; }
+  cal={on:true, kind, bar:0, taps:[], line:0, step:calStep};
+  if(kind==="bars"){
+    S.anchors=[];
+    player.seekTo(0,true);
+    $("calKind").textContent="כיול · הקשה כל "+calStep+" מידות";
+    $("calHint").innerHTML="הקש <b>רווח</b> אחת ל-"+calStep+" מידות, <b>לאורך כל השיר עד הסוף</b>.<br>זה מה שמונע סחיפה — עוגנים פרושים עדיפים בהרבה על הקשות צפופות בהתחלה.";
+  }else{
+    S.lyrics.forEach(l=>l.bar=null);
+    if(S.anchors.length<2){ toast("קודם כייל את רשת המידות"); cal.on=false; return; }
+    player.seekTo(0,true);
+    $("calKind").textContent="יישור שורות";
+    $("calHint").innerHTML="הקש <b>רווח</b> ברגע שכל שורה מתחילה להישמע.";
+  }
+  $("calNum").textContent="1";
+  $("calOverlay").hidden=false;
+  player.playVideo();
+}
+function stopCal(){
+  if(!cal.on) return;
+  cal.on=false;
+  $("calOverlay").hidden=true;
+  if(cal.kind==="bars"){
+    if(S.anchors.length<2) toast("צריך לפחות שתי הקשות כדי לפרוש רשת");
+    else toast(`נפרשה רשת · ${bpmNow()} BPM · ${S.anchors.length} עוגנים`);
+    renderMain();
+  }else{ buildLyrics(); toast("היישור נשמר"); }
+}
+$("calStop").onclick=stopCal;
+
+function reAnchor(){
+  if(!ready){ toast("הנגן עוד נטען"); return; }
+  if(cur.bar<0){ toast("אין מידה נוכחית"); return; }
+  addAnchor(cur.bar, T());
+  toast(`מידה ${cur.bar+1} עוגנה מחדש`);
+  buildGrid(); renderMain();
+}
+
+document.addEventListener("keydown",e=>{
+  if(mode!=="main") return;
+  const typing=/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName);
+  if(e.code==="Space"){
+    if(cal.on){
+      e.preventDefault();
+      const t=T();
+      if(cal.kind==="bars"){
+        addAnchor(cal.bar, t);
+        cal.bar += cal.step;
+        while(cal.bar>=S.bars.length) S.bars.push({c:null});
+        $("calNum").textContent=cal.bar+1;
+      }else{
+        if(cal.line<S.lyrics.length){
+          S.lyrics[cal.line].bar=Math.max(0, barAtTime(t));
+          cal.line++;
+          $("calNum").textContent=Math.min(cal.line+1, S.lyrics.length);
+          if(cal.line>=S.lyrics.length) stopCal();
+        }
+      }
+      return;
+    }
+    if(!typing){ e.preventDefault(); if(ready) playing()?player.pauseVideo():player.playVideo(); }
+  }
+  if(e.key==="Escape" && cal.on) stopCal();
+  if(!typing && !cal.on && ready){
+    if(e.key==="ArrowLeft"){ player.seekTo(Math.max(0,T()-5),true); }
+    if(e.key==="ArrowRight"){ player.seekTo(T()+5,true); }
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════════
+   6. הלולאה — קוראת רק את שעון הנגן
+   ═══════════════════════════════════════════════════════════════ */
+const LEAD=0.10;   // פיצוי על השהיית הדגימה של getCurrentTime
+
+function paint(force){
+  if(mode!=="main" || !$("nowc")) return;
+  const t=T()+LEAD;
+  const bi=barAtTime(t);
+
+  if(bi!==cur.bar||force){
+    cur.bar=bi;
+    const c=chordAt(bi), nx=nextChordFrom(bi);
+    const el=$("nowc");
+    el.textContent=c||"–"; el.classList.toggle("none",!c);
+    $("nextc").textContent=nx?nx.c:"–";
+    $("bn").textContent=bi>=0?bi+1:"–";
+    $("dgm").innerHTML=diagram(c,140);
+    document.querySelectorAll(".bc.cur").forEach(x=>x.classList.remove("cur"));
+    const cell=document.querySelector(`.bc[data-b="${bi}"]`);
+    if(cell){ cell.classList.add("cur"); if(!force) cell.scrollIntoView({block:"nearest",behavior:"smooth"}); }
+  }
+
+  if(bi>=0){
+    const t0=timeOfBar(bi), t1=timeOfBar(bi+1), dur=Math.max(.05,t1-t0);
+    const k=Math.max(0,Math.min(S.beatsPerBar-1, Math.floor((t-t0)/(dur/S.beatsPerBar))));
+    if(k!==cur.beat||force){
+      cur.beat=k;
+      pulseLamp(k===0);
+      const d=$("dots");
+      if(d){
+        if(d.children.length!==S.beatsPerBar) d.innerHTML=Array.from({length:S.beatsPerBar},()=>"<i></i>").join("");
+        [...d.children].forEach((x,i)=>x.className=i===k?(k===0?"down":"on"):"");
+      }
+    }
+    const nx=nextChordFrom(bi);
+    const ni=$("nexti");
+    if(ni) ni.textContent = nx ? "בעוד "+Math.max(0,(timeOfBar(nx.bar)-T())).toFixed(1)+"ש׳" : "";
+  }
+
+  if(S.lyrics.length){
+    let li=-1;
+    for(let i=0;i<S.lyrics.length;i++){
+      const b=S.lyrics[i].bar;
+      if(b!==null && b!==undefined && timeOfBar(b)<=t) li=i;
+    }
+    if(li!==cur.line){
+      cur.line=li;
+      document.querySelectorAll(".ll.cur").forEach(x=>x.classList.remove("cur"));
+      const el=document.querySelector(`.ll[data-l="${li}"]`);
+      if(el){ el.classList.add("cur"); el.scrollIntoView({block:"center",behavior:"smooth"}); }
+    }
+  }
+
+  paintHorizon(T());
+
+  const tc=$("tc"); if(tc) tc.textContent=fmt(T());
+  const pp=$("pp"); if(pp) pp.textContent=playing()?"עצור":"נגן";
+}
+function loop(){ try{ paint(false); }catch(e){} requestAnimationFrame(loop); }
+
+/* ═══════════════════════════════════════════════════════════════
+   7. ייצוא
+   ═══════════════════════════════════════════════════════════════ */
+function exportSong(){
+  const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json;charset=utf-8"});
+  const u=URL.createObjectURL(b), a=document.createElement("a");
+  a.href=u; a.download=(S.title||S.ytId).replace(/[^\wא-ת\- ]/g,"")+".song.json"; a.click();
+  setTimeout(()=>URL.revokeObjectURL(u),1500);
+  toast("הקובץ הורד");
+}
+
+mode="start"; render(); loop();
+</script>
+</body>
+</html>

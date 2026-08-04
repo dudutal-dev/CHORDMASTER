@@ -1,0 +1,16 @@
+{
+  "name": "נגן־יחד — אקורדים בזמן אמת",
+  "short_name": "נגן־יחד",
+  "description": "אקורדים ומילים מסונכרנים לסרטון יוטיוב, עם דיאגרמות אצבעות, האטה והעברת טונים.",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#171310",
+  "theme_color": "#171310",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}
