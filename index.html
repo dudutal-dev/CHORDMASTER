@@ -120,6 +120,9 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 /* ---- stage ---- */
 .main{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,430px);gap:13px;align-items:start}
 @media(max-width:1020px){.main{grid-template-columns:1fr}}
+.main.cinema{grid-template-columns:1fr;max-width:1080px;margin:0 auto}
+.main.cinema .horizon{margin-top:13px}
+.main.cinema .ytbox{box-shadow:0 10px 40px rgba(0,0,0,.6), 0 0 0 1px var(--edge)}
 .ytbox{position:relative;padding-top:56.25%;background:#000;border-radius:8px;overflow:hidden;
   border:1px solid var(--edge);box-shadow:0 6px 22px rgba(0,0,0,.5)}
 .ytbox iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
@@ -250,7 +253,7 @@ kbd{font-family:var(--mono);font-size:12px;background:#120F0D;border:1px solid v
    כל מהלך הוא הגרסה האקוסטית המקובלת — אקורד אחד למידה.
    ═══════════════════════════════════════════════════════════════ */
 const SONGBOOK = [
-  { a:"Bob Dylan", t:"Knockin' on Heaven's Door", y:1973, key:"G", diff:1,
+  { a:"Bob Dylan", t:"Knockin' on Heaven's Door", yt:"rm9coqlk8fY", y:1973, key:"G", diff:1,
     note:"שני מהלכים חוזרים לאורך כל השיר. שיר ראשון מצוין — ארבעה אקורדים פתוחים.",
     sec:{ main:["G","D","Am","Am","G","D","C","C"] },
     arr:[["main",8]] },
@@ -260,7 +263,7 @@ const SONGBOOK = [
     sec:{ main:["Em","D","Em","D"] },
     arr:[["main",16]] },
 
-  { a:"Lynyrd Skynyrd", t:"Sweet Home Alabama", y:1974, key:"D", diff:1,
+  { a:"Lynyrd Skynyrd", t:"Sweet Home Alabama", yt:"-35W_FWCT9Q", y:1974, key:"D", diff:1,
     note:"D–C–G לאורך כל השיר. זו קדנצת המיקסולידי הרוקית בצורתה הנקייה.",
     sec:{ main:["D","C","G","G"] },
     arr:[["main",16]] },
@@ -270,7 +273,7 @@ const SONGBOOK = [
     sec:{ main:["C","G","Am","Am"] },
     arr:[["main",16]] },
 
-  { a:"Creedence Clearwater Revival", t:"Bad Moon Rising", y:1969, key:"D", diff:1,
+  { a:"Creedence Clearwater Revival", t:"Bad Moon Rising", yt:"qrP5IClb6b8", ytl:"zUQiUFZ5RDw", y:1969, key:"D", diff:1,
     note:"קצב שאפל קליל. הפזמון הופך את סדר האקורדים.",
     sec:{ verse:["D","A","G","D"], chorus:["G","G","D","D","A","A","D","D"] },
     arr:[["verse",4],["chorus",1],["verse",4],["chorus",1]] },
@@ -293,12 +296,12 @@ const SONGBOOK = [
     sec:{ verse:["G","G","D","C","G","G","D","C"], chorus:["C","G","D","D","C","G","D","G"] },
     arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
 
-  { a:"Eagles", t:"Hotel California", y:1976, key:"Bm", diff:4,
+  { a:"Eagles", t:"Hotel California", yt:"dLl4PZtxia8", y:1976, key:"Bm", diff:4,
     note:"שמונה אקורדים במחזור אחד. Bm ו-F#m דורשים ברה — קאפו 2 עם צורות Am מקל מאוד.",
     sec:{ main:["Bm","F#","A","E","G","D","Em","F#"] },
     arr:[["main",12]] },
 
-  { a:"Pink Floyd", t:"Wish You Were Here", y:1975, key:"G", diff:3,
+  { a:"Pink Floyd", t:"Wish You Were Here", yt:"K6qj09OHvjw", y:1975, key:"G", diff:3,
     note:"האינטרו מנוגן על גיטרה אקוסטית עם ריף שזור בין האקורדים.",
     sec:{ main:["C","D","Am","G","D","C","Am","G","C","D","Am","G","D","C","G","G"] },
     arr:[["main",6]] },
@@ -322,12 +325,12 @@ const SONGBOOK = [
     sec:{ riff:["G","G","Bb","C","G","G","Bb","Db"], verse:["G","G","G","G"] },
     arr:[["riff",2],["verse",4],["riff",2]] },
 
-  { a:"AC/DC", t:"Highway to Hell", y:1979, key:"A", diff:2,
+  { a:"AC/DC", t:"Highway to Hell", yt:"l482T0yNkeo", y:1979, key:"A", diff:2,
     note:"בהקלטה יש D/F# בין D ל-G. פאוור אקורדים בגיטרה חשמלית.",
     sec:{ main:["A","D","G","D"] },
     arr:[["main",16]] },
 
-  { a:"Dire Straits", t:"Sultans of Swing", y:1978, key:"Dm", diff:3,
+  { a:"Dire Straits", t:"Sultans of Swing", yt:"h0ffIJ7ZO4U", y:1978, key:"Dm", diff:3,
     sec:{ verse:["Dm","C","Bb","A","Dm","C","Bb","A"], chorus:["F","C","Bb","Bb","F","C","Bb","Bb"] },
     arr:[["verse",3],["chorus",2],["verse",3]] },
 
@@ -362,6 +365,54 @@ const SONGBOOK = [
     note:"פסנתר במקור. הבית הוא C–F חוזר; הפזמון מסובך יותר ולא נכלל כאן.",
     sec:{ verse:["C","F","C","F","C","F","C","F"] },
     arr:[["verse",8]] },
+
+  { a:"Bob Marley & The Wailers", t:"Three Little Birds", yt:"HNBCVM4KbUM", y:1977, key:"A", diff:1,
+    note:"רגאיי — הפריטה על הפעמות החלשות (2 ו-4) היא כל הסגנון. שלושה אקורדים.",
+    sec:{ main:["A","A","D","A","A","A","E","A"] },
+    arr:[["main",12]] },
+
+  { a:"Bob Marley & The Wailers", t:"No Woman No Cry", y:1974, key:"C", diff:2,
+    note:"בהקלטה יש בס יורד C–G/B–Am–F. הגרסה כאן מפושטת.",
+    sec:{ main:["C","G","Am","F","C","F","C","G"] },
+    arr:[["main",12]] },
+
+  { a:"Steve Miller Band", t:"The Joker", y:1973, key:"G", diff:1,
+    note:"לולאה אחת לכל השיר, עם גליסנדו מפורסם בין האקורדים.",
+    sec:{ main:["G","C","D","C"] },
+    arr:[["main",16]] },
+
+  { a:"Fleetwood Mac", t:"Landslide", y:1975, capo:3, key:"C", diff:2,
+    note:"קאפו 3. בהקלטה יש בס יורד C–G/B–Am; פיקינג ולא פריטה.",
+    sec:{ main:["C","G","Am","G"] },
+    arr:[["main",16]] },
+
+  { a:"Jimi Hendrix", t:"All Along the Watchtower", y:1968, key:"Am", diff:1,
+    note:"מקורו של השיר בדילן. שלושה אקורדים, i–bVII–bVI ובחזרה.",
+    sec:{ main:["Am","G","F","G"] },
+    arr:[["main",16]] },
+
+  { a:"The Doors", t:"Roadhouse Blues", y:1970, key:"A", diff:2,
+    note:"בלוז 12 מידות עם גרוב כבד. בהקלטה — בוגי בקווינטות.",
+    sec:{ blues:["A","A","A","A","D","D","A","A","E","D","A","A"] },
+    arr:[["blues",8]] },
+
+  { a:"Van Morrison", t:"Brown Eyed Girl", y:1967, key:"G", diff:2,
+    sec:{ verse:["G","C","G","D"], chorus:["C","D","G","Em","C","D","G","G"] },
+    arr:[["verse",4],["chorus",1],["verse",4],["chorus",2]] },
+
+  { a:"Lynyrd Skynyrd", t:"Free Bird", y:1973, key:"G", diff:3,
+    note:"מהלך האינטרו והבתים. הסולו בסוף הוא פרק אחר לגמרי ואינו כלול כאן.",
+    sec:{ verse:["G","D","Em","F","C","D"] },
+    arr:[["verse",10]] },
+
+  { a:"Eagles", t:"Peaceful Easy Feeling", y:1972, key:"E", diff:2,
+    sec:{ verse:["E","E","A","A","E","E","A","A"], chorus:["A","B","E","E","A","B","E","E"] },
+    arr:[["verse",3],["chorus",1],["verse",3],["chorus",2]] },
+
+  { a:"The Rolling Stones", t:"Angie", y:1973, key:"Am", diff:3,
+    note:"בהקלטה E7 במקום E, ויש קישוטים בין האקורדים. מספר החזרות משוער — תקן בלוח.",
+    sec:{ main:["Am","E","G","F","C","C"] },
+    arr:[["main",10]] },
 
   /* ---- תבניות גנריות ---- */
   { a:"תבנית", t:"בלוז 12 מידות · A", y:0, key:"A", diff:1, tpl:true,
@@ -431,6 +482,7 @@ function renderBook(){
           <div style="display:flex;gap:10px;align-items:baseline;flex-wrap:wrap">
             <h3 style="margin:0">${esc(s.t)}</h3>
             <span class="stamp">${esc(s.a)}${s.y?" · "+s.y:""} · ${esc(s.key)}${s.capo?" · קאפו "+s.capo:""} · רמה ${s.diff}</span>
+            ${s.ytl?`<span class="stamp" style="color:var(--jade)">✔ קליפ מילים</span>`:s.yt?`<span class="stamp" style="color:var(--tungsten)">✔ קישור מוכן</span>`:""}
             <button class="btn sm primary" data-pick="${idx}" style="margin-inline-start:auto">טען</button>
           </div>
           <div style="font-family:var(--mono);font-size:13px;color:var(--tungsten);letter-spacing:.08em;margin:8px 0 6px">
@@ -461,13 +513,19 @@ function pickSong(entry){
     <h1 class="hero-amp" style="margin-top:10px">${esc(entry.t)}</h1>
     <p>האקורדים והמבנה מוכנים. מה שנשאר: קישור יוטיוב לגרסה שאתה רוצה לנגן איתה.</p>
     ${entry.capo?`<div class="note"><strong>קאפו ${entry.capo}.</strong> ${esc(entry.note||"")}</div>`:""}
+    ${(entry.yt||entry.ytl)?`
+    <div style="display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-bottom:16px">
+      ${entry.ytl?`<button class="btn primary" id="sbLyric">פתח קליפ מילים · בלי הדבקת מילים</button>`:""}
+      ${entry.yt?`<button class="btn ${entry.ytl?"":"primary"}" id="sbOfficial">פתח את ההקלטה הרשמית</button>`:""}
+    </div>
+    <div class="stamp" style="margin-bottom:16px">הקישורים אומתו בזמן הבנייה. אם סרטון הוסר או נחסם להטמעה — הדבק קישור אחר למטה.</div>`:""}
     <div class="urlrow">
       <input type="text" id="sbUrl" placeholder="https://www.youtube.com/watch?v=…">
-      <button class="btn primary" id="sbGo">פתח</button>
+      <button class="btn ${(entry.yt||entry.ytl)?"":"primary"}" id="sbGo">פתח</button>
     </div>
     <p style="margin:14px 0 0;font-size:14px">
       <a href="${search}" target="_blank" rel="noopener" style="color:var(--tungsten)">חיפוש השיר ביוטיוב ↗</a>
-      — העתק את הקישור מהגרסה הרשמית והדבק כאן.
+      — העתק את הקישור מהגרסה שאתה רוצה והדבק כאן.
     </p>
   </div>`;
 
@@ -482,6 +540,17 @@ function pickSong(entry){
     toast(`${ex.bars.length} מידות נטענו — עכשיו כיול רשת`);
   };
   $("sbGo").onclick = go;
+  const boot = (id, cinema) => {
+    const ex = expandSong(entry);
+    S = newSong();
+    S.ytId = id; S.title = entry.a==="תבנית" ? entry.t : entry.a+" — "+entry.t;
+    S.bars = ex.bars; S.capo = entry.capo || 0; S.cinema = !!cinema;
+    open_();
+    toast(cinema ? `${ex.bars.length} מידות נטענו · המילים מגיעות מהקליפ — נשאר לכייל`
+                 : `${ex.bars.length} מידות נטענו — עכשיו כיול רשת`);
+  };
+  const bl = $("sbLyric"); if(bl) bl.onclick = ()=> boot(entry.ytl, true);
+  const bo = $("sbOfficial"); if(bo) bo.onclick = ()=> boot(entry.yt, false);
   $("sbUrl").onkeydown = e => { if(e.key==="Enter") go(); };
   $("sbUrl").focus();
 }
@@ -578,12 +647,36 @@ function renderGuide(){
     </div>
 
     <div class="gstep">
+      <div class="gnum">1½</div>
+      <div>
+        <h3>קיצור הדרך: ספר השירים</h3>
+        <p>במקום להזין אקורדים מאפס — <b>ספר השירים</b> מכיל 34 שירים (1967–1979) ו-5 תבניות הרמוניות, עם מהלך אקורדים ומבנה מוכנים. בחירה טוענת עשרות מידות מלאות ישר ללוח.</p>
+        <ul>
+          <li><b>✔ קישור מוכן</b> — לשיר יש קישור יוטיוב רשמי מאומת. לחיצה אחת ואתה בפנים.</li>
+          <li><b>✔ קליפ מילים</b> — לשיר יש קליפ מילים רשמי. פתיחה דרכו נכנסת ישר למצב קליפ, והמילים מגיעות מהווידאו.</li>
+          <li>לשאר השירים — קישור חיפוש ביוטיוב, ואתה מדביק את הגרסה שבחרת.</li>
+        </ul>
+        <div class="note rust"><strong>הסתייגות חשובה:</strong> המהלכים הם הגרסאות האקוסטיות המקובלות, אקורד למידה — לא תמלול של ההקלטה. ספטימות וסלאש הושמטו ומספר החזרות משוער. <b>הלוח קיים כדי שתתקן.</b></div>
+      </div>
+    </div>
+
+    <div class="gstep">
       <div class="gnum">2</div>
       <div>
         <h3>כיול רשת הזמן — הצעד היחיד שבאמת קובע</h3>
         <p>לחץ <b>כיול מידות</b>. השיר מתחיל מההתחלה, והמסך עובר למצב כיול. עכשיו הקש <kbd>רווח</kbd> בכל תחילת מידה — כלומר על ה"אחת", הפעמה החזקה שאתה מנענע אליה את הראש.</p>
         <p>בורר <b>«כל 4»</b> ליד הכפתור קובע כל כמה מידות להקיש. ברירת המחדל היא אחת ל־4 מידות, ולרוב השירים היא הנכונה.</p>
         <div class="note rust"><strong>הכלל החשוב ביותר במדריך הזה:</strong> המשך להקיש <b>עד סוף השיר</b>. עדיף עשרים הקשות פרושות על כל השיר מאשר מאה הקשות בהתחלה. הקלטות אמיתיות נושמות ומשנות קצב, ולכן רשת שנפרשה רק על ההתחלה נסחפת — וזו בדיוק הסיבה שאקורדים "מתנתקים" בסוף.</div>
+        <h3 style="margin:18px 0 6px;font-size:17px">הדרך המהירה — רשת מטמפו</h3>
+        <p>אם השיר יציב בקצב, אין צורך להקיש ארבעים פעם. לחץ <b>הקש טמפו</b> ותופף על הפעמה 8–12 פעמים — ה-BPM מחושב לבד. ואז <b>צור רשת מטמפו</b>, והקשה אחת ברגע שהמידה הראשונה מתחילה פורשת רשת על כל השיר.</p>
+        <p>אחר כך פשוט נגן. בכל מקום שהאקורד מחליק — הקש <kbd>Enter</kbd> ברגע שהמידה הנוכחית מתחילה, והרשת מתעגנת מחדש משם. שבעה תיקונים כאלה מביאים לדיוק של כ-145 מ״ש.</p>
+        <table class="gtable">
+          <tr><th>שיטה</th><th>סטייה ממוצעת</th><th>סטייה מרבית</th></tr>
+          <tr><td>רשת מטמפו, בלי תיקונים</td><td>866 מ״ש</td><td>2,133 מ״ש</td></tr>
+          <tr><td>רשת מטמפו + 3 תיקונים</td><td>360 מ״ש</td><td>762 מ״ש</td></tr>
+          <tr><td><b>רשת מטמפו + 7 תיקונים</b></td><td><b>145 מ״ש</b></td><td>475 מ״ש</td></tr>
+        </table>
+        <p style="margin-top:12px">כיול מלא בהקשה עדיין מדויק פי עשרה. הנה ההשוואה:</p>
         <table class="gtable">
           <tr><th>צפיפות ההקשה</th><th>סטייה ממוצעת</th><th>סטייה מרבית</th></tr>
           <tr><td><b>כל מידה</b> לאורך השיר</td><td>15 מ״ש</td><td>30 מ״ש</td></tr>
@@ -598,7 +691,7 @@ function renderGuide(){
     <div class="gstep">
       <div class="gnum">3</div>
       <div>
-        <h3>הזנת האקורדים</h3>
+        <h3>הזנת האקורדים — אם לא הגיעו מספר השירים</h3>
         <p>שתי דרכים, ואפשר לשלב:</p>
         <ul>
           <li><b>אחד־אחד:</b> לחץ על מידה בלוח, הקלד את האקורד בתיבה והקש <kbd>Enter</kbd>. הסמן קופץ למידה הבאה, כך שאפשר לרוץ על כל השיר במקלדת בלבד.</li>
@@ -612,9 +705,13 @@ function renderGuide(){
     <div class="gstep">
       <div class="gnum">4</div>
       <div>
-        <h3>מילים</h3>
+        <h3>מילים — שתי דרכים</h3>
+        <p><b>הדרך הקצרה: מצב קליפ מילים.</b> אם בחרת קליפ שהמילים כבר מוצגות בו על המסך, לחץ <b>מצב קליפ מילים</b> בשורת הבקרה. הווידאו יגדל, מסלול האקורדים ולוח האקורדים ייערכו ישר מתחתיו, ושלב יישור המילים נמחק לגמרי — נשאר רק לכייל את רשת המידות.</p>
+        <div class="note sage"><strong>למה זה עדיף:</strong> המילים בקליפ כבר מסונכרנות בידי מי שהעלה אותו, ואתה חוסך גם את ההדבקה וגם את היישור. החיסרון היחיד — צריך להסתכל על המסך, ולכן העיצוב במצב הזה מרכז את הווידאו והאקורדים במקום אחד.</div>
+        <p style="margin-top:14px"><b>הדרך השנייה: המילים שלך.</b> שימושי כשאין קליפ מילים טוב, כשאתה רוצה גרסה מסוימת, או כשאתה מנגן מהטלפון ורוצה טקסט גדול.</p>
         <p>הדבק את מילות השיר בתיבה — שורה אחת בכל שורה — ולחץ <b>טעינה</b>. אחר כך <b>יישור שורות</b>: השיר מתנגן, ואתה מקיש <kbd>רווח</kbd> ברגע שכל שורה מתחילה להישמע.</p>
         <p>מרגע שהשורות מיושרות, האקורדים של כל שורה מופיעים <b>מעליה</b> אוטומטית — נגזרים מרשת המידות, לא מוקלדים בנפרד. השורה הפעילה מודגשת וגוללת מעצמה.</p>
+        <p>בתיבה הריקה יש קישורי חיפוש ל-<b>Genius</b>, <b>Musixmatch</b> וחיפוש כללי, מותאמים אוטומטית לשם השיר שנטען — נפתחים בלשונית חדשה, מעתיקים משם ומדביקים.</p>
         <div class="note"><strong>למה המילים לא מגיעות מהאפליקציה:</strong> מילות שיר מוגנות בזכויות יוצרים. אתה מדביק את הגרסה שלך, והיא נשמרת מקומית במכשיר שלך בלבד.</div>
       </div>
     </div>
@@ -719,12 +816,14 @@ function newSong(){ return {
   anchors:[],            // [{bar, t}] ממוין לפי bar
   bars:[],               // [{c:"G"|null}]
   lyrics:[],             // [{text, bar|null}]
-  transpose:0, flats:false, capo:0
+  transpose:0, flats:false, capo:0, cinema:false
 };}
 let S = newSong();
 let player=null, ready=false, mode="idle", sel=-1;
 let cal={on:false, kind:"", bar:0, taps:[], line:0, step:4};
 let calStep=4;
+let tapT=[];
+let manualBpm=0;
 let cur={bar:-1, beat:-1, line:-1};
 let lastRate=1;
 
@@ -967,12 +1066,8 @@ function renderMain(){
     <button class="btn sm" id="bBack">ספרייה</button>`;
 
   const capo=suggestCapo();
-  app.innerHTML=`
-  <div class="main">
-    <div>
-      <div class="ytbox"><div id="ytFrame"></div></div>
-
-      <div class="tr" style="margin-top:13px">
+  const B_YT = `      <div class="ytbox"><div id="ytFrame"></div></div>`;
+  const B_TR = `      <div class="tr" style="margin-top:13px">
         <button class="btn primary" id="pp">נגן</button>
         <span class="time" id="tc">0:00</span>
         <div class="grp"><label>מהירות</label>
@@ -981,9 +1076,9 @@ function renderMain(){
         <div class="grp"><label>טונים</label>
           <select id="tr">${Array.from({length:13},(_,i)=>i-6).map(v=>`<option value="${v}" ${v===S.transpose?"selected":""}>${v>0?"+"+v:v}</option>`).join("")}</select></div>
         <div class="grp"><label>מידות</label><span class="time" id="binfo">–</span></div>
-      </div>
-
-      <div class="panel">
+        <button class="btn sm ${S.cinema?"on":""}" id="cine" title="הווידאו גדול והאקורדים מתחתיו — לקליפים שהמילים כבר בתוכם">מצב קליפ מילים</button>
+      </div>`;
+  const B_TIME = `      <div class="panel">
         <h3>רשת הזמן</h3>
         <p class="sub">כאן נקבע הסנכרון. הקש רווח על כל דאונביט — תחילת כל מידה — לאורך השיר. אפשר לעצור מתי שרוצים; המשך השיר יימשך מהקצב האחרון. אם ראית שהאקורד מקדים או מאחר, פשוט הקש שוב באותו רגע והרשת תתוקן משם והלאה.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -996,14 +1091,21 @@ function renderMain(){
           <button class="btn sm" id="clrAnch">ניקוי עוגנים</button>
           <span class="time" id="anchInfo"></span>
         </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;
+                    padding-top:10px;border-top:1px solid var(--edge)">
+          <span class="stamp">רשת מהירה</span>
+          <button class="btn sm" id="tapTempo">הקש טמפו</button>
+          <input type="text" id="bpmIn" value="${manualBpm||""}" placeholder="BPM" style="width:78px;text-align:center">
+          <button class="btn primary sm" id="genGrid">צור רשת מטמפו</button>
+          <span class="time" id="tapInfo"></span>
+        </div>
         ${S.anchors.length<2?`<div class="note"><strong>עדיין אין רשת.</strong> בלי שני עוגנים לפחות אין סנכרון — התחל ב«כיול מידות», הקש רווח בכל תחילת מידה במשך 16–32 מידות, ועצור.</div>`:
         (()=>{ const last=S.anchors[S.anchors.length-1].bar, cov=Math.round(100*(last+1)/S.bars.length);
           return cov>=90
             ? `<div class="note sage"><strong>${S.anchors.length} עוגנים · ${bpmNow()} BPM · כיסוי ${cov}%.</strong> הרשת פרושה על כל השיר. סטייה צפויה: עשרות מילישניות.</div>`
             : `<div class="note rust"><strong>כיסוי ${cov}% בלבד.</strong> מעבר למידה ${last+1} (המקווקוות) הרשת משוערת, והסטייה תגדל ככל שמתרחקים. המשך את הכיול עד סוף השיר — זה ההבדל בין סנכרון מדויק למתפרק.</div>`; })()}
-      </div>
-
-      <div class="panel">
+      </div>`;
+  const B_CHORD = `      <div class="panel">
         <h3>אקורדים</h3>
         <p class="sub">לחץ על מידה, הקלד אקורד ואנטר — הסמן מתקדם למידה הבאה. מידה ריקה ממשיכה את האקורד הקודם.</p>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:11px;align-items:center">
@@ -1014,17 +1116,14 @@ function renderMain(){
           ${capo?`<span class="time">הצעה: קאפו ${capo.cap} → ${capo.n} מתוך ${capo.total} אקורדים פתוחים</span>`:""}
         </div>
         <div class="grid" id="grid"></div>
-      </div>
-    </div>
-
-    <div>
-      <div class="horizon">
+      </div>`;
+  const B_HZ = `      <div class="horizon">
         <div class="lane" id="hzLane"></div>
         <div class="fadeout"></div>
         <div class="nowline"></div>
         <div class="nowcap">NOW</div>
-      </div>
-      <div class="stage">
+      </div>`;
+  const B_STAGE = `      <div class="stage">
         <div>
           <div class="nl">אקורד נוכחי · מידה <span id="bn">–</span></div>
           <div class="nowc" id="nowc">–</div>
@@ -1032,13 +1131,41 @@ function renderMain(){
           <div class="beats" id="dots"></div>
         </div>
         <div id="dgm">${diagram(null,140)}</div>
-      </div>
-
+      </div>`;
+  const B_LYR = S.cinema ? `
+      <div class="panel">
+        <h3>מילים · מהקליפ</h3>
+        <p class="sub">המילים מגיעות מהקליפ עצמו — אין מה להדביק ואין מה ליישר. נשאר רק לכייל את רשת האקורדים.</p>
+      </div>` : `
       <div class="panel">
         <h3>מילים</h3>
         <p class="sub" id="lsub">הדבק את המילים שלך, שורה בכל שורה. הן נשמרות מקומית בלבד ואינן מגיעות מהאפליקציה.</p>
         <div id="lbox"></div>
-      </div>
+      </div>`;
+
+  app.innerHTML = S.cinema ? `
+  <div class="main cinema">
+    <div>
+      ${B_YT}
+      ${B_HZ}
+      ${B_STAGE}
+      ${B_TR}
+      ${B_TIME}
+      ${B_CHORD}
+      ${B_LYR}
+    </div>
+  </div>` : `
+  <div class="main">
+    <div>
+      ${B_YT}
+      ${B_TR}
+      ${B_TIME}
+      ${B_CHORD}
+    </div>
+    <div>
+      ${B_HZ}
+      ${B_STAGE}
+      ${B_LYR}
     </div>
   </div>`;
 
@@ -1055,6 +1182,26 @@ function renderMain(){
   $("calBars").onclick=()=>startCal("bars");
   const css=$("calStepSel"); if(css){ css.value=String(calStep); css.onchange=e=>{ calStep=+e.target.value; }; }
   $("reAnchor").onclick=reAnchor;
+  $("tapTempo").onclick=()=>{
+    const now=performance.now()/1000;
+    if(tapT.length && now-tapT[tapT.length-1]>2.5) tapT=[];
+    tapT.push(now);
+    if(tapT.length>=2){
+      const d=[]; for(let i=1;i<tapT.length;i++) d.push(tapT[i]-tapT[i-1]);
+      d.sort((a,b)=>a-b);
+      const med=d[Math.floor(d.length/2)];
+      manualBpm=Math.round(60/med);
+      $("bpmIn").value=manualBpm;
+      $("tapInfo").textContent=`${tapT.length} הקשות · ${manualBpm} BPM`;
+    } else $("tapInfo").textContent="המשך להקיש על הפעמה…";
+    if(tapT.length>=12) tapT=tapT.slice(-8);
+  };
+  $("bpmIn").oninput=e=>{ manualBpm=parseInt(e.target.value,10)||0; };
+  $("genGrid").onclick=()=>{
+    if(!ready){ toast("הנגן עוד נטען"); return; }
+    if(!manualBpm || manualBpm<40 || manualBpm>240){ toast("הזן BPM בין 40 ל-240, או הקש טמפו"); return; }
+    startCal("one");
+  };
   $("clrAnch").onclick=()=>{ S.anchors=[]; toast("העוגנים נוקו"); renderMain(); };
   $("addBars").onclick=()=>{ for(let i=0;i<16;i++) S.bars.push({c:null}); buildGrid(); };
   $("delBars").onclick=()=>{ S.bars=S.bars.slice(0,Math.max(8,S.bars.length-16)); buildGrid(); };
@@ -1069,8 +1216,10 @@ function renderMain(){
     $("chIn").value=""; buildGrid(); paint(true);
   };
   $("chPaste").onclick=pasteProg;
+  const ci=$("cine"); if(ci) ci.onclick=()=>{ S.cinema=!S.cinema; renderMain();
+    toast(S.cinema?"מצב קליפ מילים — המילים מגיעות מהווידאו":"חזרה לתצוגה רגילה"); };
 
-  buildGrid(); buildLyrics(); paint(true);
+  buildGrid(); if(!S.cinema) buildLyrics(); paint(true);
   if(ready && player.setPlaybackRate) player.setPlaybackRate(lastRate);
 }
 
@@ -1126,8 +1275,16 @@ function chordsOfLine(i){
 function buildLyrics(){
   const box=$("lbox"); if(!box) return;
   if(!S.lyrics.length){
+    const q = encodeURIComponent((S.title||"").replace(/\s+—\s+/g," ")+" lyrics");
     box.innerHTML=`<textarea id="lin" placeholder="הדבק כאן את מילות השיר…"></textarea>
-      <button class="btn primary sm" id="lset" style="margin-top:9px">טעינה</button>`;
+      <button class="btn primary sm" id="lset" style="margin-top:9px">טעינה</button>
+      <div style="margin-top:12px;font-size:13px;line-height:1.9;color:var(--cream-2)">
+        חיפוש המילים במקורות מורשים:
+        <a href="https://genius.com/search?q=${q}" target="_blank" rel="noopener" style="color:var(--tungsten)">Genius ↗</a> ·
+        <a href="https://www.musixmatch.com/search/${q}" target="_blank" rel="noopener" style="color:var(--tungsten)">Musixmatch ↗</a> ·
+        <a href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener" style="color:var(--tungsten)">חיפוש כללי ↗</a>
+        <div class="stamp" style="margin-top:6px">העתק משם והדבק כאן. האפליקציה שומרת את הטקסט במכשיר שלך בלבד.</div>
+      </div>`;
     $("lset").onclick=()=>{
       const r=$("lin").value.split("\n").map(s=>s.trim()).filter(Boolean);
       if(!r.length){ toast("אין מה לטעון"); return; }
@@ -1167,6 +1324,10 @@ function startCal(kind){
     player.seekTo(0,true);
     $("calKind").textContent="כיול · הקשה כל "+calStep+" מידות";
     $("calHint").innerHTML="הקש <b>רווח</b> אחת ל-"+calStep+" מידות, <b>לאורך כל השיר עד הסוף</b>.<br>זה מה שמונע סחיפה — עוגנים פרושים עדיפים בהרבה על הקשות צפופות בהתחלה.";
+  }else if(kind==="one"){
+    S.anchors=[];
+    $("calKind").textContent="עוגן יחיד · "+manualBpm+" BPM";
+    $("calHint").innerHTML="נגן עד לרגע שהמידה הראשונה של השיר מתחילה, והקש <b>רווח</b> פעם אחת.<br>מהרגע הזה תיפרש רשת על כל השיר לפי הטמפו שהוזן.";
   }else{
     S.lyrics.forEach(l=>l.bar=null);
     if(S.anchors.length<2){ toast("קודם כייל את רשת המידות"); cal.on=false; return; }
@@ -1174,17 +1335,16 @@ function startCal(kind){
     $("calKind").textContent="יישור שורות";
     $("calHint").innerHTML="הקש <b>רווח</b> ברגע שכל שורה מתחילה להישמע.";
   }
-  $("calNum").textContent="1";
+  $("calNum").textContent = kind==="one" ? "▸" : "1";
   $("calOverlay").hidden=false;
-  player.playVideo();
+  if(kind!=="one") player.playVideo();
 }
 function stopCal(){
   if(!cal.on) return;
   cal.on=false;
   $("calOverlay").hidden=true;
-  if(cal.kind==="bars"){
-    if(S.anchors.length<2) toast("צריך לפחות שתי הקשות כדי לפרוש רשת");
-    else toast(`נפרשה רשת · ${bpmNow()} BPM · ${S.anchors.length} עוגנים`);
+  if(cal.kind==="bars" || cal.kind==="one"){
+    if(S.anchors.length<2 && cal.kind==="bars") toast("צריך לפחות שתי הקשות כדי לפרוש רשת");
     renderMain();
   }else{ buildLyrics(); toast("היישור נשמר"); }
 }
@@ -1205,6 +1365,14 @@ document.addEventListener("keydown",e=>{
     if(cal.on){
       e.preventDefault();
       const t=T();
+      if(cal.kind==="one"){
+        const bd = 60/manualBpm*S.beatsPerBar;
+        addAnchor(0, t);
+        addAnchor(16, t + 16*bd);          // עוגן שני קובע את השיפוע במדויק
+        stopCal();
+        toast(`רשת נפרשה מ-${manualBpm} BPM — נגן ותקן במקומות שמחליקים`);
+        return;
+      }
       if(cal.kind==="bars"){
         addAnchor(cal.bar, t);
         cal.bar += cal.step;
@@ -1224,6 +1392,7 @@ document.addEventListener("keydown",e=>{
   }
   if(e.key==="Escape" && cal.on) stopCal();
   if(!typing && !cal.on && ready){
+    if(e.key==="Enter"){ e.preventDefault(); reAnchor(); }
     if(e.key==="ArrowLeft"){ player.seekTo(Math.max(0,T()-5),true); }
     if(e.key==="ArrowRight"){ player.seekTo(T()+5,true); }
   }
@@ -1269,7 +1438,7 @@ function paint(force){
     if(ni) ni.textContent = nx ? "בעוד "+Math.max(0,(timeOfBar(nx.bar)-T())).toFixed(1)+"ש׳" : "";
   }
 
-  if(S.lyrics.length){
+  if(S.lyrics.length && !S.cinema){
     let li=-1;
     for(let i=0;i<S.lyrics.length;i++){
       const b=S.lyrics[i].bar;
