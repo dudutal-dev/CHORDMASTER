@@ -1122,6 +1122,52 @@ const SONGBOOK = [
     note:"קישור רשמי מאומת. המהלך מלא באקורדי מעבר ובאס יורד — עדיף להדביק אותו מאתר אקורדים.",
     sec:{}, arr:[] },
 
+  /* ---- גלישה לשנות השמונים ---- */
+  { a:"AC/DC", t:"Back in Black", yt:"pAgnJDJN4VA", y:1980, key:"E", diff:2,
+    note:"אחד הריפים המזוהים ביותר ברוק. פאוור אקורדים, והשתיקות בין הפריטות חשובות כמו הצלילים.",
+    sec:{ main:["E","E","D","A"], chorus:["E","D","A","E"] },
+    arr:[["main",8],["chorus",4],["main",8],["chorus",4]] },
+
+  { a:"The Police", t:"Every Breath You Take", yt:"OMOGaugKpzs", y:1983, key:"G", diff:2,
+    note:"אנדי סאמרס מנגן ארפג'ו על כל אקורד במקום פריטה — נסה את זה.",
+    sec:{ verse:["G","G","Em","Em","C","D","G","G"], bridge:["C","C","D","D","Em","Em","Em","Em"] },
+    arr:[["verse",4],["bridge",1],["verse",4],["bridge",1]] },
+
+  { a:"Guns N' Roses", t:"Sweet Child o' Mine", yt:"1w7OgIMMRc4", y:1987, key:"D", diff:3,
+    note:"הריף הפותח הוא ארפג'ו על D. הבית עצמו הוא ארבעה אקורדים פתוחים.",
+    sec:{ verse:["D","D","C","C","G","G","D","D"], chorus:["A","A","C","C","G","G","D","D"] },
+    arr:[["verse",4],["chorus",2],["verse",4],["chorus",2]] },
+
+  { a:"U2", t:"With or Without You", y:1987, key:"D", diff:1,
+    note:"ארבעה אקורדים בלולאה אחת לכל השיר — כל ההתפתחות היא בדינמיקה.",
+    sec:{ main:["D","A","Bm","G"] }, arr:[["main",20]] },
+
+  { a:"Journey", t:"Don't Stop Believin'", y:1981, key:"E", diff:2,
+    note:"הפסנתר מנגן את המהלך; בגיטרה זה נשמע מלא גם בפריטה פשוטה.",
+    sec:{ verse:["E","B","C#m","A"], chorus:["E","B","C#m","A","E","B","A","A"] },
+    arr:[["verse",6],["chorus",2],["verse",6],["chorus",3]] },
+
+  { a:"Bon Jovi", t:"Livin' on a Prayer", y:1986, key:"Em", diff:2,
+    note:"הפזמון עולה בטון בסוף השיר — אם תרצה לשיר איתו, השתמש בבורר הטונים.",
+    sec:{ verse:["Em","C","D","D"], chorus:["G","D","Em","C","G","D","Em","Em"] },
+    arr:[["verse",6],["chorus",2],["verse",6],["chorus",3]] },
+
+  { a:"Bryan Adams", t:"Summer of '69", y:1984, key:"D", diff:1,
+    sec:{ verse:["D","D","A","A"], chorus:["Bm","A","G","D"] },
+    arr:[["verse",6],["chorus",2],["verse",6],["chorus",3]] },
+
+  { a:"The Clash", t:"Should I Stay or Should I Go", y:1982, key:"D", diff:1,
+    note:"שלושה אקורדים ופאנק ישר. מצוין לתרגול קצב אגרסיבי.",
+    sec:{ main:["D","D","G","G","D","D","A","A"] }, arr:[["main",14]] },
+
+  { a:"Dire Straits", t:"Walk of Life", y:1985, key:"E", diff:1,
+    note:"האורגן מנגן את הליק; הגיטרה מחזיקה את שלושת האקורדים.",
+    sec:{ main:["E","E","A","A","E","E","B","A"] }, arr:[["main",14]] },
+
+  { a:"Survivor", t:"Eye of the Tiger", y:1982, key:"Cm", diff:2,
+    note:"הריף הפותח בפריטות מנוחתות. שלושה אקורדים בלבד, וכולם ברה.",
+    sec:{ main:["Cm","Cm","A#","G#","Cm","Cm","G#","A#"] }, arr:[["main",14]] },
+
   /* ---- ישראלי · קישור רשמי, אקורדים להזנה ---- */
   { a:"משינה", t:"רכבת לילה", yt:"7etbVoEEqGU", y:1985, key:"?", diff:0, blank:96, il:true,
     note:"מילים: אהוד בנאי · לחן: שלומי ברכה. הקישור הוא ההקלטה הרשמית מהאלבום הראשון (1985).",
@@ -1529,7 +1575,7 @@ function paintHorizon(now){
   const NOWX = hzNowX();
   const span = W - NOWX - 8;
   const bi = Math.max(0, cur.bar);
-  handFrame(bi);
+  handFrame(bi, now);
 
   /* שיר שנטען בלי אקורדים (למשל מהערכים הישראליים) — הפס מסביר במקום להיראות שבור */
   const empty = !S.bars.some(b=>b.c);
@@ -2380,7 +2426,8 @@ function handSVG(st, W, withHand){
             stroke-width="1.6" opacity=".55"/>`;                      /* אצבע ציר */
     if(t.lift>0.05) s += `<ellipse cx="${cx}" cy="${cy+sp*0.5*t.lift}" rx="${r*0.8}" ry="${r*0.34}"
             fill="#000" opacity="${(0.28*t.lift).toFixed(3)}"/>`;      /* צל בזמן ההרמה */
-    s += `<circle cx="${cx}" cy="${cy}" r="${(r*(1+0.18*(t.lift||0))).toFixed(2)}" fill="#F0A83C"
+    const pr = r * (1 + 0.18*(t.lift||0) + 0.12*(st.pulse||0)*(t.down>0.6?1:0));
+    s += `<circle cx="${cx}" cy="${cy}" r="${pr.toFixed(2)}" fill="#F0A83C"
             stroke="#7A5417" stroke-width=".8" opacity="${Math.max(0.25,t.down).toFixed(3)}"/>`;
     s += `<text x="${cx}" y="${cy}" fill="#241705" font-size="${fh*0.44}" font-weight="700"
             text-anchor="middle" dominant-baseline="central" font-family="sans-serif"
@@ -2413,7 +2460,7 @@ function handRegister(el, size, withHand){
 }
 const easeIO = u => u<0.5 ? 4*u*u*u : 1-Math.pow(-2*u+2,3)/2;
 
-function handFrame(bi){
+function handFrame(bi, tNow){
   if(!handEls.size) return;
   const cNow = chordAt(bi);
   const nx   = nextChordFrom(bi);
@@ -2422,7 +2469,7 @@ function handFrame(bi){
   if(cNow && nx && nx.c && nx.c !== cNow){
     const barDur = fitBarDur();
     const lead   = Math.max(0.22, Math.min(barDur*0.75, 0.9));   // שניות לפני החילוף
-    const dt     = timeOfBar(nx.bar) - T();
+    const dt     = timeOfBar(nx.bar) - tNow;
     if(dt <= lead && dt > -0.05){
       const u = Math.max(0, Math.min(1, 1 - dt/lead));
       st = lerpState(cState(cNow), cState(nx.c), easeIO(u), 1);
@@ -2430,6 +2477,13 @@ function handFrame(bi){
     }
   }
   if(!st) return;
+  /* פעימה עדינה על קצות האצבעות, נעולה לרשת — מחזקת את תחושת הסנכרון */
+  const bd = fitBarDur()/Math.max(1,S.beatsPerBar);
+  const ph = bd>0 ? ((tNow - timeOfBar(bi)) % bd) / bd : 0;
+  const pulse = Math.max(0, 1 - ph*3.2);
+  const pk = pulse.toFixed(1);
+  if(pk !== "0.0") key += "p" + pk;
+  st = Object.assign({}, st, {pulse});
   handEls.forEach((cfg, el)=>{
     if(!el.isConnected){ handEls.delete(el); return; }
     if(cfg.key === key) return;
@@ -3241,13 +3295,16 @@ function paint(force){
     if(el){ el.textContent=c||"–"; el.classList.toggle("none",!c); }
     const nc2=$("nextc"); if(nc2) nc2.textContent=nx?nx.c:"–";
     const bn=$("bn"); if(bn) bn.textContent=bi>=0?bi+1:"–";
-    const dg=$("dgm");
-    if(dg){ if(c) handRegister(dg, 150, true); else { handEls.delete(dg); dg.innerHTML=`<div class="nodgm">–</div>`; } }
-    const hd=$("hzDgm");
+    /* יד אחת בלבד לכל מסך: אם קיים לוח הבמה — היד שם, והפס מציג
+       שרטוט מצומצם. בנייד אין במה, ולכן היד יושבת בפס. */
+    const dg=$("dgm"), hd=$("hzDgm");
+    const stageOn = !!dg;
+    if(dg){ if(c) handRegister(dg, 168, true); else { handEls.delete(dg); dg.innerHTML=`<div class="nodgm">–</div>`; } }
     if(hd){
       const fsOn = document.body.classList.contains("fs");
-      const sz = fsOn ? (narrow()?148:172) : (narrow()?80:90);
-      if(c) handRegister(hd, sz, true); else { handEls.delete(hd); hd.innerHTML=`<div class="nodgm">–</div>`; }
+      const sz = stageOn ? (narrow()?78:86)
+                         : (fsOn ? (narrow()?148:172) : (narrow()?80:90));
+      if(c) handRegister(hd, sz, !stageOn); else { handEls.delete(hd); hd.innerHTML=`<div class="nodgm">–</div>`; }
     }
     document.querySelectorAll(".bc.cur").forEach(x=>x.classList.remove("cur"));
     const cell=document.querySelector(`.bc[data-b="${bi}"]`);
