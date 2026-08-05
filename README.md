@@ -1,4 +1,4 @@
-# נגן־יחד · Play Along
+# ChordMaster · נגן־יחד
 
 > אקורדים ומילים שרצים עם השיר — מסונכרנים לסרטון יוטיוב, בקובץ HTML אחד.
 
@@ -107,13 +107,16 @@ python3 -m http.server 8000
 
 ```
 play-along/
-├── index.html                    # האפליקציה כולה — HTML, CSS, JS
-├── manifest.json                 # PWA
+├── index.html                    # האפליקציה כולה — HTML, CSS, JS, תמונות
+├── manifest.json                 # PWA — השם והאייקון במסך הבית
 ├── README.md
 ├── LICENSE                       # MIT
 ├── assets/
-│   ├── favicon.svg
-│   └── icon.svg
+│   ├── icon.png                  # אייקון האפליקציה (512)
+│   ├── apple-touch-icon.png      # אייקון iOS (180)
+│   ├── favicon.png
+│   ├── guitar.jpg                # גיטרת מסך הפתיחה
+│   └── bg-*.jpg                  # רקע ייעודי לכל מסך
 └── .github/workflows/deploy.yml  # פרסום אוטומטי
 ```
 
