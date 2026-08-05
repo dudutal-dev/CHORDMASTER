@@ -51,9 +51,9 @@ input,select,textarea{font-family:inherit;font-size:inherit}
 h1,h2,h3{font-family:var(--disp);font-weight:400;line-height:1.25;margin:0;letter-spacing:-.01em}
 
 /* ---- chassis / top ---- */
-.top{position:sticky;top:0;z-index:50;border-bottom:1px solid #1B2430;
+.top{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid #1B2430;
   padding-top:env(safe-area-inset-top,0px);
-  background:rgba(8,9,12,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  background:rgba(8,9,12,.94);
   border-bottom:1px solid #0C0A09; box-shadow:0 1px 0 rgba(255,255,255,.05) inset, 0 6px 18px rgba(0,0,0,.5)}
 .top-in{max-width:1560px;margin:0 auto;padding:9px 14px;display:flex;gap:11px;align-items:center;flex-wrap:wrap}
 .lamp{width:13px;height:13px;border-radius:50%;flex:0 0 13px;
@@ -138,7 +138,7 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
   border:1px dashed var(--edge-2);border-radius:6px;padding:9px 16px;background:rgba(6,7,9,.5)}
 .horizon .hzempty b{color:var(--tungsten);font-weight:500}
 .horizon .hzhold{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;
-  background:rgba(6,7,9,.66);backdrop-filter:blur(1.5px)}
+  background:rgba(6,7,9,.66)}
 .horizon .hzhold span{font-family:var(--mono);font-size:12px;letter-spacing:.12em;color:var(--tungsten);
   border:1px solid var(--tungsten-d);border-radius:4px;padding:7px 14px;text-align:center;line-height:1.6}
 .horizon .hzbeats{position:absolute;left:10px;bottom:6px;z-index:3;gap:4px;margin:0}
@@ -162,8 +162,7 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
     scrollbar-width:none;max-width:100%;padding-bottom:1px}
   .top .right::-webkit-scrollbar{display:none}
   .top .right .btn{font-family:var(--disp);font-weight:400;font-size:14.5px;padding:6px 13px;
-  flex:0 0 auto;letter-spacing:.01em;background:rgba(22,27,36,.62);border-color:rgba(120,170,255,.18);
-  backdrop-filter:blur(8px)}
+  flex:0 0 auto;letter-spacing:.01em;background:rgba(22,27,36,.62);border-color:rgba(120,170,255,.18)}
 .top .right .btn:hover{border-color:#5B8FC9;color:#A8CDFF;background:rgba(30,40,55,.75)}
   .top .right #toStrip{position:sticky;right:0;z-index:2;background:#241D10;
     border-color:var(--tungsten-d);color:var(--tungsten);box-shadow:-8px 0 10px -6px rgba(6,7,9,.9)}
@@ -370,7 +369,7 @@ body.locked{overflow:hidden}
 .home{max-width:1200px;margin:0 auto}
 .hgreet{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--tungsten);margin-bottom:6px}
 .home h1{font-family:var(--disp);font-size:clamp(28px,7vw,44px);line-height:1.1;margin:0 0 18px}
-.searchbar{width:100%;display:flex;align-items:center;gap:10px;background:rgba(20,24,31,.5);border:1px solid rgba(255,255,255,.08);backdrop-filter:blur(9px);
+.searchbar{width:100%;display:flex;align-items:center;gap:10px;background:rgba(17,20,26,.78);border:1px solid rgba(255,255,255,.08);
   border-radius:12px;padding:13px 16px;color:var(--dim);font-size:15px;text-align:start;transition:.15s}
 .searchbar:hover{border-color:var(--edge-2);color:var(--cream-2)}
 .searchbar b{color:var(--tungsten);font-weight:400;font-family:var(--mono);font-size:13px}
@@ -410,7 +409,7 @@ body.locked{overflow:hidden}
 .pills{display:flex;gap:9px;overflow-x:auto;padding:2px 0 4px;margin:18px 0 4px;
   scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .pills::-webkit-scrollbar{display:none}
-.pill{flex:0 0 auto;background:rgba(22,26,34,.62);border:1px solid rgba(255,255,255,.06);backdrop-filter:blur(8px);color:var(--cream-2);border-radius:999px;
+.pill{flex:0 0 auto;background:rgba(20,24,31,.82);border:1px solid rgba(255,255,255,.06);color:var(--cream-2);border-radius:999px;
   padding:9px 20px;font-size:15px;font-weight:500;transition:.15s;white-space:nowrap}
 .pill:hover{background:#1D2027;color:var(--cream)}
 .pill.on{background:var(--cream);color:#08090C}
@@ -423,10 +422,9 @@ body.locked{overflow:hidden}
 
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:11px}
 .tile{display:flex;align-items:center;gap:11px;border-radius:13px;
-  background:rgba(20,24,31,.42);border:1px solid rgba(255,255,255,.06);
-  backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+  background:rgba(17,20,26,.72);border:1px solid rgba(255,255,255,.06);
   padding:9px;text-align:start;color:var(--cream);transition:.15s;min-width:0}
-.tile:hover{background:rgba(32,38,48,.6);border-color:rgba(159,200,255,.22)}
+.tile:hover{background:rgba(30,36,46,.9);border-color:rgba(159,200,255,.22)}
 .tile .art{width:54px;height:54px;flex:0 0 54px;border-radius:8px}
 .tile .art.round{border-radius:50%}
 .tile .art i{font-size:19px}
@@ -445,15 +443,13 @@ body.locked{overflow:hidden}
 
 /* המסכים הפנימיים מקבלים בדיוק את אותה שפה */
 .gstep{grid-template-columns:44px 1fr;gap:14px;border-radius:14px;padding:18px;margin-bottom:11px;
-  background:rgba(20,24,31,.46);border:1px solid rgba(255,255,255,.06);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.panel{border-radius:14px;background:rgba(20,24,31,.52);border:1px solid rgba(255,255,255,.06);
-  backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
-.catrow{background:rgba(20,24,31,.40);border:1px solid rgba(255,255,255,.06);border-radius:12px;
-  padding:11px 13px;margin-bottom:8px;backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+  background:rgba(17,20,26,.78);border:1px solid rgba(255,255,255,.06)}
+.panel{border-radius:14px;background:rgba(17,20,26,.80);border:1px solid rgba(255,255,255,.06)}
+.catrow{background:rgba(17,20,26,.72);border:1px solid rgba(255,255,255,.06);border-radius:12px;
+  padding:11px 13px;margin-bottom:8px}
 .abcredit{background:#121417;border:0;border-inline-start:3px solid var(--tungsten);border-radius:13px}
 .note{border-radius:10px;border-inline-start-width:3px}
-.chipA{background:rgba(22,26,34,.62);border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:9px 16px;backdrop-filter:blur(8px)}
+.chipA{background:rgba(20,24,31,.82);border:1px solid rgba(255,255,255,.06);border-radius:999px;padding:9px 16px}
 .chipA:hover{background:#1D2027}
 .grouphead{border-bottom-color:var(--edge)}
 .verbox{margin-top:11px;background:#0F1216;border:1px solid var(--edge);border-radius:10px;padding:10px}
@@ -500,14 +496,14 @@ body.fs .hzbeats i{width:26px;height:5px}
 #fsExit{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-start:12px;z-index:140;
   opacity:0;pointer-events:none;transition:opacity .25s;
   background:rgba(6,7,9,.72);border:1px solid #34404F;color:#CFE0F5;font-weight:600;
-  border-radius:999px;padding:9px 18px;backdrop-filter:blur(6px)}
+  border-radius:999px;padding:9px 18px}
 #fsExit.show{opacity:1;pointer-events:auto}
 .toast{position:fixed;bottom:16px;inset-inline-start:16px;background:#1A1E25;
   border:1px solid var(--tungsten-d);color:var(--tungsten);padding:10px 15px;border-radius:5px;
   z-index:95;font-size:14px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
 .toast.on{opacity:1;transform:none}
-.big{position:fixed;inset:0;background:rgba(6,7,9,.95);z-index:80;display:grid;place-items:center;
-  text-align:center;padding:20px;backdrop-filter:blur(3px)}
+.big{position:fixed;inset:0;background:rgba(6,7,9,.95);backdrop-filter:blur(4px);z-index:80;display:grid;place-items:center;
+  text-align:center;padding:20px}
 .big[hidden]{display:none}
 .big .k{font-family:var(--mono);font-size:11px;letter-spacing:.24em;color:var(--tungsten);text-transform:uppercase}
 .big .v{font-family:var(--disp);font-size:clamp(64px,19vw,160px);line-height:1;margin:12px 0;
@@ -1386,7 +1382,7 @@ function songRow(it){
   </div>`;
 }
 
-let libFilter = "all", libSort = "az";
+let libFilter = "all", libSort = "az", libShow = 60, searchT = 0;
 
 function renderBook(){
   setTimeout(resetTop,0); setTimeout(paintArt,30);
@@ -1429,34 +1425,47 @@ function renderBook(){
         <button class="btn sm" id="catAll">← כל האמנים</button>
         <h3 style="margin-inline-start:6px">${esc(bookArtist)}</h3>
         <span class="stamp" style="margin-inline-start:auto">${matches.length}</span></div>
-      ${matches.map(songRow).join("")}
+      ${matches.slice(0, libShow).map(songRow).join("")}
+      ${matches.length > libShow ? `<div style="text-align:center;margin-top:14px">
+        <button class="btn" id="moreArtists">עוד שירים · ${matches.length - libShow} נותרו</button></div>`:""}
     ` : q ? `
       <div class="sec-head" style="margin-top:16px"><h3>תוצאות</h3>
         <span class="stamp" style="margin-inline-start:auto">${matches.length}</span></div>
-      ${matches.length ? matches.slice(0,100).map(songRow).join("")
+      ${matches.length ? matches.slice(0,libShow).map(songRow).join("")
         : `<div class="note">אין תוצאה תואמת.</div>`}
-      ${matches.length>100?`<p class="stamp" style="margin-top:10px">מוצגות 100 מתוך ${matches.length}</p>`:""}
+      ${matches.length>libShow?`<div style="text-align:center;margin-top:14px"><button class="btn" id="moreArtists">עוד תוצאות · ${matches.length-libShow} נותרו</button></div>`:""}
     ` : `
       <div class="sec-head" style="margin-top:16px"><h3>אמנים</h3>
         <span class="stamp" style="margin-inline-start:auto">${artists.length}</span></div>
-      <div class="tiles">${artists.map(([a,songs])=>
+      <div class="tiles">${artists.slice(0, libShow).map(([a,songs])=>
         `<button class="tile" data-ca="${esc(a)}">
           <span class="art round" style="${artStyle(a)}" data-artist="${esc(a)}"><i>${esc(initial(a))}</i></span>
           <span class="tx"><b>${esc(a)}</b><small>${songs.length} שירים</small></span>
           <span class="go">›</span></button>`).join("")}</div>
+      ${artists.length > libShow ? `<div style="text-align:center;margin-top:14px">
+        <button class="btn" id="moreArtists">עוד אמנים · ${artists.length - libShow} נותרו</button></div>`:""}
     `}
   </div>`;
 
-  const ca=$("catAll"); if(ca) ca.onclick=()=>{ bookArtist=null; renderBook(); };
+  const ca=$("catAll"); if(ca) ca.onclick=()=>{ bookArtist=null; libShow=60; renderBook(); };
   const qi=$("sbQ");
-  qi.oninput=()=>{ const c=qi.selectionStart; sbQuery=qi.value; bookArtist=null; renderBook();
-    const n=$("sbQ"); n.focus(); n.setSelectionRange(c,c); };
+  /* השהיה קצרה — רינדור מלא בכל הקשה תקע את המסך ברשימות גדולות */
+  qi.oninput=()=>{
+    clearTimeout(searchT);
+    const c=qi.selectionStart, v=qi.value;
+    searchT=setTimeout(()=>{
+      sbQuery=v; bookArtist=null; libShow=60; renderBook();
+      const n=$("sbQ"); if(n){ n.focus(); n.setSelectionRange(c,c); }
+    }, 220);
+  };
+  const more=$("moreArtists");
+  if(more) more.onclick=()=>{ libShow+=60; renderBook(); };
   app.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
-    libFilter=b.dataset.f; bookArtist=null; renderBook(); });
+    libFilter=b.dataset.f; bookArtist=null; libShow=60; renderBook(); });
   app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{
-    libSort=b.dataset.s; renderBook(); });
+    libSort=b.dataset.s; libShow=60; renderBook(); });
   app.querySelectorAll("[data-ca]").forEach(b=>b.onclick=()=>{
-    bookArtist=b.dataset.ca; sbQuery=""; renderBook(); });
+    bookArtist=b.dataset.ca; sbQuery=""; libShow=60; renderBook(); });
   app.querySelectorAll("[data-song]").forEach(b=>b.onclick=()=>{
     const it=all.find(x=>x.id===b.dataset.song); if(it) openItem(it); });
   app.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{
