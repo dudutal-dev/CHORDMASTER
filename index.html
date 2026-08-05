@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#08090C">
+<meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
+<meta name="build" content="2026-08-05 07:49 UTC">
 <meta name="description" content="ChordMaster — אקורדים ומילים מסונכרנים לסרטון יוטיוב, עם דיאגרמות אצבעות, האטה והעברת טונים.">
 <title>ChordMaster</title>
 <meta name="apple-mobile-web-app-title" content="ChordMaster">
@@ -595,6 +597,20 @@ const ytSearch = (a,t) => "https://www.youtube.com/results?search_query=" +
 const BOOK_KEY = "playalong-book-index-v1";
 let pdfDoc = null, bookIndex = null, bookPick = null, bookRtl = true;
 
+function bookStored(){                      /* קיים באחסון? לא תלוי במשתנה */
+  try{ const r=localStorage.getItem(BOOK_KEY); return r ? (JSON.parse(r)||[]).length : 0; }
+  catch(e){ return 0; }
+}
+function bookDrop(){
+  const n = bookStored();
+  if(!n){ toast("אין ספר מיובא"); return false; }
+  if(!confirm(`להסיר ${n} שירים מהספר המיובא?\nהשירים ששמרת בעצמך לא ייפגעו.`)) return false;
+  localStorage.removeItem(BOOK_KEY);
+  bookIndex = null; bookArtist = null; pdfDoc = null;
+  invalidateItems();
+  toast("הספר הוסר");
+  return true;
+}
 function bookLoad(){ try{ return JSON.parse(localStorage.getItem(BOOK_KEY)||"null"); }catch(e){ return null; } }
 function bookSave(idx){
   invalidateItems();
@@ -750,7 +766,7 @@ function renderImport(){
         ` : `<p>בחר קובץ כדי להתחיל. סריקה של ספר גדול אורכת דקה-שתיים.</p>`}
         <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:12px">
           <button class="btn primary" id="ibPick">${bookIndex&&bookIndex.length?"סריקה מחדש":"בחר קובץ וסרוק"}</button>
-          ${bookIndex&&bookIndex.length?`
+          ${bookStored()?`
             <button class="btn" id="ibLib2">הצג בספרייה</button>
             <button class="btn" id="ibSwap">החלף שיר↔אמן</button>
             <button class="btn" id="ibClear">הסרת הספר</button>`:""}
@@ -783,11 +799,7 @@ function renderImport(){
     toast("הוחלף. אם עכשיו נכון — זהו; אם לא, לחץ שוב");
   };
   const cl=$("ibClear");
-  if(cl) cl.onclick=()=>{
-    if(!confirm(`להסיר ${bookIndex.length} שירים מהספר?\nהשירים ששמרת בעצמך לא ייפגעו.`)) return;
-    localStorage.removeItem(BOOK_KEY); invalidateItems(); bookIndex=null; bookArtist=null; pdfDoc=null;
-    renderImport(); toast("הספר הוסר");
-  };
+  if(cl) cl.onclick=()=>{ if(bookDrop()) renderImport(); };
 }
 
 async function bookApply(){
@@ -1576,6 +1588,8 @@ function renderBook(){
 
     <div class="pills">${TABS.map(([k,t])=>
       `<button class="pill ${libFilter===k?"on":""}" data-f="${k}">${t}</button>`).join("")}</div>
+    ${bookStored()?`<div style="display:flex;gap:9px;flex-wrap:wrap;margin:2px 0 6px">
+      <button class="btn sm" id="libDropBook">✕ הסרת הספר המיובא (${bookStored()})</button></div>`:""}
     <div style="display:flex;align-items:center;gap:9px;margin:2px 0 4px">
       <span class="stamp">מיון</span>
       <button class="pill ${libSort==="az"?"on":""}" style="padding:6px 14px;font-size:13.5px" data-s="az">א → ת</button>
@@ -1620,6 +1634,8 @@ function renderBook(){
       const n=$("sbQ"); if(n){ n.focus(); n.setSelectionRange(c,c); }
     }, 220);
   };
+  const ldb=$("libDropBook");
+  if(ldb) ldb.onclick=()=>{ if(bookDrop()){ libFilter="all"; renderBook(); } };
   const more=$("moreArtists");
   if(more) more.onclick=()=>{ libShow+=60; renderBook(); };
   app.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{
@@ -1771,6 +1787,10 @@ function renderSettings(){
           <span class="art" style="${artStyle("ספר")}"><i>📕</i></span>
           <span class="tx"><b>ספר אקורדים</b><small>${(bookIndex||[]).length?`${bookIndex.length} שירים · ${withC} עם אקורדים`:"ייבוא קובץ PDF"}</small></span>
           <span class="go">›</span></button>
+        ${bookStored()?`<button class="tile" id="stDropBook">
+          <span class="art" style="${artStyle("הסרה")}"><i>✕</i></span>
+          <span class="tx"><b>הסרת הספר המיובא</b><small>${bookStored()} שירים · השירים שלך לא ייפגעו</small></span>
+          <span class="go">›</span></button>`:""}
         <button class="tile" data-go="book">
           <span class="art" style="${artStyle("ספרייה")}"><i>▤</i></span>
           <span class="tx"><b>ספרייה</b><small>${all.length} שירים</small></span>
@@ -1824,6 +1844,23 @@ function renderSettings(){
     </section>
 
     <section class="sec">
+      <div class="sec-head"><h3>גרסה</h3></div>
+      <div class="tiles">
+        <button class="tile" id="stReload">
+          <span class="art" style="${artStyle("גרסה")}"><i>⟳</i></span>
+          <span class="tx"><b>טעינה מחדש</b><small>עוקף את מטמון הדפדפן</small></span>
+          <span class="go">›</span></button>
+        <div class="tile" style="cursor:default">
+          <span class="art" style="${artStyle("בנייה")}"><i>#</i></span>
+          <span class="tx"><b>בנייה</b><small dir="ltr" style="text-align:start">${esc(BUILD)}</small></span>
+        </div>
+      </div>
+      <div class="note" style="margin-top:12px"><strong>לא רואה שינוי שביקשת?</strong>
+        דפדפנים שומרים את הקובץ במטמון ומגישים גרסה ישנה. «טעינה מחדש» מוסיף
+        חותמת זמן לכתובת ומאלץ הורדה טרייה. השווה את מספר הבנייה כאן למה שנמסר לך.</div>
+    </section>
+
+    <section class="sec">
       <div class="sec-head"><h3>עוד</h3></div>
       <div class="tiles">
         <button class="tile" data-go="guide">
@@ -1851,6 +1888,12 @@ function renderSettings(){
   $("stImportJ").onclick=()=> $("jsonIn").click();
   $("stArt").onclick=()=>{ artSetEnabled(!artEnabled()); renderSettings();
     toast(artEnabled()?"תמונות אמנים פעילות":"תמונות אמנים כבויות"); };
+  const sdb=$("stDropBook");
+  if(sdb) sdb.onclick=()=>{ if(bookDrop()) renderSettings(); };
+  $("stReload").onclick=()=>{
+    const u = location.pathname + "?v=" + Date.now();
+    location.replace(u);
+  };
   $("stArtClear").onclick=()=>{ artCache={}; artStore(); artQueue=[]; artObs=null; renderSettings(); toast("המטמון נוקה — התמונות ייטענו מחדש"); };
   $("stSplash").onclick=()=>{ if(window.showSplash) window.showSplash(); };
   window.scrollTo({top:0});
@@ -1926,7 +1969,8 @@ function renderAbout(){
     </div>
 
     <div style="border-top:1px solid var(--edge);margin-top:26px;padding-top:20px;text-align:center">
-      <div class="stamp" style="margin-bottom:12px">ChordMaster · נגן־יחד · גרסה 1.0</div>
+      <div class="stamp" style="margin-bottom:6px">ChordMaster · נגן־יחד · גרסה 1.0</div>
+      <div class="stamp" id="buildTag" style="margin-bottom:12px;color:var(--tungsten)">בנייה ${esc(BUILD)}</div>
       <button class="btn primary" id="abBack2">חזרה לאפליקציה</button>
     </div>
   </div>`;
@@ -2205,6 +2249,7 @@ const ALIAS={"Db":"C#","Eb":"D#","Gb":"F#","Ab":"G#","Bb":"A#"};
 const OPEN = new Set(["C","A","G","E","D","Am","Em","Dm"]);
 
 /* ---------- מצב ---------- */
+const BUILD = "2026-08-05 07:49 UTC";
 const KEY="playalong-lib-v1";
 function newSong(){ return {
   id:"s"+Date.now(), title:"", ytId:"", beatsPerBar:4,
@@ -2718,10 +2763,7 @@ function render(){
         <button class="btn" id="errArt">ניקוי מטמון תמונות</button>
       </div></div>`;
     const h=$("errHome"); if(h) h.onclick=()=>{ mode="start"; libFilter="all"; bookArtist=null; sbQuery=""; render(); };
-    const d=$("errDrop"); if(d) d.onclick=()=>{
-      localStorage.removeItem(BOOK_KEY); bookIndex=null; invalidateItems();
-      mode="start"; render(); toast("הספר הוסר");
-    };
+    const d=$("errDrop"); if(d) d.onclick=()=>{ if(bookDrop()){ mode="start"; render(); } };
     const a2=$("errArt"); if(a2) a2.onclick=()=>{ artCache={}; artStore(); toast("המטמון נוקה"); };
   }
 }
