@@ -1548,15 +1548,18 @@ function renderBook(){
 
   bookIndex = bookIndex || bookLoad();
   const all = itemsAll();
-  const F = { all:x=>true, own:x=>x.src==="own", book:x=>x.src==="book",
+  /* ספר מיובא גדול מכביד על "הכל" — הוא מקבל לשונית משלו.
+     כך הספרייה נשארת מיידית, והספר נגיש במלואו. */
+  const bookBig = (bookIndex||[]).length > 250;
+  const F = { all: bookBig ? (x=>x.src!=="book") : (x=>true),
+              own:x=>x.src==="own", book:x=>x.src==="book",
               built:x=>x.src==="built", ready:x=>x.chordsCount>0 && x.yt };
   const pool = all.filter(F[libFilter]||F.all);
   const q = sbQuery.trim().toLowerCase();
   const dir = libSort==="za" ? -1 : 1;
   const bySong   = (a,b)=> dir*heCmp(a.t, b.t);
   const byArtist = (a,b)=> dir*heCmp(a[0], b[0]);
-  const artists = (libFilter==="all" && !q ? artistGroups().slice() : groupByArtist(pool, x=>x.a, true))
-                    .sort(byArtist);
+  const artists = groupByArtist(pool, x=>x.a, true).sort(byArtist);
   const matches = (bookArtist ? pool.filter(x=>x.a===bookArtist)
     : (q ? pool.filter(x=>(x.t+" "+x.a).toLowerCase().includes(q)) : [])).sort(bySong);
 
@@ -1565,7 +1568,8 @@ function renderBook(){
   app.innerHTML = `
   <div class="home">
     <div class="hero-row"><h1>ספרייה</h1></div>
-    <div class="hgreet">${all.length} שירים · ${artistGroups().length} אמנים</div>
+    <div class="hgreet">${pool.length} שירים · ${artists.length} אמנים${
+      bookBig && libFilter==="all" ? ` · ${(bookIndex||[]).length} מהספר בלשונית «מהספר»` : ""}</div>
 
     <input type="text" id="sbQ" placeholder="חיפוש שיר או אמן…" value="${esc(sbQuery)}"
       style="width:100%;margin-top:16px">
@@ -1769,7 +1773,7 @@ function renderSettings(){
           <span class="go">›</span></button>
         <button class="tile" data-go="book">
           <span class="art" style="${artStyle("ספרייה")}"><i>▤</i></span>
-          <span class="tx"><b>ספרייה</b><small>${artistGroups().length} אמנים</small></span>
+          <span class="tx"><b>ספרייה</b><small>${all.length} שירים</small></span>
           <span class="go">›</span></button>
       </div>
     </section>
@@ -2697,6 +2701,31 @@ function setPageBg(m){
   el.className = cls ? cls+" on" : "";
 }
 function render(){
+  try{ renderInner(); }
+  catch(err){
+    console.error("render", err);
+    /* מסך שגיאה קריא במקום מסך שבור — ואפשרות לפעול */
+    app.innerHTML = `<div class="guide">
+      <div class="hero-row"><h1>משהו נתקע</h1></div>
+      <div class="note rust" style="margin-top:14px"><strong>הרינדור נכשל.</strong>
+        ${esc(String(err && err.message || err))}</div>
+      <p style="color:var(--cream-2);font-size:14px;line-height:1.7;margin-top:12px">
+        לרוב זה קורה כשספר אקורדים גדול נטען לספרייה. אפשר להסיר אותו —
+        השירים ששמרת בעצמך לא ייפגעו.</p>
+      <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn primary" id="errHome">חזרה לבית</button>
+        <button class="btn" id="errDrop">הסרת הספר המיובא</button>
+        <button class="btn" id="errArt">ניקוי מטמון תמונות</button>
+      </div></div>`;
+    const h=$("errHome"); if(h) h.onclick=()=>{ mode="start"; libFilter="all"; bookArtist=null; sbQuery=""; render(); };
+    const d=$("errDrop"); if(d) d.onclick=()=>{
+      localStorage.removeItem(BOOK_KEY); bookIndex=null; invalidateItems();
+      mode="start"; render(); toast("הספר הוסר");
+    };
+    const a2=$("errArt"); if(a2) a2.onclick=()=>{ artCache={}; artStore(); toast("המטמון נוקה"); };
+  }
+}
+function renderInner(){
   if(mode!=="main") handEls.clear();
   setPageBg(mode);
   setTimeout(wireNav,0);
@@ -2739,9 +2768,13 @@ function renderStart(){
 
   bookIndex = bookIndex || bookLoad();
   const L = lib(), all = itemsAll();
-  const artists = artistGroups().slice().sort((a,b)=>b[1].length-a[1].length);
+  /* בבית מציגים אמנים מהספר המובנה ומהשירים שלך; ספר מיובא גדול
+     נשאר בלשונית שלו בספרייה כדי שהבית יישאר מיידי. */
+  const bookBig = (bookIndex||[]).length > 250;
+  const homePool = bookBig ? all.filter(x=>x.src!=="book") : all;
+  const artists = groupByArtist(homePool, x=>x.a, true).sort((a,b)=>b[1].length-a[1].length);
   const mine  = all.filter(x=>x.src==="own");
-  const ready = all.filter(x=>x.chordsCount>0 && x.yt);
+  const ready = all.filter(x=>x.chordsCount>0 && x.yt && x.src!=="book");
   const TABS=[["all","הכל"],["mine","שלי"],["artists","אמנים"],["ready","מוכן לנגינה"]];
   const show = k => homeTab==="all" || homeTab===k;
   const lim = k => homeTab===k ? 200 : 6;
