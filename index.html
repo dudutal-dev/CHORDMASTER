@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#08090C">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-<meta name="build" content="2026-08-05 10:01 UTC">
+<meta name="build" content="2026-08-05 10:10 UTC">
 <meta name="description" content="ChordMaster — אקורדים ומילים מסונכרנים לסרטון יוטיוב, עם דיאגרמות אצבעות, האטה והעברת טונים.">
 <title>ChordMaster</title>
 <meta name="apple-mobile-web-app-title" content="ChordMaster">
@@ -516,12 +516,11 @@ body.fs .hzbeats i{width:26px;height:5px}
 
 /* ── מסך ההדגמה: פריים לכל אקורד, מיזוג ביניהם ── */
 body.demo #pageBg{display:none}
-.demoWrap{display:flex;flex-direction:column;min-height:calc(100dvh - var(--topH,52px));
+.demoWrap{display:flex;flex-direction:column;height:calc(100dvh - var(--topH,52px));
   margin:-16px -14px 0;background:#05060A}
-.demoStage{position:relative;flex:1 1 auto;min-height:38vh;overflow:hidden}
-/* מוגבל ל-460px כדי לא למתוח את המקור מעבר למה שהוא נושא */
+.demoStage{position:relative;flex:1 1 auto;min-height:52vh;overflow:hidden}
 .demoFrame{position:absolute;inset:0;margin:auto;display:block;
-  max-width:min(100%,520px);max-height:min(100%,460px);width:auto;height:auto;
+  max-width:100%;max-height:100%;width:auto;height:100%;
   object-fit:contain;transform-origin:58% 42%;will-change:transform,opacity}
 #demoB{opacity:0;transition:opacity .06s linear}
 .demoGlow{position:absolute;inset:0;pointer-events:none;opacity:.12;
@@ -531,7 +530,7 @@ body.demo #pageBg{display:none}
   text-shadow:0 0 26px rgba(245,178,74,.5),0 3px 12px rgba(0,0,0,.9);pointer-events:none}
 .demoBar{flex:0 0 auto;background:rgba(6,7,10,.96);border-top:1px solid var(--edge);
   padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px))}
-.demoBar .horizon{height:118px;margin:0 0 8px}
+.demoBar .horizon{height:106px;margin:0 0 8px}
 .demoCtl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .demoCtl .stamp{margin-inline-start:auto;color:var(--cream-2)}
 @media(min-width:900px){ .demoBar .horizon{height:132px} }
@@ -2381,7 +2380,7 @@ const FRAMES = {
 };
 
 let demoOn = false;
-const BUILD = "2026-08-05 10:01 UTC";
+const BUILD = "2026-08-05 10:10 UTC";
 const KEY="playalong-lib-v1";
 function newSong(){ return {
   id:"s"+Date.now(), title:"", ytId:"", beatsPerBar:4,
@@ -2865,19 +2864,33 @@ function loadYT(){
     document.head.appendChild(t);
   });
 }
+async /* האלמנט שעליו נבנה הנגן מוחלף ב-iframe בבנייה הראשונה,
+   ולכן לפני בנייה חוזרת צריך ליצור אותו מחדש. */
+function ensureFrameEl(){
+  const host = document.getElementById("ytHost");
+  if(!host) return false;
+  if(!document.getElementById("ytFrame")){
+    host.innerHTML = '<div id="ytFrame"></div>';
+  }
+  return true;
+}
 async function mountPlayer(){
   await loadYT();
-  /* נגן קיים — מחליפים סרטון במקום לבנות מחדש */
-  if(player && player.loadVideoById){
+  const live = !!document.querySelector("#ytHost iframe");
+  if(player && live && player.loadVideoById){
     try{ player.loadVideoById(S.ytId); ready = true; syncPlayerBox(); return; }catch(e){}
   }
+  try{ if(player && player.destroy) player.destroy(); }catch(e){}
+  player = null;
+  if(!ensureFrameEl()){ toast("מיכל הנגן חסר"); return; }
   player = new YT.Player("ytFrame", {
     videoId: S.ytId,
     playerVars:{rel:0, modestbranding:1, playsinline:1},
     events:{
-      onReady: ()=>{ ready=true;
+      onReady: ()=>{ ready=true; syncPlayerBox();
         (function grab(n){ const d=player.getDuration&&player.getDuration();
-          if(d>0){ songDur=Math.max(songDur,d); } else if(n<20) setTimeout(()=>grab(n+1),250); })(0); if(!S.title){ try{ S.title=player.getVideoData().title||"" ; $("ttl").textContent=S.title; }catch(e){} } },
+          if(d>0){ songDur=Math.max(songDur,d); } else if(n<20) setTimeout(()=>grab(n+1),250); })(0);
+        if(!S.title){ try{ S.title=player.getVideoData().title||""; $("ttl").textContent=S.title; }catch(e){} } },
       onError: ()=> toast("הסרטון אינו זמין להטמעה — נסה קישור אחר")
     }
   });
@@ -3049,7 +3062,7 @@ function renderStart(){
 
 function open_(){
   if(!S.bars.length) S.bars=Array.from({length:64},()=>({c:null}));
-  mode="main"; ready=false; player=null; songDur=0; adOn=false; holdSync=false;
+  mode="main"; ready=false; songDur=0; adOn=false; holdSync=false;
   cur={bar:-1,beat:-1,line:-1};
   render();
   if(S.ytId) mountPlayer();
