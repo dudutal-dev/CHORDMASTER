@@ -111,15 +111,15 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .note.rust strong{color:var(--ruby)} .note.sage strong{color:var(--jade)}
 
 /* ═══ SIGNATURE — מסלול האקורדים הנע ═══ */
-.horizon{position:relative;height:130px;border-radius:8px;overflow:hidden;margin-bottom:12px;
+.horizon{position:relative;height:134px;border-radius:8px;overflow:hidden;margin-bottom:12px;
   background:
     linear-gradient(180deg,#151A21,#0D1015);
   border:1px solid var(--edge); box-shadow:inset 0 3px 12px rgba(0,0,0,.55)}
 .horizon .lane{position:absolute;inset:0;direction:ltr}
-.horizon .nowline{position:absolute;top:0;bottom:0;right:114px;width:2px;
+.horizon .nowline{position:absolute;top:0;bottom:0;right:126px;width:2px;
   background:linear-gradient(180deg,transparent,var(--tungsten) 18%,var(--tungsten) 82%,transparent);
   box-shadow:0 0 14px var(--tungsten-glow);z-index:3}
-.horizon .nowcap{position:absolute;top:5px;right:96px;font-family:var(--mono);font-size:9px;
+.horizon .nowcap{position:absolute;top:5px;right:108px;font-family:var(--mono);font-size:9px;
   letter-spacing:.18em;color:var(--tungsten);z-index:3}
 .hchip{position:absolute;top:32px;height:56px;border-radius:5px;
   background:#1C2129;border:1px solid var(--edge-2);
@@ -129,10 +129,10 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
 .hchip.hot{background:var(--tungsten);border-color:var(--tungsten);color:#12131A;
   box-shadow:0 0 22px var(--tungsten-glow)}
 .hchip.silent{opacity:.28;font-size:16px;color:var(--dim)}
-.horizon .nowdgm{position:absolute;top:4px;right:4px;width:104px;z-index:4;
+.horizon .nowdgm{position:absolute;top:3px;right:4px;width:116px;z-index:4;
   display:flex;align-items:center;justify-content:center}
 .horizon .nodgm{font-family:var(--disp);font-size:26px;color:var(--dim);opacity:.5}
-.horizon .nowdgm svg{height:118px;width:auto;max-width:100%}
+.horizon .nowdgm svg{height:126px;width:auto;max-width:100%;display:block}
 .horizon .hzempty{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:10px}
 .horizon .hzempty span{font-size:13px;line-height:1.65;color:var(--cream-2);text-align:center;
   border:1px dashed var(--edge-2);border-radius:6px;padding:9px 16px;background:rgba(6,7,9,.5)}
@@ -169,12 +169,13 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
   .stickytop{position:sticky;top:var(--topH,44px);z-index:25;padding-bottom:6px;
     box-shadow:0 10px 18px -8px rgba(11,9,8,.95)}
   .stickytop .ytbox{border-radius:0;margin-inline:-14px;width:calc(100% + 28px)}
-  .horizon{height:128px;margin-bottom:0}
+  .horizon{height:122px;margin-bottom:0}
   .main.cinema .horizon{margin-top:6px}
   .hchip{top:34px;height:56px;font-size:21px}
-  .horizon .nowdgm{width:100px;top:4px}
-  .horizon .nowline{right:108px}
-  .horizon .nowcap{right:92px;font-size:8px;top:2px}
+  .horizon .nowdgm{width:104px;top:3px}
+  .horizon .nowdgm svg{height:114px}
+  .horizon .nowline{right:112px}
+  .horizon .nowcap{right:96px;font-size:8px;top:2px}
   .stage{padding:13px}
   .nowc{font-size:clamp(42px,15vw,64px)}
   .bc{width:60px}
@@ -486,15 +487,16 @@ body.fs .stickytop{position:static;padding:0;box-shadow:none;flex:1;min-height:0
   display:flex;flex-direction:column}
 /* הווידאו נמתח לכל הגובה הפנוי במקום יחס קבוע */
 body.fs .ytbox{padding-top:0;flex:1;min-height:0;border-radius:0;border:0;background:#000}
-body.fs .horizon{flex:0 0 auto;height:min(30vh,190px);border-radius:0;border-inline:0;
+body.fs .horizon{flex:0 0 auto;height:min(42vh,300px);border-radius:0;border-inline:0;
   border-bottom:0;margin:0}
-body.fs .horizon .nowdgm{width:min(30vw,150px);top:0;bottom:0;height:auto;
-  background:linear-gradient(270deg,rgba(10,12,16,.96) 62%,rgba(10,12,16,0));
-  padding-inline-start:12px}
-body.fs .horizon .nowdgm svg{height:min(26vh,160px)}
-body.fs .horizon .nowline{right:min(31vw,158px)}
-body.fs .horizon .nowcap{right:calc(min(31vw,158px) + 14px)}
-body.fs .hchip{top:16%;height:56%;font-size:clamp(24px,7vw,42px)}
+body.fs .horizon .nowdgm{width:min(48vw,250px);top:0;bottom:0;height:auto;
+  display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(270deg,rgba(10,12,16,.97) 66%,rgba(10,12,16,0));
+  padding-inline-start:10px}
+body.fs .horizon .nowdgm svg{height:min(38vh,270px);width:auto;max-width:none}
+body.fs .horizon .nowline{right:min(49vw,256px)}
+body.fs .horizon .nowcap{right:calc(min(49vw,256px) + 14px)}
+body.fs .hchip{top:14%;height:46%;font-size:clamp(24px,7vw,44px)}
 body.fs .hzbeats{bottom:8px;left:14px}
 body.fs .hzbeats i{width:26px;height:5px}
 #fsExit{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);inset-inline-start:12px;z-index:140;
@@ -1101,6 +1103,25 @@ const SONGBOOK = [
     sec:{ verse:["C","C","G","C"], chorus:["F","C","G","C"] },
     arr:[["verse",4],["chorus",2],["verse",4],["chorus",2]] },
 
+  { a:"Eagles", t:"Desperado", yt:"-q93wc3-deU", y:1973, key:"G", diff:3,
+    note:"בלדה על פסנתר. ה-Cm אחרי ה-C הוא הרגע שעושה את השיר. בהקלטה יש גם ספטימות (G7, A7, D7) — כאן הן מוצגות כבסיס שלהן, כי התצוגה מראה מז'ור ומינור בלבד.",
+    sec:{ verse:["G","G","C","Cm","G","D","Em","A","D","G"],
+          chorus:["C","D","G","Em","Am","D","G","G"] },
+    arr:[["verse",2],["chorus",1],["verse",2],["chorus",2]] },
+
+  { a:"Simon & Garfunkel", t:"The Boxer", yt:"l3LFML_pxlY", y:1969, key:"C", diff:2,
+    note:"בהקלטה יש פיקינג אצבעות; המהלך עצמו פשוט ופתוח.",
+    sec:{ verse:["C","C","Am","Am","C","C","G","G"], chorus:["F","F","C","C","G","G","C","C"] },
+    arr:[["verse",3],["chorus",2],["verse",3],["chorus",2]] },
+
+  { a:"Neil Young", t:"Old Man", yt:"ZKCiC-H2Xbg", y:1972, key:"?", diff:0, blank:96,
+    note:"קישור רשמי מאומת. את מהלך האקורדים לא הזנתי — הוא לא פשוט כפי שנדמה, ולא ארצה לנחש.",
+    sec:{}, arr:[] },
+
+  { a:"James Taylor", t:"Fire and Rain", yt:"EbD7lfrsY2s", y:1970, key:"?", diff:0, blank:96,
+    note:"קישור רשמי מאומת. המהלך מלא באקורדי מעבר ובאס יורד — עדיף להדביק אותו מאתר אקורדים.",
+    sec:{}, arr:[] },
+
   /* ---- ישראלי · קישור רשמי, אקורדים להזנה ---- */
   { a:"משינה", t:"רכבת לילה", yt:"7etbVoEEqGU", y:1985, key:"?", diff:0, blank:96, il:true,
     note:"מילים: אהוד בנאי · לחן: שלומי ברכה. הקישור הוא ההקלטה הרשמית מהאלבום הראשון (1985).",
@@ -1508,6 +1529,7 @@ function paintHorizon(now){
   const NOWX = hzNowX();
   const span = W - NOWX - 8;
   const bi = Math.max(0, cur.bar);
+  handFrame(bi);
 
   /* שיר שנטען בלי אקורדים (למשל מהערכים הישראליים) — הפס מסביר במקום להיראות שבור */
   const empty = !S.bars.some(b=>b.c);
@@ -1894,6 +1916,9 @@ function renderGuide(){
           <li>שיר שנטען מהספר נפתח <b>מיד</b>, גם בלי קישור יוטיוב. במקום הנגן יופיע <b>חיפוש מוטמע</b>: לחיצה על «חפש והצג כאן» טוענת את התוצאה הראשונה מיוטיוב לתוך האפליקציה, «התוצאה הבאה ›» מדלגת, ו«אשר קישור זה» מחבר אותה לשיר. אם החיפוש המוטמע לא נתמך אצלך, יש תמיד הדבקה ידנית מתחתיו.</li>
           <li><b>הסרה:</b> ✕ ליד שיר מסיר אותו מהספרייה, ו«הסרת הספר המיובא» מוחקת את כולו בבת אחת. השירים ששמרת בעצמך לא נפגעים.</li>
           <li><b>מי שיר ומי אמן</b> נקבע אוטומטית: שם אמן חוזר על פני שירים רבים ושם שיר כמעט ייחודי, ולכן הצד עם פחות ערכים שונים הוא האמן. אם בכל זאת יצא הפוך — יש כפתור <b>«החלף שיר↔אמן»</b> במסך הייבוא, ואין צורך לסרוק מחדש.</li>
+          <li><b>היד על הצוואר:</b> הצוואר מוצג מסובב — האגוז מימין, המיתרים אופקיים, הנמוך למעלה — כמו שאתה רואה אותו כשאתה מנגן. כשמתחלף אקורד, <b>קצות האצבעות נעים למקומם החדש</b> במקום לקפוץ, וכשהאקורד נמצא גבוה על הצוואר גם החלון עצמו מחליק. זה מה שמלמד את המעבר, לא רק את היעד.</li>
+          <li><b>במסך מלא בנייד</b> היד הופכת לאלמנט הראשי — היא גדלה פי שלושה, ולצדה האקורדים הזורמים. זו התצוגה ללמידת מעבר: הצוואר, האצבעות והתנועה ביניהן, בלי שום דבר אחר.</li>
+          <li>משך התנועה מתארך כשמאטים את השיר: 260 מילישניות ב-100%, 347 ב-75%, ו-520 ב-50%. בהאטה רואים בדיוק איך האצבעות עוברות.</li>
           <li><b>מיון ותמונות:</b> בספרייה אפשר למיין א→ת או ת→א, והעטיפות נטענות אוטומטית מהאינטרנט לפי שם האמן. אפשר לכבות את זה בהגדרות, ואז חוזרים לעטיפה שנוצרת מהשם עצמו.</li>
           <li>לפני הטעינה מוצגת תצוגה מקדימה של האקורדים הראשונים. אם הסדר יוצא הפוך — בטל, ונסה שוב עם כיוון הפוך.</li>
           <li>שיר שנטען <b>בלי אקורדים</b> — כמו הערכים הישראליים בספר — יציג בפס הודעה במקום בלוקים ריקים, ודיאגרמת האצבעות תישאר ריקה עד שיהיה מה להראות. זה תקין, ולא תקלה.</li>
@@ -2152,107 +2177,266 @@ function suggestCapo(){
   return (best && best.cap>0 && best.n>best.total*0.6) ? best : null;
 }
 
-function diagram(name, size, opt){
-  const hand = !(opt && opt.hand === false);
+/* ═══════════════════════════════════════════════════════════════
+   יד על הצוואר — מצב אחד, שרטוט אחד, ומעבר מונפש בין אקורדים.
+   הצוואר מוצג מסובב 90°: האגוז מימין, מיתרים אופקיים, נמוך למעלה.
+   כשעוברים אקורד, קצות האצבעות והחלון על הצוואר נעים בהינף אחד —
+   וזה בדיוק מה שמלמד את המעבר. משך התנועה מתארך כשמאטים את השיר.
+   ═══════════════════════════════════════════════════════════════ */
+function chordState(name){
   const sh = shapeOf(name);
-  const W = size || 140;
-  const BH = W*1.22;                       // גובה הלוח בלבד
-  const H  = hand ? W*1.52 : BH;           // מקום לכף היד מתחת
-  if(!sh) return `<svg class="dgm" width="${W}" height="${H}"></svg>`;
-
+  if(!sh) return null;
   const nums = sh.f.split("").map(c => c==="x" ? -1 : parseInt(c,36));
   const fing = (sh.g||"------").split("");
   const played = nums.filter(n=>n>0);
   const minF = played.length?Math.min(...played):1, maxF = played.length?Math.max(...played):4;
   const base = (maxF<=4)?1:minF;
-  const L=W*0.17, T=W*0.20, sp=(W-2*L)/5, fh=(BH-T-W*0.16)/5;
-  const boardBottom = T + fh*4;
-
-  const X = i => L + i*sp;
-  const Y = n => T + (n-base+0.5)*fh;
-
-  let s = `<svg class="dgm" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" aria-label="${esc(name)}">`;
-  s += `<defs>
-    <linearGradient id="sk${W}" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#F3DCBE"/><stop offset="1" stop-color="#C9A277"/>
-    </linearGradient>
-  </defs>`;
-
-  /* --- הלוח --- */
-  if(base===1) s += `<rect x="${L-1}" y="${T-4}" width="${W-2*L+2}" height="4" rx="1" fill="#DCE6E4"/>`;
-  else s += `<text x="${L-7}" y="${T+fh*0.72}" fill="#8FA7AB" font-size="${W*0.075}" font-family="monospace" text-anchor="end">${base}fr</text>`;
-  for(let i=0;i<6;i++) s += `<line x1="${X(i)}" y1="${T}" x2="${X(i)}" y2="${boardBottom}" stroke="#E9EEF5" stroke-width="1.5"/>`;
-  for(let k=0;k<=4;k++) s += `<line x1="${L}" y1="${T+k*fh}" x2="${W-L}" y2="${T+k*fh}" stroke="#7E8B9C" stroke-width="1.1"/>`;
-
-  /* --- סימוני מיתר פתוח וממותת --- */
+  const tips = {};
   for(let i=0;i<6;i++){
-    if(nums[i]===-1) s += `<text x="${X(i)}" y="${T-8}" fill="#8FA7AB" font-size="${W*0.085}" text-anchor="middle">✕</text>`;
-    else if(nums[i]===0) s += `<circle cx="${X(i)}" cy="${T-11}" r="${W*0.032}" fill="none" stroke="#DCE6E4" stroke-width="1.4"/>`;
-  }
-
-  /* --- אצבעות --- */
-  const tips = [];
-  for(let i=0;i<6;i++){
-    const n = nums[i];
-    if(n<=0 || n<base || n>=base+4) continue;
+    const n = nums[i]; if(n<=0) continue;
     const f = fing[i]==="-" ? 0 : parseInt(fing[i],10)||0;
-    tips.push({i, x:X(i), y:Y(n), f});
+    if(!f) continue;
+    if(!tips[f] || n < tips[f].fret) tips[f] = {fret:n, str:i};
   }
-
-  if(hand && tips.length){
-    /* פרקי האצבעות מסודרים מתחת ללוח — אצבע 1 קרובה לאגוז, 4 רחוקה */
-    const kY  = boardBottom + fh*0.85;
-    const kX  = f => L + sp*(5.05 - (f-1)*1.08);
-    const fw  = sp*0.50;
-
-    /* כף היד */
-    s += `<path d="M ${kX(4)-fw*0.9} ${kY-fw*0.2}
-                   L ${kX(1)+fw*1.0} ${kY-fw*0.2}
-                   Q ${W*0.99} ${kY+fh*0.9} ${W*0.80} ${H-2}
-                   L ${W*0.26} ${H-2}
-                   Q ${W*0.05} ${kY+fh*0.7} ${kX(4)-fw*0.9} ${kY-fw*0.2} Z"
-             fill="url(#sk${W})" opacity=".30"/>`;
-
-    /* ברה — אצבע שוכבת לרוחב */
-    if(sh.b && sh.b.fr>=base && sh.b.fr<base+4){
-      const by = Y(sh.b.fr);
-      const x1 = X(6-sh.b.from), x2 = X(6-sh.b.to);
-      const a = Math.min(x1,x2), b = Math.max(x1,x2);
-      s += `<line x1="${a}" y1="${by}" x2="${b+fw*0.1}" y2="${by}" stroke="url(#sk${W})"
-              stroke-width="${fw*1.15}" stroke-linecap="round" opacity=".62"/>`;
-      s += `<line x1="${a}" y1="${by-fw*0.16}" x2="${b}" y2="${by-fw*0.16}" stroke="#F6E3C8"
-              stroke-width="${fw*0.30}" stroke-linecap="round" opacity=".30"/>`;
-    }
-
-    /* אצבע לכל לחיצה — קימור טבעי מהפרק אל קצה האצבע */
-    const drawn = {};
-    tips.forEach(t=>{
-      const f = t.f || 1;
-      if(sh.b && f===1 && drawn[1]) return;         // בברה מציירים אצבע אחת בלבד
-      drawn[f] = true;
-      const bx = kX(f), by = kY;
-      const cx = bx + (t.x-bx)*0.42, cy = by - (by-t.y)*0.72;
-      const d = `M ${bx} ${by} Q ${cx} ${cy} ${t.x} ${t.y}`;
-      s += `<path d="${d}" fill="none" stroke="url(#sk${W})" stroke-width="${fw*1.12}" stroke-linecap="round" opacity=".55"/>`;
-      s += `<path d="${d}" fill="none" stroke="#F6E3C8" stroke-width="${fw*0.30}" stroke-linecap="round" opacity=".26"/>`;
-    });
+  const F = {};
+  for(let f=1; f<=4; f++){
+    F[f] = tips[f] ? {fret:tips[f].fret, str:tips[f].str, down:1}
+                   : {fret: base + (f-1)*0.85 + 0.5, str: 6.5, down:0};   // מרחפת בהמתנה
   }
-
-  /* --- קצות האצבעות עם מספר, תמיד מעל הכול --- */
-  if(sh.b && sh.b.fr>=base && sh.b.fr<base+4 && !hand){
-    const by = Y(sh.b.fr), x1 = X(6-sh.b.from), x2 = X(6-sh.b.to);
-    s += `<line x1="${Math.min(x1,x2)}" y1="${by}" x2="${Math.max(x1,x2)}" y2="${by}" stroke="#CBA255"
-            stroke-width="${fh*0.5}" stroke-linecap="round" opacity=".92"/>`;
+  return { base, F, nums, barre: sh.b || null, name };
+}
+const lerp = (a,b,u) => a + (b-a)*u;
+function lerpState(a, b, u, sp){
+  if(!a) return b;
+  if(!b) return a;
+  const F = {};
+  for(let f=1; f<=4; f++){
+    const A=a.F[f], B=b.F[f];
+    /* אצבע ציר — נשארת במקומה בין שני האקורדים. זה מה שגיטריסט מחפש. */
+    const pivot = A.down>0.5 && B.down>0.5 &&
+                  Math.abs(A.fret-B.fret)<0.01 && Math.abs(A.str-B.str)<0.01;
+    /* היסט מדורג: לא כל האצבעות יוצאות יחד */
+    const off = 0.075*(f-1);
+    const uf = Math.max(0, Math.min(1, (u - off) / (1 - 0.075*3)));
+    const moves = !pivot && (Math.abs(A.fret-B.fret)>0.01 || Math.abs(A.str-B.str)>0.01
+                             || Math.abs(A.down-B.down)>0.01);
+    /* הרמה: האצבע עולה מהמיתר, נעה באוויר ונוחתת — לא מחליקה על הלוח */
+    const lift = moves ? Math.sin(Math.PI*uf) : 0;
+    F[f] = { fret: lerp(A.fret, B.fret, uf),
+             str:  lerp(A.str,  B.str,  uf) + lift*0.42,
+             down: Math.min(lerp(A.down, B.down, uf), 1 - lift*0.75),
+             pivot, lift };
   }
-  tips.forEach(t=>{
-    s += `<circle cx="${t.x}" cy="${t.y}" r="${fh*0.315}" fill="#F0A83C" stroke="#7A5417" stroke-width=".8"/>`;
-    if(t.f) s += `<text x="${t.x}" y="${t.y+fh*0.155}" fill="#241705" font-size="${fh*0.44}"
-                    font-weight="700" text-anchor="middle" font-family="sans-serif">${t.f}</text>`;
-  });
-
-  return s+`</svg>`;
+  return { base: lerp(a.base, b.base, u), F,
+           nums: u<0.5?a.nums:b.nums, barre: u<0.5?a.barre:b.barre,
+           name: u<0.5?a.name:b.name,
+           bAlpha: a.barre&&b.barre ? 1 : (a.barre ? 1-u : (b.barre ? u : 0)) };
 }
 
+function handSVG(st, W, withHand){
+  const BH = W*1.24;
+  const OW = BH, OH = withHand ? W*1.42 : W;
+  if(!st) return `<svg class="dgm" width="${OW}" height="${OH}"></svg>`;
+  const L=W*0.17, T=W*0.19, sp=(W-2*L)/5, fh=(BH-T-W*0.14)/5;
+  const x = f => BH - (T + (f - st.base + 0.5)*fh);     // מיקום סריג מוחלט
+  const y = i => L + i*sp;                              // מיקום מיתר
+  const uid = Math.round(W)+(withHand?"h":"c");
+  const skin = `url(#sk${uid})`;
+
+  let s = `<defs>
+    <linearGradient id="sk${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#F8E7CE"/><stop offset=".45" stop-color="#E2BE96"/>
+      <stop offset="1" stop-color="#B0864F"/></linearGradient>
+    <linearGradient id="nl${uid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF3E2"/><stop offset="1" stop-color="#E9CBA4"/></linearGradient>
+    <clipPath id="bd${uid}"><rect x="${x(st.base+4.5)}" y="${y(0)-sp*0.55}"
+      width="${fh*5.2}" height="${sp*6.1}"/></clipPath>
+  </defs>`;
+
+  /* ---- האגודל, מאחורי הצוואר ----
+     משורטט לפני הלוח: הלוח מסתיר את רובו ורק קצהו מציץ מעל המיתר
+     הנמוך, בדיוק כמו אגודל שאוחז בצוואר מאחור. */
+  if(withHand){
+    const fwT = W*0.084;
+    const kxT = f => x(st.base + 0.4 + (f-1)*0.95);
+    const tipX = x(st.base + 1.30), tipY = y(0) - sp*1.05;
+    s += `<path d="M ${kxT(3)-fwT*1.3} ${OH-2}
+                   Q ${kxT(3)-fwT*2.4} ${OH*0.50} ${tipX-fwT*1.05} ${tipY+sp*0.40}
+                   Q ${tipX-fwT*0.15} ${tipY-fwT*0.80} ${tipX+fwT*1.05} ${tipY+sp*0.34}
+                   Q ${kxT(3)+fwT*1.8} ${OH*0.54} ${kxT(3)+fwT*1.6} ${OH-2} Z"
+             fill="${skin}" opacity=".32"/>`;
+    s += `<ellipse cx="${tipX}" cy="${tipY+sp*0.10}" rx="${fwT*0.50}" ry="${fwT*0.38}"
+             fill="url(#nl${uid})" opacity=".24"/>`;
+  }
+
+  /* ---- הצוואר ---- */
+  s += `<g clip-path="url(#bd${uid})">`;
+  for(let k=-1;k<=6;k++){
+    const fr = Math.round(st.base)+k;
+    if(fr<1) continue;
+    const fx = x(fr-0.5);
+    s += `<line x1="${fx}" y1="${y(0)}" x2="${fx}" y2="${y(5)}" stroke="#7E8B9C" stroke-width="1.1"/>`;
+  }
+  for(let i=0;i<6;i++)
+    s += `<line x1="${x(st.base+4.5)}" y1="${y(i)}" x2="${x(st.base-0.5)}" y2="${y(i)}"
+            stroke="#E9EEF5" stroke-width="${1.05 + (5-i)*0.22}"/>`;
+  s += `</g>`;
+  if(st.base < 1.6){                                    // האגוז נראה רק בקצה הצוואר
+    const nx = x(0.5);
+    s += `<rect x="${nx-3}" y="${y(0)-2}" width="4" height="${y(5)-y(0)+4}" rx="1"
+            fill="#DCE6E4" opacity="${Math.max(0,Math.min(1,1.6-st.base))}"/>`;
+  } else {
+    s += `<text x="${x(st.base+0.5)}" y="${y(0)-W*0.075}" fill="#8FA7AB" font-size="${W*0.075}"
+            font-family="monospace" text-anchor="middle">${Math.round(st.base)}fr</text>`;
+  }
+  /* נקודות ציון בצוואר */
+  [3,5,7,9,12].forEach(fr=>{
+    if(fr < st.base-0.5 || fr > st.base+4.5) return;
+    const fx=x(fr), cy=(y(0)+y(5))/2;
+    (fr===12?[-sp*1.2,sp*1.2]:[0]).forEach(dy=>
+      s += `<circle cx="${fx}" cy="${cy+dy}" r="${sp*0.16}" fill="#5C6A7A" opacity=".55"/>`);
+  });
+
+  /* ---- מיתרים פתוחים וממותתים ---- */
+  const mx = x(st.base-0.5) + W*0.055;
+  for(let i=0;i<6;i++){
+    if(st.nums[i]===-1) s += `<text x="${mx}" y="${y(i)}" fill="#8FA7AB" font-size="${W*0.085}"
+        text-anchor="middle" dominant-baseline="central">✕</text>`;
+    else if(st.nums[i]===0) s += `<circle cx="${mx}" cy="${y(i)}" r="${W*0.032}" fill="none"
+        stroke="#DCE6E4" stroke-width="1.4"/>`;
+  }
+
+  if(withHand){
+    const fw = W*0.084;
+    const ky = W*1.10;                                   /* קו פרקי האצבעות */
+    const kx = f => x(st.base + 0.4 + (f-1)*0.95);       /* פרק 1 קרוב לאגוז */
+
+    /* אצבע בשני פרקים: בסיס עבה, פרק אמצע, קצה מעוגל עם ציפורן */
+    const digit = (bx,by,tx,ty,wB,wT,bend)=>{
+      const mx2 = bx + (tx-bx)*0.46 + bend*0.5, my2 = by + (ty-by)*0.52;
+      const c1x = bx + (mx2-bx)*0.55, c1y = by + (my2-by)*0.72;
+      const c2x = mx2 + (tx-mx2)*0.45 + bend, c2y = my2 + (ty-my2)*0.42;
+      let dx=tx-c2x, dy=ty-c2y; const m=Math.hypot(dx,dy)||1; dx/=m; dy/=m;
+      const px=-dy*wT/2, py=dx*wT/2;
+      return { d:`M ${bx-wB/2} ${by} Q ${c1x-wB*0.34} ${c1y} ${mx2-wT*0.62} ${my2}
+                  Q ${c2x-wT*0.55} ${c2y} ${tx+px} ${ty+py}
+                  A ${wT/2} ${wT/2} 0 0 1 ${tx-px} ${ty-py}
+                  Q ${c2x+wT*0.55} ${c2y} ${mx2+wT*0.62} ${my2}
+                  Q ${c1x+wB*0.34} ${c1y} ${bx+wB/2} ${by} Z`,
+               mid:[mx2,my2], nx:dx, ny:dy };
+    };
+
+    /* כף היד — כמעט שקופה. במציאות היא מאחורי הצוואר ורואים רק
+       את שוליה; קווי הגידים הם מה שנותן לה קריאוּת של יד. */
+    const pw = fw*1.15;
+    s += `<path d="M ${kx(1)+pw*1.05} ${ky-fw*0.1}
+                   C ${kx(1)+pw*1.45} ${ky+W*0.17} ${kx(2)+pw*0.85} ${OH*0.86} ${kx(3)-pw*0.1} ${OH-2}
+                   L ${kx(4)-pw*0.15} ${OH-2}
+                   C ${kx(4)-pw*1.25} ${OH*0.84} ${kx(4)-pw*1.2} ${ky+W*0.15} ${kx(4)-pw*1.0} ${ky-fw*0.1} Z"
+             fill="${skin}" opacity=".12"/>`;
+    for(let f=1; f<=4; f++){
+      const wx = kx(2.6), wy = OH-6;
+      s += `<path d="M ${kx(f)} ${ky+fw*0.4} Q ${(kx(f)+wx)/2} ${(ky+wy)*0.52} ${wx+(f-2.5)*fw*0.55} ${wy}"
+               fill="none" stroke="#FBEFDC" stroke-width="${fw*0.15}" opacity=".075"/>`;
+    }
+
+    if(st.barre && (st.bAlpha===undefined || st.bAlpha>0.05)){
+      const bx = x(st.barre.fr);
+      const y1 = y(6-st.barre.from), y2 = y(6-st.barre.to);
+      s += `<line x1="${bx}" y1="${Math.min(y1,y2)}" x2="${bx}" y2="${Math.max(y1,y2)}"
+              stroke="${skin}" stroke-width="${fw*1.3}" stroke-linecap="round"
+              opacity="${0.58*(st.bAlpha===undefined?1:st.bAlpha)}"/>`;
+    }
+
+    for(let f=1; f<=4; f++){
+      const t = st.F[f];
+      const bx = kx(f), by = ky;
+      const tx = x(t.fret), ty = y(t.str);
+      const g = digit(bx, by, tx, ty, fw*1.6, fw*1.0, fh*0.14);
+      const op = 0.26 + 0.36*t.down;
+      s += `<path d="${g.d}" fill="${skin}" opacity="${op.toFixed(3)}"/>`;
+      /* פרק אמצע */
+      s += `<circle cx="${g.mid[0]}" cy="${g.mid[1]}" r="${fw*0.42}" fill="#FBEFDC" opacity="${(0.10+0.10*t.down).toFixed(3)}"/>`;
+      /* ציפורן בקצה */
+      s += `<ellipse cx="${tx - g.nx*fw*0.30}" cy="${ty - g.ny*fw*0.30}" rx="${fw*0.34}" ry="${fw*0.25}"
+              transform="rotate(${Math.atan2(g.ny,g.nx)*180/Math.PI} ${tx - g.nx*fw*0.30} ${ty - g.ny*fw*0.30})"
+              fill="url(#nl${uid})" opacity="${(0.22+0.30*t.down).toFixed(3)}"/>`;
+      /* פרק כף היד */
+      s += `<circle cx="${bx}" cy="${by+fw*0.1}" r="${fw*0.62}" fill="${skin}" opacity=".30"/>`;
+    }
+  }
+
+  /* ---- נקודות הלחיצה ומספרי האצבעות ---- */
+  if(st.barre && !withHand){
+    const bx=x(st.barre.fr), y1=y(6-st.barre.from), y2=y(6-st.barre.to);
+    s += `<line x1="${bx}" y1="${Math.min(y1,y2)}" x2="${bx}" y2="${Math.max(y1,y2)}" stroke="#CBA255"
+            stroke-width="${fh*0.5}" stroke-linecap="round" opacity=".92"/>`;
+  }
+  for(let f=1; f<=4; f++){
+    const t = st.F[f];
+    if(t.down < 0.25) continue;
+    const cx=x(t.fret), cy=y(t.str), r=fh*0.315;
+    if(t.pivot) s += `<circle cx="${cx}" cy="${cy}" r="${r*1.55}" fill="none" stroke="#5FD0A8"
+            stroke-width="1.6" opacity=".55"/>`;                      /* אצבע ציר */
+    if(t.lift>0.05) s += `<ellipse cx="${cx}" cy="${cy+sp*0.5*t.lift}" rx="${r*0.8}" ry="${r*0.34}"
+            fill="#000" opacity="${(0.28*t.lift).toFixed(3)}"/>`;      /* צל בזמן ההרמה */
+    s += `<circle cx="${cx}" cy="${cy}" r="${(r*(1+0.18*(t.lift||0))).toFixed(2)}" fill="#F0A83C"
+            stroke="#7A5417" stroke-width=".8" opacity="${Math.max(0.25,t.down).toFixed(3)}"/>`;
+    s += `<text x="${cx}" y="${cy}" fill="#241705" font-size="${fh*0.44}" font-weight="700"
+            text-anchor="middle" dominant-baseline="central" font-family="sans-serif"
+            opacity="${t.down.toFixed(3)}">${f}</text>`;
+  }
+  return `<svg class="dgm" width="${OW}" height="${OH}" viewBox="0 0 ${OW} ${OH}" aria-label="${esc(st.name||"")}">${s}</svg>`;
+}
+
+/* תאימות לאחור — שרטוט סטטי לפי שם אקורד */
+function diagram(name, size, opt){
+  const withHand = !(opt && opt.hand === false);
+  return handSVG(chordState(name), size||140, withHand);
+}
+
+/* ---- מנוע המעבר ----
+   ההנפשה נגזרת משעון הנגן, לא מטיימר עצמאי. לכן היא מתאימה את עצמה
+   לכל מהירות נגינה בלי חישוב נוסף, והאצבע נוחתת בדיוק על הפעמה:
+   התנועה מתחילה לפני חילוף האקורד ומסתיימת ברגע שהוא מתחיל. */
+const chordCache = new Map();
+function cState(name){
+  if(!name) return null;
+  if(!chordCache.has(name)) chordCache.set(name, chordState(name));
+  return chordCache.get(name);
+}
+const handEls = new Map();          // אלמנט → {size, withHand, key}
+function handRegister(el, size, withHand){
+  if(!el) return;
+  const prev = handEls.get(el);
+  if(!prev || prev.size !== size) handEls.set(el, {size, withHand, key:""});
+}
+const easeIO = u => u<0.5 ? 4*u*u*u : 1-Math.pow(-2*u+2,3)/2;
+
+function handFrame(bi){
+  if(!handEls.size) return;
+  const cNow = chordAt(bi);
+  const nx   = nextChordFrom(bi);
+  let st = cState(cNow), key = (cNow||"-");
+
+  if(cNow && nx && nx.c && nx.c !== cNow){
+    const barDur = fitBarDur();
+    const lead   = Math.max(0.22, Math.min(barDur*0.75, 0.9));   // שניות לפני החילוף
+    const dt     = timeOfBar(nx.bar) - T();
+    if(dt <= lead && dt > -0.05){
+      const u = Math.max(0, Math.min(1, 1 - dt/lead));
+      st = lerpState(cState(cNow), cState(nx.c), easeIO(u), 1);
+      key = cNow + ">" + nx.c + ":" + u.toFixed(2);
+    }
+  }
+  if(!st) return;
+  handEls.forEach((cfg, el)=>{
+    if(!el.isConnected){ handEls.delete(el); return; }
+    if(cfg.key === key) return;
+    cfg.key = key;
+    el.innerHTML = handSVG(st, cfg.size, cfg.withHand);
+  });
+}
 
 /* ═══════════════════════════════════════════════════════════════
    חילוץ אקורדים מדף אקורדים מכל פורמט:
@@ -3057,10 +3241,14 @@ function paint(force){
     if(el){ el.textContent=c||"–"; el.classList.toggle("none",!c); }
     const nc2=$("nextc"); if(nc2) nc2.textContent=nx?nx.c:"–";
     const bn=$("bn"); if(bn) bn.textContent=bi>=0?bi+1:"–";
-    const dg=$("dgm"); if(dg) dg.innerHTML=diagram(c,140);
+    const dg=$("dgm");
+    if(dg){ if(c) handRegister(dg, 150, true); else { handEls.delete(dg); dg.innerHTML=`<div class="nodgm">–</div>`; } }
     const hd=$("hzDgm");
-    if(hd) hd.innerHTML = c ? diagram(c, narrow()?96:104, {hand:false})
-      : `<div class="nodgm">–</div>`;
+    if(hd){
+      const fsOn = document.body.classList.contains("fs");
+      const sz = fsOn ? (narrow()?148:172) : (narrow()?80:90);
+      if(c) handRegister(hd, sz, true); else { handEls.delete(hd); hd.innerHTML=`<div class="nodgm">–</div>`; }
+    }
     document.querySelectorAll(".bc.cur").forEach(x=>x.classList.remove("cur"));
     const cell=document.querySelector(`.bc[data-b="${bi}"]`);
     if(cell){ cell.classList.add("cur"); if(!force) cell.scrollIntoView({block:"nearest",behavior:"smooth"}); }
