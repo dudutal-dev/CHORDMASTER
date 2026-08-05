@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#08090C">
 <meta http-equiv="Cache-Control" content="no-cache, must-revalidate">
-<meta name="build" content="2026-08-05 10:42 UTC">
+<meta name="build" content="2026-08-05 10:51 UTC">
 <meta name="description" content="ChordMaster — אקורדים ומילים מסונכרנים לסרטון יוטיוב, עם דיאגרמות אצבעות, האטה והעברת טונים.">
 <title>ChordMaster</title>
 <meta name="apple-mobile-web-app-title" content="ChordMaster">
@@ -512,6 +512,10 @@ body.fs .hzbeats i{width:26px;height:5px}
   border-radius:999px;padding:9px 18px}
 #fsExit.show{opacity:1;pointer-events:auto}
 
+.syncbox{display:inline-flex;align-items:center;gap:5px;background:rgba(20,24,31,.7);
+  border:1px solid var(--edge);border-radius:8px;padding:3px 6px}
+.syncbox .btn{padding:3px 9px;font-size:14px;min-width:30px}
+.syncbox .time{min-width:56px;text-align:center;font-size:12px;color:var(--tungsten)}
 .toast{position:fixed;bottom:16px;inset-inline-start:16px;background:#1A1E25;
   border:1px solid var(--tungsten-d);color:var(--tungsten);padding:10px 15px;border-radius:5px;
   z-index:95;font-size:14px;opacity:0;transform:translateY(8px);transition:.25s;pointer-events:none}
@@ -2269,7 +2273,7 @@ const OPEN = new Set(["C","A","G","E","D","Am","Em","Dm"]);
 
 /* ---------- מצב ---------- */
 
-const BUILD = "2026-08-05 10:42 UTC";
+const BUILD = "2026-08-05 10:51 UTC";
 const KEY="playalong-lib-v1";
 function newSong(){ return {
   id:"s"+Date.now(), title:"", ytId:"", beatsPerBar:4,
@@ -2630,8 +2634,12 @@ function handFrame(bi, tNow){
 
   if(cNow && nx && nx.c && nx.c !== cNow){
     const barDur = fitBarDur();
-    const lead   = Math.max(0.22, Math.min(barDur*0.75, 0.9));
-    const dt     = timeOfBar(nx.bar) - tNow;
+    const beat   = barDur / Math.max(1, S.beatsPerBar);
+    /* התנועה נמשכת פעמה אחת — כך גיטריסט באמת עובר — ומסתיימת
+       מעט לפני הפעמה, כדי שהאצבע כבר תהיה על המיתר כשהאקורד נשמע. */
+    const lead   = Math.max(0.24, Math.min(beat*1.05, 0.7));
+    const early  = 0.06;
+    const dt     = (timeOfBar(nx.bar) - early) - tNow;
     if(dt <= lead && dt > -0.05){
       const raw = Math.max(0, Math.min(1, 1 - dt/lead));
       /* קיטוע לעשרים שלבים: העין לא מבחינה, והדפדפן בונה SVG חמש פעמים פחות */
@@ -2980,6 +2988,12 @@ function renderMain(){
         <div class="grp"><label>טונים</label>
           <select id="tr">${Array.from({length:13},(_,i)=>i-6).map(v=>`<option value="${v}" ${v===S.transpose?"selected":""}>${v>0?"+"+v:v}</option>`).join("")}</select></div>
         <div class="grp"><label>מידות</label><span class="time" id="binfo">–</span></div>
+        <span class="syncbox">
+          <button class="btn sm" id="syncM" title="האקורדים מאחרים">−</button>
+          <span class="time" id="syncVal">${(syncMs>0?"+":"")+syncMs}ms</span>
+          <button class="btn sm" id="syncP" title="האקורדים מקדימים">+</button>
+          <button class="btn sm" id="syncZ" title="איפוס">↺</button>
+        </span>
         <button class="btn sm ${holdSync?"on":""}" id="hold" title="מקפיא את האקורדים במקום — לפרסומות או להפסקה">${holdSync?"⏸ מוקפא":"הקפא סנכרון"}</button>
         <button class="btn sm ${S.cinema?"on":""}" id="cine" title="הווידאו גדול והאקורדים מתחתיו — לקליפים שהמילים כבר בתוכם">מצב קליפ מילים</button>
       </div>`;
@@ -3175,6 +3189,9 @@ function renderMain(){
   if(cf) cf.href = "https://www.google.com/search?q=" +
     encodeURIComponent((S.title||"").replace(/\s+—\s+/g," ") + " אקורדים");
   $("gridTog").onclick=()=>{ gridOpen=!gridOpen; renderMain(); paint(true); };
+  const sm=$("syncM"); if(sm) sm.onclick=()=>setSync(syncMs-20);
+  const sp2=$("syncP"); if(sp2) sp2.onclick=()=>setSync(syncMs+20);
+  const sz=$("syncZ"); if(sz) sz.onclick=()=>setSync(0);
   const hb=$("hold"); if(hb) hb.onclick=()=>{ holdSync=!holdSync; renderMain(); paint(true);
     toast(holdSync?"הסנכרון מוקפא — האקורדים לא יזוזו":"הסנכרון חזר"); };
   const ci=$("cine"); if(ci) ci.onclick=()=>{ S.cinema=!S.cinema; renderMain();
@@ -3458,7 +3475,19 @@ document.addEventListener("keydown",e=>{
 /* ═══════════════════════════════════════════════════════════════
    6. הלולאה — קוראת רק את שעון הנגן
    ═══════════════════════════════════════════════════════════════ */
-const LEAD=0.10;   // פיצוי על השהיית הדגימה של getCurrentTime
+const LEAD=0.10;
+/* היסט סנכרון אישי: השהיית האודיו ופענוח הווידאו שונים ממכשיר למכשיר,
+   ולכן ההיסט ניתן לכיוון באוזן ונשמר. חיובי = האקורדים מקדימים. */
+const SYNC_KEY="playalong-sync-ms";
+let syncMs = (()=>{ const v=parseInt(localStorage.getItem(SYNC_KEY)||"0",10); return isNaN(v)?0:v; })();
+function setSync(ms){
+  syncMs = Math.max(-400, Math.min(400, ms|0));
+  try{ localStorage.setItem(SYNC_KEY, String(syncMs)); }catch(e){}
+  const el=$("syncVal"); if(el) el.textContent=(syncMs>0?"+":"")+syncMs+"ms";
+  paint(true);
+}
+/* זמן התצוגה: שעון הנגן, בתוספת ההקדמה הקבועה וההיסט האישי */
+const TD = () => T() + LEAD + syncMs/1000;   // פיצוי על השהיית הדגימה של getCurrentTime
 
 /* יוטיוב לא מדווח במפורש על פרסומת, אבל בזמן פרסומת getDuration מחזיר
    את אורך הפרסומת ולא את אורך השיר. פער משמעותי = כמעט תמיד פרסומת. */
@@ -3487,7 +3516,7 @@ function paint(force){
     return;
   }
 
-  const t=T()+LEAD;
+  const t=TD();
   const bi=barAtTime(t);
 
   if(bi!==cur.bar||force){
@@ -3544,7 +3573,7 @@ function paint(force){
     }
   }
 
-  paintHorizon(T());
+  paintHorizon(TD());
 
   const tc=$("tc"); if(tc) tc.textContent=fmt(T());
   const pp=$("pp"); if(pp) pp.textContent=playing()?"עצור":"נגן";
