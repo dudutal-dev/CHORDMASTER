@@ -133,6 +133,7 @@ textarea{width:100%;min-height:120px;line-height:1.6;resize:vertical}
   display:flex;align-items:center;justify-content:center}
 .horizon .nodgm{font-family:var(--disp);font-size:26px;color:var(--dim);opacity:.5}
 .horizon .nowdgm svg{height:126px;width:auto;max-width:100%;display:block}
+.nowdgm,#dgm{transform-origin:center;will-change:transform}
 .horizon .hzempty{position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:10px}
 .horizon .hzempty span{font-size:13px;line-height:1.65;color:var(--cream-2);text-align:center;
   border:1px dashed var(--edge-2);border-radius:6px;padding:9px 16px;background:rgba(6,7,9,.5)}
@@ -596,6 +597,7 @@ let pdfDoc = null, bookIndex = null, bookPick = null, bookRtl = true;
 
 function bookLoad(){ try{ return JSON.parse(localStorage.getItem(BOOK_KEY)||"null"); }catch(e){ return null; } }
 function bookSave(idx){
+  invalidateItems();
   try{ localStorage.setItem(BOOK_KEY, JSON.stringify(idx)); return true; }
   catch(e){
     /* אם אין מקום לאקורדים — שומרים לפחות את האינדקס */
@@ -741,7 +743,7 @@ function renderImport(){
       <div>
         <h3>${bookIndex&&bookIndex.length?"הספר שלך":"עוד לא יובא ספר"}</h3>
         ${bookIndex&&bookIndex.length ? `
-          <p>${bookIndex.length} שירים · ${groupByArtist(bookIndex,x=>x.a).length} אמנים ·
+          <p>${bookIndex.length} שירים · ${groupByArtist(bookIndex,x=>x.a,true).length} אמנים ·
              <b>${withC}</b> עם אקורדים שמורים.</p>
           ${withC ? `<div class="note sage"><strong>הקובץ כבר לא נחוץ.</strong> אפשר למחוק אותו מהמכשיר — כל השירים נגישים מהספרייה.</div>`
             : `<div class="note rust"><strong>נסרק בגרסה ישנה</strong> ולכן נשמרו רק שמות ועמודים. סרוק שוב כדי לשמור גם את האקורדים.</div>`}
@@ -783,7 +785,7 @@ function renderImport(){
   const cl=$("ibClear");
   if(cl) cl.onclick=()=>{
     if(!confirm(`להסיר ${bookIndex.length} שירים מהספר?\nהשירים ששמרת בעצמך לא ייפגעו.`)) return;
-    localStorage.removeItem(BOOK_KEY); bookIndex=null; bookArtist=null; pdfDoc=null;
+    localStorage.removeItem(BOOK_KEY); invalidateItems(); bookIndex=null; bookArtist=null; pdfDoc=null;
     renderImport(); toast("הספר הוסר");
   };
 }
@@ -1122,6 +1124,78 @@ const SONGBOOK = [
     note:"קישור רשמי מאומת. המהלך מלא באקורדי מעבר ובאס יורד — עדיף להדביק אותו מאתר אקורדים.",
     sec:{}, arr:[] },
 
+  { a:"Bob Dylan", t:"Blowin' in the Wind", y:1963, key:"G", diff:1,
+    note:"שלושה אקורדים פתוחים. אם יש רק שיר אחד ללמוד ראשון — זה הוא.",
+    sec:{ verse:["G","C","G","G","C","G","D","D"], chorus:["C","D","G","Em","C","D","G","G"] },
+    arr:[["verse",3],["chorus",1],["verse",3],["chorus",2]] },
+
+  { a:"The Beatles", t:"Twist and Shout", y:1963, key:"D", diff:1,
+    note:"שלושה אקורדים בלולאה עולה. אחד השירים הכי כיפיים לנגן בקבוצה.",
+    sec:{ main:["D","G","A","A"] }, arr:[["main",20]] },
+
+  { a:"The Animals", t:"House of the Rising Sun", y:1964, key:"Am", diff:2,
+    note:"בהקלטה מנוגן בארפג'ו ב-6/8. המהלך עולה ויורד כמו סולם.",
+    sec:{ main:["Am","C","D","F","Am","C","E","E"] }, arr:[["main",14]] },
+
+  { a:"Bruce Springsteen", t:"Born in the U.S.A.", y:1984, key:"B", diff:1,
+    note:"שני אקורדים לכל השיר. הכוח הוא בקצב ובתופים.",
+    sec:{ main:["B","B","E","E"] }, arr:[["main",20]] },
+
+  { a:"Tom Petty and the Heartbreakers", t:"I Won't Back Down", y:1989, key:"Em", diff:1,
+    sec:{ verse:["Em","D","G","D"], chorus:["Em","D","G","D","Em","D","C","C"] },
+    arr:[["verse",4],["chorus",2],["verse",4],["chorus",2]] },
+
+  { a:"Neil Young", t:"Rockin' in the Free World", y:1989, key:"Em", diff:1,
+    note:"שלושה אקורדים בלולאה. עובד גם אקוסטי וגם בעיוות מלא.",
+    sec:{ main:["Em","D","C","C"] }, arr:[["main",20]] },
+
+  { a:"The Rolling Stones", t:"(I Can't Get No) Satisfaction", y:1965, key:"E", diff:2,
+    note:"הריף המפורסם מנוגן בפאזז. מתחת לזה שני אקורדים בלבד.",
+    sec:{ main:["E","A","E","A"], chorus:["E","D","A","A"] },
+    arr:[["main",8],["chorus",3],["main",8],["chorus",3]] },
+
+  { a:"The Beach Boys", t:"Sloop John B", y:1966, key:"G", diff:1,
+    note:"שלושה אקורדים והרמוניות. מצוין לשירה משותפת.",
+    sec:{ verse:["G","G","G","G","C","C","G","G"], chorus:["G","D","G","C","G","D","G","G"] },
+    arr:[["verse",4],["chorus",2],["verse",4],["chorus",2]] },
+
+  { a:"The Beatles", t:"Yellow Submarine", y:1966, key:"G", diff:1,
+    sec:{ verse:["G","D","C","Em","Am","C","D","G"], chorus:["G","D","C","G"] },
+    arr:[["verse",3],["chorus",2],["verse",3],["chorus",3]] },
+
+  { a:"Don McLean", t:"American Pie", y:1971, key:"G", diff:2,
+    note:"שיר ארוך עם מבנה חוזר. אחרי שלומדים בית אחד — כולם זהים.",
+    sec:{ verse:["G","D","Em","Am","C","D","G","G"], chorus:["G","C","G","D","G","C","G","D"] },
+    arr:[["verse",4],["chorus",2],["verse",4],["chorus",3]] },
+
+  { a:"Bob Seger", t:"Turn the Page", y:1973, key:"Em", diff:1,
+    note:"שלושה אקורדים בלולאה, וסקסופון שעושה את השאר.",
+    sec:{ main:["Em","Em","D","D","C","C","Em","Em"] }, arr:[["main",14]] },
+
+  { a:"Boston", t:"More Than a Feeling", y:1976, key:"D", diff:2,
+    note:"הפתיחה האקוסטית היא D–C–G בארפג'ו; מאותו רגע הכול נבנה עליה.",
+    sec:{ verse:["D","D","C","C","G","G","D","D"], chorus:["G","G","C","C","D","D","D","D"] },
+    arr:[["verse",4],["chorus",2],["verse",4],["chorus",2]] },
+
+  { a:"Kansas", t:"Dust in the Wind", y:1977, key:"C", diff:2,
+    note:"פיקינג אצבעות מתמשך על שני אקורדים. הדיוק ביד ימין הוא כל השיר.",
+    sec:{ main:["C","C","Am","Am"] }, arr:[["main",20]] },
+
+  { a:"Metallica", t:"Nothing Else Matters", y:1991, key:"Em", diff:2,
+    note:"הפתיחה היא ארפג'ו על מיתרים פתוחים. שלושה אקורדים לכל הבית.",
+    sec:{ verse:["Em","Em","D","D","C","C","Em","Em"], chorus:["C","C","D","D","Em","Em","Em","Em"] },
+    arr:[["verse",4],["chorus",2],["verse",4],["chorus",2]] },
+
+  { a:"R.E.M.", t:"Losing My Religion", y:1991, key:"Am", diff:2,
+    note:"בהקלטה זו מנדולינה. על גיטרה זה עובד יפה באותה פריטה.",
+    sec:{ verse:["Am","Em","Am","Em"], chorus:["Dm","G","Am","Am","Dm","G","Am","Am"] },
+    arr:[["verse",6],["chorus",2],["verse",6],["chorus",2]] },
+
+  { a:"Oasis", t:"Wonderwall", y:1995, key:"Em", diff:1,
+    note:"עם קאפו 2 זה בדיוק ההקלטה. ארבעה אקורדים לכל השיר.",
+    sec:{ verse:["Em","G","D","A"], chorus:["C","D","Em","Em","C","D","G","G"] },
+    arr:[["verse",6],["chorus",2],["verse",6],["chorus",3]] },
+
   /* ---- גלישה לשנות השמונים ---- */
   { a:"AC/DC", t:"Back in Black", yt:"pAgnJDJN4VA", y:1980, key:"E", diff:2,
     note:"אחד הריפים המזוהים ביותר ברוק. פאוור אקורדים, והשתיקות בין הפריטות חשובות כמו הצלילים.",
@@ -1229,15 +1303,18 @@ function expandSong(entry){
 /* ═══════════════════════════════════════════════════════════════
    קיטלוג לפי אמן — משותף לספר השירים, לספרייה האישית ולאינדקס הספר
    ═══════════════════════════════════════════════════════════════ */
-const heCmp = (a,b) => String(a).localeCompare(String(b), "he");
-function groupByArtist(items, artistOf){
+/* יצירת קולטור בכל השוואה עולה פי שבעה — יוצרים אותו פעם אחת */
+const heColl = new Intl.Collator("he", {sensitivity:"base", numeric:true});
+const heCmp = (a,b) => heColl.compare(String(a), String(b));
+function groupByArtist(items, artistOf, noSort){
   const m = new Map();
   items.forEach(x=>{
     const a = (artistOf(x) || "ללא אמן").trim();
     if(!m.has(a)) m.set(a, []);
     m.get(a).push(x);
   });
-  return [...m.entries()].sort((x,y)=>heCmp(x[0], y[0]));
+  const out = [...m.entries()];
+  return noSort ? out : out.sort((x,y)=>heCmp(x[0], y[0]));
 }
 /* בספרייה הכותרת נשמרת כ־«אמן — שיר»; מפרידים בחזרה */
 function splitTitle(t){
@@ -1357,7 +1434,13 @@ function wireNav(){
    מודל אחיד: כל שיר — מובנה, מיובא או שלך — הוא אותה רשומה,
    נפתח באותו מסלול ומקבל את אותן פעולות. המקור הוא תג, לא התנהגות.
    ═══════════════════════════════════════════════════════════════ */
-function itemsAll(){
+let _items=null, _groups=null;
+function invalidateItems(){ _items=null; _groups=null; }
+function artistGroups(){
+  if(!_groups) _groups = groupByArtist(itemsAll(), x=>x.a);
+  return _groups;
+}
+function itemsAllRaw(){
   const out = [];
   const own = lib();
   const ownKey = new Set(own.map(x=>(x.title||"").trim()));
@@ -1389,6 +1472,10 @@ function itemsAll(){
           .filter(Boolean).join(" · ") });
   });
   return out;
+}
+function itemsAll(){
+  if(!_items) _items = itemsAllRaw();
+  return _items;
 }
 
 /* פתיחה אחת לכולם */
@@ -1468,7 +1555,8 @@ function renderBook(){
   const dir = libSort==="za" ? -1 : 1;
   const bySong   = (a,b)=> dir*heCmp(a.t, b.t);
   const byArtist = (a,b)=> dir*heCmp(a[0], b[0]);
-  const artists = groupByArtist(pool, x=>x.a).sort(byArtist);
+  const artists = (libFilter==="all" && !q ? artistGroups().slice() : groupByArtist(pool, x=>x.a, true))
+                    .sort(byArtist);
   const matches = (bookArtist ? pool.filter(x=>x.a===bookArtist)
     : (q ? pool.filter(x=>(x.t+" "+x.a).toLowerCase().includes(q)) : [])).sort(bySong);
 
@@ -1477,7 +1565,7 @@ function renderBook(){
   app.innerHTML = `
   <div class="home">
     <div class="hero-row"><h1>ספרייה</h1></div>
-    <div class="hgreet">${all.length} שירים · ${groupByArtist(all,x=>x.a).length} אמנים</div>
+    <div class="hgreet">${all.length} שירים · ${artistGroups().length} אמנים</div>
 
     <input type="text" id="sbQ" placeholder="חיפוש שיר או אמן…" value="${esc(sbQuery)}"
       style="width:100%;margin-top:16px">
@@ -1541,8 +1629,12 @@ function renderBook(){
   app.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{
     const it=all.find(x=>x.id===b.dataset.rm); if(!it) return;
     if(!confirm(`להסיר את «${it.t}» מהספרייה?`)) return;
-    if(it.src==="own") localStorage.setItem(KEY, JSON.stringify(lib().filter(y=>y.id!==it.ref)));
-    else { bookIndex=(bookIndex||[]).filter(x=>x.p!==it.ref); bookSave(bookIndex); }
+    if(it.src==="own"){
+      localStorage.setItem(KEY, JSON.stringify(lib().filter(y=>y.id!==it.ref)));
+    } else {
+      bookIndex=(bookIndex||[]).filter(x=>x.p!==it.ref); bookSave(bookIndex);
+    }
+    invalidateItems();
     renderBook();
   });
 }
@@ -1677,7 +1769,7 @@ function renderSettings(){
           <span class="go">›</span></button>
         <button class="tile" data-go="book">
           <span class="art" style="${artStyle("ספרייה")}"><i>▤</i></span>
-          <span class="tx"><b>ספרייה</b><small>${groupByArtist(all,x=>x.a).length} אמנים</small></span>
+          <span class="tx"><b>ספרייה</b><small>${artistGroups().length} אמנים</small></span>
           <span class="go">›</span></button>
       </div>
     </section>
@@ -2426,7 +2518,7 @@ function handSVG(st, W, withHand){
             stroke-width="1.6" opacity=".55"/>`;                      /* אצבע ציר */
     if(t.lift>0.05) s += `<ellipse cx="${cx}" cy="${cy+sp*0.5*t.lift}" rx="${r*0.8}" ry="${r*0.34}"
             fill="#000" opacity="${(0.28*t.lift).toFixed(3)}"/>`;      /* צל בזמן ההרמה */
-    const pr = r * (1 + 0.18*(t.lift||0) + 0.12*(st.pulse||0)*(t.down>0.6?1:0));
+    const pr = r * (1 + 0.18*(t.lift||0));
     s += `<circle cx="${cx}" cy="${cy}" r="${pr.toFixed(2)}" fill="#F0A83C"
             stroke="#7A5417" stroke-width=".8" opacity="${Math.max(0.25,t.down).toFixed(3)}"/>`;
     s += `<text x="${cx}" y="${cy}" fill="#241705" font-size="${fh*0.44}" font-weight="700"
@@ -2460,35 +2552,45 @@ function handRegister(el, size, withHand){
 }
 const easeIO = u => u<0.5 ? 4*u*u*u : 1-Math.pow(-2*u+2,3)/2;
 
+let handLast = 0;
 function handFrame(bi, tNow){
   if(!handEls.size) return;
   const cNow = chordAt(bi);
   const nx   = nextChordFrom(bi);
-  let st = cState(cNow), key = (cNow||"-");
+  let st = cState(cNow), key = (cNow||"-"), moving = false;
 
   if(cNow && nx && nx.c && nx.c !== cNow){
     const barDur = fitBarDur();
-    const lead   = Math.max(0.22, Math.min(barDur*0.75, 0.9));   // שניות לפני החילוף
+    const lead   = Math.max(0.22, Math.min(barDur*0.75, 0.9));
     const dt     = timeOfBar(nx.bar) - tNow;
     if(dt <= lead && dt > -0.05){
-      const u = Math.max(0, Math.min(1, 1 - dt/lead));
+      const raw = Math.max(0, Math.min(1, 1 - dt/lead));
+      /* קיטוע לעשרים שלבים: העין לא מבחינה, והדפדפן בונה SVG חמש פעמים פחות */
+      const u = Math.round(raw*20)/20;
       st = lerpState(cState(cNow), cState(nx.c), easeIO(u), 1);
       key = cNow + ">" + nx.c + ":" + u.toFixed(2);
+      moving = true;
     }
   }
   if(!st) return;
-  /* פעימה עדינה על קצות האצבעות, נעולה לרשת — מחזקת את תחושת הסנכרון */
-  const bd = fitBarDur()/Math.max(1,S.beatsPerBar);
+
+  /* הפעימה מוחלת כטרנספורם על המיכל ולא בבנייה מחדש של השרטוט —
+     שינוי סגנון עולה כמעט כלום, בניית SVG עולה הרבה. */
+  const bd = fitBarDur()/Math.max(1, S.beatsPerBar);
   const ph = bd>0 ? ((tNow - timeOfBar(bi)) % bd) / bd : 0;
   const pulse = Math.max(0, 1 - ph*3.2);
-  const pk = pulse.toFixed(1);
-  if(pk !== "0.0") key += "p" + pk;
-  st = Object.assign({}, st, {pulse});
+
+  /* תקרת קצב: לכל היותר 25 בנייה בשנייה, גם בזמן מעבר */
+  const nowMs = performance.now();
+  const may = !moving || (nowMs - handLast) > 40;
+
   handEls.forEach((cfg, el)=>{
     if(!el.isConnected){ handEls.delete(el); return; }
-    if(cfg.key === key) return;
+    el.style.transform = `scale(${(1 + pulse*0.022).toFixed(4)})`;
+    if(cfg.key === key || !may) return;
     cfg.key = key;
     el.innerHTML = handSVG(st, cfg.size, cfg.withHand);
+    handLast = nowMs;
   });
 }
 
@@ -2595,6 +2697,7 @@ function setPageBg(m){
   el.className = cls ? cls+" on" : "";
 }
 function render(){
+  if(mode!=="main") handEls.clear();
   setPageBg(mode);
   setTimeout(wireNav,0);
   setTimeout(paintArt, 30);
@@ -2609,6 +2712,7 @@ function render(){
 
 function lib(){ try{ return JSON.parse(localStorage.getItem(KEY)||"[]"); }catch(e){ return []; } }
 function libSave(){
+  invalidateItems();
   const l=lib().filter(x=>x.id!==S.id);
   l.unshift(JSON.parse(JSON.stringify(S)));
   try{ localStorage.setItem(KEY, JSON.stringify(l.slice(0,60))); toast("נשמר בספרייה"); }
@@ -2635,7 +2739,7 @@ function renderStart(){
 
   bookIndex = bookIndex || bookLoad();
   const L = lib(), all = itemsAll();
-  const artists = groupByArtist(all, x=>x.a).sort((a,b)=>b[1].length-a[1].length);
+  const artists = artistGroups().slice().sort((a,b)=>b[1].length-a[1].length);
   const mine  = all.filter(x=>x.src==="own");
   const ready = all.filter(x=>x.chordsCount>0 && x.yt);
   const TABS=[["all","הכל"],["mine","שלי"],["artists","אמנים"],["ready","מוכן לנגינה"]];
