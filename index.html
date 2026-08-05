@@ -218,10 +218,14 @@ svg.dgm{display:block}
 /* ---- bar grid ---- */
 .catrow{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:11px 2px;
   border-bottom:1px solid var(--edge)}
-.catrow b{font-weight:500;font-size:16px}
-/* בלי רוחב מזערי, הטקסט מתכווץ לאפס והמילים נשברות אחת בשורה */
-.catrow .tx{flex:1 1 clamp(140px,48vw,320px);min-width:clamp(140px,48vw,320px)}
-.catrow .art{flex:0 0 40px}
+/* סגנון מוטבע גובר על כללים — לכן כל מידות השורה מוגדרות כאן בלבד */
+.catrow .rowart{width:40px;height:40px;flex:0 0 40px;border-radius:7px}
+.catrow .rowart i{font-size:15px}
+.catrow .tx{flex:1 1 auto;min-width:clamp(150px,52vw,340px)}
+.catrow .tx b{display:block;font-weight:500;font-size:16px;line-height:1.35}
+.catrow .tx small{display:block;color:var(--dim);font-size:12.5px;margin-top:2px}
+.catrow .stamp{flex:0 0 auto}
+.catrow .btn{flex:0 0 auto}
 .tile .tx{flex:1 1 auto;min-width:76px}
 .chipA{background:#171B21;border:1px solid var(--edge);color:var(--cream);
   border-radius:20px;padding:6px 13px;font-size:14px;display:inline-flex;gap:7px;align-items:baseline;transition:.14s}
@@ -1369,11 +1373,10 @@ function songTile(it){
 }
 function songRow(it){
   return `<div class="catrow">
-    <span class="art" style="${artStyle(it.a)};width:40px;height:40px;flex:0 0 40px;border-radius:7px"
-      data-artist="${esc(it.a)}"><i style="font-size:15px">${esc(initial(it.a))}</i></span>
-    <span class="tx" style="min-width:0;flex:1">
-      <b style="display:block;font-weight:500">${esc(it.t)}</b>
-      <small style="color:var(--dim);font-size:12.5px">${esc(it.a)}${it.sub?" · "+esc(it.sub):""}</small></span>
+    <span class="art rowart" style="${artStyle(it.a)}" data-artist="${esc(it.a)}"><i>${esc(initial(it.a))}</i></span>
+    <span class="tx">
+      <b>${esc(it.t)}</b>
+      <small>${esc(it.a)}${it.sub?" · "+esc(it.sub):""}</small></span>
     ${it.chordsCount?"":`<span class="stamp" style="color:var(--ruby)">ללא אקורדים</span>`}
     <span class="stamp" style="color:${SRC_COL[it.src]}">${SRC_TAG[it.src]}</span>
     <a class="btn sm" href="${ytSearch(it.a,it.t)}" target="_blank" rel="noopener" style="text-decoration:none">▶</a>
